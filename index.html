@@ -24,10 +24,11 @@
   <button id="start">Start</button>
 </div>
 <div id="read" hidden></div>
+<script src="script.js"></script>
 <script>
 const src = document.getElementById('src'), read = document.getElementById('read'), edit = document.getElementById('edit');
 let lines = [], i = 0;
-try { src.value = localStorage.getItem('script') || ''; } catch {}
+try { src.value = localStorage.getItem('script') || window.SCRIPT || ''; } catch {}
 
 function show(n) {
   i = Math.max(0, Math.min(lines.length - 1, n));
