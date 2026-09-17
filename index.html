@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Script Follower</title>
+<style>
+  :root { --bg: #111; --fg: #eee; --dim: #555; --hi: #ffd84d; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 32px/1.5 Georgia, serif; }
+  #edit { max-width: 800px; margin: 40px auto; padding: 0 16px; font-size: 16px; }
+  textarea { width: 100%; height: 60vh; font: 16px/1.4 monospace; background: #222; color: var(--fg); border: 1px solid #444; padding: 8px; box-sizing: border-box; }
+  button { font-size: 16px; padding: 8px 16px; margin-top: 8px; }
+  #read { max-width: 900px; margin: 0 auto; padding: 50vh 16px; }
+  #read p { margin: 0 0 .6em; color: var(--dim); transition: color .2s; cursor: pointer; }
+  #read p.cur { color: var(--hi); }
+  #read p.cur ~ p { color: var(--fg); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div id="edit">
+  <p>Paste script. One line per step. Then Start. Keys: Space/↓ next, ↑/Backspace back, Esc edit. Click a line to jump.</p>
+  <textarea id="src"></textarea>
+  <button id="start">Start</button>
+</div>
+<div id="read" hidden></div>
+<script>
+const src = document.getElementById('src'), read = document.getElementById('read'), edit = document.getElementById('edit');
+let lines = [], i = 0;
+try { src.value = localStorage.getItem('script') || ''; } catch {}
+
+function show(n) {
+  i = Math.max(0, Math.min(lines.length - 1, n));
+  lines.forEach((p, k) => p.classList.toggle('cur', k === i));
+  lines[i]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+document.getElementById('start').onclick = () => {
+  try { localStorage.setItem('script', src.value); } catch {}
+  read.replaceChildren(...src.value.split('\n').filter(l => l.trim()).map((t, k) => {
+    const p = document.createElement('p');
+    p.textContent = t;
+    p.onclick = () => show(k);
+    return p;
+  }));
+  lines = [...read.children];
+  if (!lines.length) return;
+  edit.hidden = true; read.hidden = false;
+  show(0);
+};
+
+document.addEventListener('keydown', e => {
+  if (read.hidden) return;
+  if (e.key === ' ' || e.key === 'ArrowDown') show(i + 1);
+  else if (e.key === 'ArrowUp' || e.key === 'Backspace') show(i - 1);
+  else if (e.key === 'Escape') { read.hidden = true; edit.hidden = false; }
+  else return;
+  e.preventDefault();
+});
+</script>
+</body>
+</html>
