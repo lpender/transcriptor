@@ -1,3 +1,6 @@
 .playwright-mcp/
 tmp/
 *.pdf
+script.js
+clips/
+clips.js
