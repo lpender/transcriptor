@@ -65,6 +65,7 @@ function show(n) {
   i = Math.max(0, Math.min(lines.length - 1, n));
   lines.forEach((p, k) => p.classList.toggle('cur', k === i));
   lines[i]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  save('line', i);
   if (playing) play();
   if (!learn) return;
   if (pending(cur())) { answer.value = ''; cur().after(answer); answer.focus({ preventScroll: true }); }
@@ -129,6 +130,7 @@ answer.addEventListener('keydown', e => {
 role.onchange = () => { role.blur(); startLearn(); };
 
 $('start').onclick = () => {
+  const sameScript = load('script') === src.value;  // a new script starts from the top
   save('script', src.value);
   read.replaceChildren(...src.value.split('\n').filter(l => l.trim()).map((t, k) => {
     const p = document.createElement('p');
@@ -143,7 +145,7 @@ $('start').onclick = () => {
   role.value = names.includes(load('role')) ? load('role') : '';
   stopLearn();
   edit.hidden = true; read.hidden = false;
-  show(0);
+  show(sameScript ? +load('line', 0) : 0);
 };
 
 if (src.value.trim()) $('start').click();
