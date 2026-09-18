@@ -174,7 +174,7 @@ function paint() {
     // sentence's length, and how many are still to come, give too much away.
     html += done ? `<span class="${it === now && shown ? 'now' : ''}${cues && it === now ? ' cue' : ''}">${esc(text)}</span>`
       : '<span class="hide">▒▒▒▒▒</span>';
-    if (!done) return p.innerHTML = html;
+    if (it === now) return p.innerHTML = html;  // nothing past the sentence you are on
     rest = rest.slice(at + it.text.length);
   }
   p.innerHTML = html + esc(rest);
