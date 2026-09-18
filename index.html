@@ -63,8 +63,13 @@ let lines = [], i = 0;
 const audio = new Audio();
 let playing = false;
 // Learn mode: reveal your lines a sentence at a time and grade yourself on each.
-let learn = false, drilling = false, got = 0, tried = 0, streak = 0;
-let parts = [], part = 0, shown = false;
+let learn = false, drilling = false;
+// Every sentence you have to recall, in script order. Clearing one moves you on;
+// missing one takes back the two before it, so the game is how far you can get.
+let items = [], cleared = new Set(), shown = false;
+const id = it => it.li + ':' + it.si;
+const atLine = () => items.filter(it => it.li === i);
+const item = () => atLine().find(it => !cleared.has(id(it)));
 const load = (k, d) => { try { return localStorage.getItem(k) ?? d; } catch { return d; } };
 const save = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
 const speaker = p => p.textContent.split(':')[0];
@@ -117,39 +122,47 @@ function play() {
 function stopPlay() { playing = false; audio.pause(); }
 audio.onended = () => setTimeout(() => playing && (i < lines.length - 1 ? show(i + 1) : stopPlay()), 300);
 
-const quizzing = () => learn && mine(cur()) && part < parts.length;
+const quizzing = () => learn && !!item();
 
 // Start (or leave) the current line: your lines get hidden a sentence at a time.
 function enter() {
   lines.forEach(p => { if (p !== cur()) p.textContent = p.dataset.text; });
-  parts = mine(cur()) ? sentences(words(cur())).map((text, n) => ({ text, quiz: !drilling || missCount(text) > 0 })).filter(s => s.quiz) : [];
-  part = 0; shown = false;
+  shown = false;
   paint(); render();
 }
 
-// Redraw the current line: graded sentences plain, the one under test revealed or blurred.
+// Redraw the current line: cleared sentences plain, the one under test revealed or blurred.
 function paint() {
-  const p = cur();
-  if (!parts.length) return void (p.textContent = p.dataset.text);
+  const p = cur(), mine = atLine();
+  if (!mine.length) return void (p.textContent = p.dataset.text);
+  const now = item();
   let rest = words(p), html = speaker(p) + ':';
-  parts.forEach((s, n) => {
-    const at = rest.indexOf(s.text);
+  for (const it of mine) {
+    const at = rest.indexOf(it.text);
     html += esc(rest.slice(0, at));
-    html += `<span class="${n < part ? '' : n === part && shown ? 'now' : 'hide'}">${esc(s.text)}</span>`;
-    rest = rest.slice(at + s.text.length);
-  });
+    const cls = cleared.has(id(it)) ? '' : it === now && shown ? 'now' : 'hide';
+    html += `<span class="${cls}">${esc(it.text)}</span>`;
+    rest = rest.slice(at + it.text.length);
+  }
   p.innerHTML = html + esc(rest);
 }
 const esc = t => t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
 
 function grade(ok) {
-  record(parts[part].text, ok);
-  tried++;
-  if (ok) { got++; streak++; if (streak > +load(bestKey(), 0)) save(bestKey(), streak); }
-  else streak = 0;
-  part++; shown = false;
+  const now = item(), n = items.indexOf(now);
+  record(now.text, ok);
+  shown = false;
+  if (ok) {
+    cleared.add(id(now));
+    if (cleared.size > +load(bestKey(), 0)) save(bestKey(), cleared.size);
+  } else {
+    // A miss costs the two sentences before it, which you have to get again.
+    for (const back of items.slice(Math.max(0, n - 2), n)) cleared.delete(id(back));
+  }
   cur().classList.toggle('weak', weakLine(cur()));
-  if (part < parts.length) { paint(); render(); }
+  const back = items[Math.max(0, n - 2)];
+  if (!ok && back !== now) return show(back.li);
+  if (item()) { paint(); render(); }
   else { paint(); next(); }
 }
 
@@ -162,11 +175,11 @@ function next() {
 
 function render() {
   const weak = lines.filter(p => mine(p) && weakLine(p)).length;
-  score.textContent = learn ? `${got}/${tried} · streak ${streak} · best ${load(bestKey(), 0)}` : '';
+  score.textContent = learn ? `${cleared.size}/${items.length} clear · best ${load(bestKey(), 0)}` : '';
   drillBtn.textContent = weak ? `Drill ${weak} weak (W)` : 'No weak lines yet';
   drillBtn.disabled = !weak;
   hint.textContent = !learn ? '' : quizzing()
-    ? (shown ? 'Y got it · N missed' : `Say it, then Space to reveal${parts.length > 1 ? ` (sentence ${part + 1} of ${parts.length})` : ''}`)
+    ? (shown ? 'Y got it · N missed (costs you two)' : `Say it, then Space to reveal${atLine().length > 1 ? ` (sentence ${atLine().indexOf(item()) + 1} of ${atLine().length})` : ''}`)
     : drilling && !weak ? 'Weak lines cleared! W or L to stop' : 'Space next · L exit';
   const b = [...document.querySelectorAll('#pad button')];
   b[0].textContent = quizzing() && shown ? '✗ Missed' : '▲ Back';
@@ -177,19 +190,22 @@ function render() {
 
 function startLearn(weakOnly) {
   learn = true; drilling = !!weakOnly;
-  got = tried = streak = 0;
   hud.hidden = false; document.body.classList.add('learn');
   lines.forEach(p => {
     p.classList.toggle('mine', !role.value || speaker(p) === role.value);
     p.classList.toggle('weak', mine(p) && weakLine(p));
   });
+  cleared = new Set();
+  items = lines.flatMap((p, li) => mine(p)
+    ? sentences(words(p)).map((text, si) => ({ li, si, text })).filter(it => !drilling || missCount(it.text))
+    : []);
   save('role', role.value);
   if (drilling) { const t = lines.findIndex(p => mine(p) && weakLine(p)); show(t < 0 ? i : t); }
   else enter();
 }
 
 function stopLearn() {
-  learn = drilling = false; parts = []; hud.hidden = true; document.body.classList.remove('learn');
+  learn = drilling = false; items = []; cleared = new Set(); hud.hidden = true; document.body.classList.remove('learn');
   lines.forEach(p => { p.textContent = p.dataset.text; p.classList.remove('mine', 'weak'); });
 }
 
