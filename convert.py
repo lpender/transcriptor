@@ -43,5 +43,27 @@ for half in pages():
                 speeches[-1] += ("" if speeches[-1].endswith("-") else " ") + line.strip()
 
 speeches = [repair(s) for s in speeches]
+
+# A whole rant in one block is unreadable on screen, so long speeches become
+# several blocks, split between sentences and each labelled with the speaker.
+# (index.html splits those blocks into sentences again for learn mode.)
+MAX = 220
+
+
+def split_long(speech):
+    if "***" not in speech and len(speech) > MAX:
+        speaker, text = speech.split(":", 1)
+        block = ""
+        for sentence in re.findall(r"[^.!?…]+[.!?…]*\s*", text):
+            if block and len(block) + len(sentence) > MAX:
+                yield f"{speaker}:{block.rstrip()}"
+                block = " "
+            block += sentence
+        yield f"{speaker}:{block.rstrip()}"
+    else:
+        yield speech
+
+
+speeches = [block for s in speeches for block in split_long(s)]
 open("script.js", "w").write("window.SCRIPT = " + json.dumps("\n".join(speeches), ensure_ascii=False) + ";\n")
 print(f"{len(speeches)} speeches -> script.js")
