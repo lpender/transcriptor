@@ -176,6 +176,17 @@ function grade(ok) {
   else { paint(); next(); }
 }
 
+// Back one sentence: take back the last one you cleared and say it again.
+function back() {
+  const now = item();
+  const n = now ? items.indexOf(now) : items.findLastIndex(it => it.li <= i && cleared.has(id(it))) + 1;
+  const prev = items[n - 1];
+  if (!prev) return show(i - 1);  // nothing of yours behind you: step back a line
+  cleared.delete(id(prev));
+  shown = false;
+  prev.li === i ? (paint(), render()) : show(prev.li);
+}
+
 // Next line; while drilling weak lines, skip ahead to the next one that needs work.
 function next() {
   if (!drilling) return show(i + 1);
@@ -259,7 +270,7 @@ function act(k) {
   }
   else if (quizzing() && shown && k === 'n') grade(false);
   else if (k === ' ' || k === 'arrowdown') next();
-  else if (k === 'arrowup' || k === 'backspace') show(i - 1);
+  else if (k === 'arrowup' || k === 'backspace') learn ? back() : show(i - 1);
   else if (k === 'e') { stopPlay(); stopLearn(); read.hidden = true; edit.hidden = false; }
   else if (k === 'p') (playing = !playing) ? play() : stopPlay();
   else if (k === 'l') learn ? stopLearn() : startLearn();
