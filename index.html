@@ -84,8 +84,8 @@ const mine = p => has(p, 'mine');
 const bestKey = () => 'best:' + role.value;
 let cues = load('cues') === 'true';
 
-// Cue mode: instead of blocks, prompt with the sentence's rarest words, on the
-// theory that two or three odd images are easier to hold than a whole line.
+// Cue mode: what a sentence reveals as, and what counts as knowing it, is two or
+// three of its rarest words, on the theory that odd images stick better than lines.
 const SKIP = new Set('a an the and or but so if then that this these those there here it its is am are was were be been being do does did done have has had will would can could shall should may might must no not of to in on at for with from by as your you i me my he she we they him her them his hers their our us what who when why how all any some out up down off over just very really maybe think know got said says tell told like well yeah okay yes now one about into more than other such get went come came see saw make made take took give gave much many because'.split(' '));
 let freq = {};
 function cue(text) {
@@ -168,10 +168,11 @@ function paint() {
     const at = rest.indexOf(it.text);
     html += esc(rest.slice(0, at));
     const done = cleared.has(id(it)) || (it === now && shown);
+    const text = cues ? cue(it.text) : it.text;
     // One fixed row of blocks for the sentence under test, and nothing past it: a
     // sentence's length, and how many are still to come, give too much away.
-    html += done ? `<span class="${it === now && shown ? 'now' : ''}">${esc(it.text)}</span>`
-      : `<span class="hide${cues ? ' cue' : ''}">${cues ? esc(cue(it.text)) : '▒▒▒▒▒'}</span>`;
+    html += done ? `<span class="${it === now && shown ? 'now' : ''}${cues ? ' cue' : ''}">${esc(text)}</span>`
+      : '<span class="hide">▒▒▒▒▒</span>';
     if (!done) return p.innerHTML = html;
     rest = rest.slice(at + it.text.length);
   }
