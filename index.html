@@ -183,13 +183,13 @@ function render() {
   drillBtn.textContent = weak ? `Drill ${weak} weak (W)` : 'No weak lines yet';
   drillBtn.disabled = !weak;
   hint.textContent = !learn ? '' : quizzing()
-    ? (shown ? 'Y got it · N missed (costs you two)' : `Say it, then Space to reveal${atLine().length > 1 ? ` (sentence ${atLine().indexOf(item()) + 1} of ${atLine().length})` : ''}`)
+    ? (shown ? 'Space got it · N missed (costs you two)' : `Say it, then Space to reveal${atLine().length > 1 ? ` (sentence ${atLine().indexOf(item()) + 1} of ${atLine().length})` : ''}`)
     : drilling && !weak ? 'Weak lines cleared! W or L to stop' : 'Space next · L exit';
   const b = [...document.querySelectorAll('#pad button')];
   b[0].textContent = quizzing() && shown ? '✗ Missed' : '▲ Back';
   b[0].dataset.key = quizzing() && shown ? 'n' : 'arrowup';
   b[3].textContent = quizzing() ? (shown ? '✓ Got it' : 'Reveal') : 'Next ▼';
-  b[3].dataset.key = quizzing() && shown ? 'y' : ' ';
+  b[3].dataset.key = ' ';
 }
 
 function startLearn(weakOnly) {
@@ -244,9 +244,8 @@ if (src.value.trim()) $('start').click();
 // One handler for keyboard shortcuts and the phone button bar. Returns false for unused keys.
 function act(k) {
   if (quizzing() && !shown && (k === ' ' || k === 'arrowdown')) { shown = true; paint(); render(); }
-  else if (quizzing() && shown && (k === 'y' || k === 'arrowright')) grade(true);
+  else if (quizzing() && shown && (k === ' ' || k === 'y' || k === 'arrowright')) grade(true);
   else if (quizzing() && shown && k === 'n') grade(false);
-  else if (quizzing() && shown) return false;  // revealed: only Y or N moves on
   else if (k === ' ' || k === 'arrowdown') next();
   else if (k === 'arrowup' || k === 'backspace') show(i - 1);
   else if (k === 'e') { stopPlay(); stopLearn(); read.hidden = true; edit.hidden = false; }
