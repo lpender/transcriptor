@@ -22,6 +22,7 @@
   /* Lines ahead are invisible, not blurred: a blur still shows how long they are. */
   body.learn #read p.cur ~ p, body.learn #read p.cur ~ hr { visibility: hidden; }
   #read .now { color: var(--hi); }
+  #read b { font-weight: 700; color: #fff; }
   #read .weak { text-decoration: underline wavy #e448; text-underline-offset: 6px; }
   #read p.got { box-shadow: -8px 0 0 #3c6; }
   #read p.missed { box-shadow: -8px 0 0 #e44; }
@@ -37,7 +38,7 @@
 </head>
 <body>
 <div id="edit">
-  <p>Paste script. One line per step. Then Start. Keys: Space/↓ next, ↑/Backspace back, E edit script, L learn mode, P play aloud, W drill weak lines. Click a line to jump.</p>
+  <p>Paste script. One line per step. Then Start. Keys: Space/↓ next, ↑/Backspace back, E edit script, L learn mode, P play aloud, W drill weak lines, K key words. Click a line to jump.</p>
   <textarea id="src"></textarea>
   <button id="start">Start</button>
 </div>
@@ -104,6 +105,28 @@ function sentences(text) {
 }
 const weakLine = p => sentences(words(p)).some(missCount);
 
+// Key words: the rarest words in a sentence, about one in five, bolded as hooks to
+// hang the line on. Frequency comes from the script itself, so "years" in a script
+// about waiting counts as common.
+let keywords = load('keywords') === 'true', freq = {};
+const STOP = new Set('a an the and or but so if then than that this these those i you he she it we they me him her them my your his its our their is am are was were be been being do does did done have has had will would can could shall should may might must no not of to in on at for with from by as up out about into over after before there here what which who whom when where why how all any both each few more most other some such own same too very just now oh well yeah yes mr mrs ms dr think thinks know got get gonna going want maybe really thing things way lot said say tell told something someone anything nothing everything im ive ill id youre youve youll thats theres whats hes shes theyre lets dont doesnt didnt cant wont isnt arent wasnt couldnt wouldnt okay ok back'.split(' '));
+const keyWords = text => {
+  const list = text.match(/[\p{L}\p{N}'-]+/gu) || [];
+  const contraction = /^(are|is|was|were|do|does|did|can|could|would|should|have|has|had|wo|ai)nt$/;
+  const pick = list.filter(w => norm(w).length > 2 && !STOP.has(norm(w)) && !contraction.test(norm(w)));
+  const want = Math.min(4, Math.max(1, Math.ceil(pick.length / 2)));
+  // Long and rare beats short and common: a big odd word is the better hook.
+  const score = w => (freq[norm(w)] || 0) / 2 - norm(w).length;
+  return new Set([...pick].sort((a, b) => score(a) - score(b)).slice(0, want).map(norm));
+};
+// Text as HTML, with the key words bolded when the mode is on.
+const mark = text => {
+  if (!keywords) return esc(text);
+  const keys = keyWords(text);
+  return text.replace(/[\p{L}\p{N}'-]+/gu, w => keys.has(norm(w)) ? `<b>${esc(w)}</b>` : esc(w));
+};
+const plain = p => p.innerHTML = keywords ? sentences(p.dataset.text).map(mark).join(' ') : esc(p.dataset.text);
+
 function show(n) {
   i = Math.max(0, Math.min(lines.length - 1, n));
   lines.forEach((p, k) => p.classList.toggle('cur', k === i));
@@ -126,7 +149,7 @@ const quizzing = () => learn && !!item();
 
 // Start (or leave) the current line: your lines get hidden a sentence at a time.
 function enter() {
-  lines.forEach(p => { if (p !== cur()) p.textContent = p.dataset.text; });
+  lines.forEach(p => { if (p !== cur()) plain(p); });
   shown = false;
   paint(); render();
 }
@@ -134,7 +157,7 @@ function enter() {
 // Redraw the current line: cleared sentences plain, the one under test revealed or blurred.
 function paint() {
   const p = cur(), mine = atLine();
-  if (!mine.length) { p.textContent = p.dataset.text; return center(); }
+  if (!mine.length) { plain(p); return center(); }
   const now = item();
   let rest = p.dataset.text.slice(speaker(p).length + 1), html = speaker(p) + ':';  // the original text, not what is on screen
   for (const it of mine) {
@@ -145,7 +168,7 @@ function paint() {
     // sentence's length, and how many are still to come, give too much away.
     // A sentence you keep missing is marked on its own, not across the whole line.
     const cls = (done ? (it === now && shown ? 'now' : '') : 'hide') + (missCount(it.text) ? ' weak' : '');
-    html += `<span class="${cls}">${esc(done ? it.text : '▒▒▒▒▒')}</span>`;
+    html += `<span class="${cls}">${done ? mark(it.text) : '▒▒▒▒▒'}</span>`;
     if (!done) { p.innerHTML = html; return center(); }
     rest = rest.slice(at + it.text.length);
   }
@@ -227,7 +250,7 @@ function startLearn(weakOnly) {
 
 function stopLearn() {
   learn = drilling = false; items = []; cleared = new Set(); hud.hidden = true; document.body.classList.remove('learn');
-  lines.forEach(p => { p.textContent = p.dataset.text; p.classList.remove('mine'); });
+  lines.forEach(p => { plain(p); p.classList.remove('mine'); });
 }
 
 role.onchange = () => { role.blur(); startLearn(drilling); };
@@ -241,12 +264,16 @@ $('start').onclick = () => {
   read.replaceChildren(...src.value.split('\n').filter(l => l.trim()).map(t => {
     if (t.trim() === '***') return document.createElement('hr');
     const p = document.createElement('p');
-    p.textContent = p.dataset.text = t;
+    p.dataset.text = t;
+    p.textContent = t;
     p.onclick = () => show(lines.indexOf(p));
     return p;
   }));
   lines = [...read.querySelectorAll('p')];
   if (!lines.length) return;
+  freq = {};
+  for (const w of src.value.match(/[\p{L}\p{N}'-]+/gu) || []) freq[norm(w)] = (freq[norm(w)] || 0) + 1;
+  lines.forEach(plain);
   const names = [...new Set(lines.map(speaker))];
   role.replaceChildren(new Option('Everyone (all lines)', ''), ...names.map(n => new Option(n)));
   role.value = names.includes(load('role')) ? load('role') : '';
@@ -274,6 +301,7 @@ function act(k) {
   else if (k === 'e') { stopPlay(); stopLearn(); read.hidden = true; edit.hidden = false; }
   else if (k === 'p') (playing = !playing) ? play() : stopPlay();
   else if (k === 'l') learn ? stopLearn() : startLearn();
+  else if (k === 'k') { keywords = !keywords; save('keywords', keywords); lines.forEach(p => p !== cur() && plain(p)); learn ? paint() : plain(cur()); render(); }
   else if (k === 'w') learn && drilling ? startLearn() : startLearn(true);
   else return false;
   return true;
