@@ -80,6 +80,7 @@ const cur = () => lines[i];
 const has = (p, c) => p.classList.contains(c);
 const mine = p => has(p, 'mine');
 const bestKey = () => 'best:' + role.value;
+const runKey = () => 'run:' + role.value;
 
 // How often each sentence has been missed, kept across visits so the weak ones can be drilled.
 const stats = JSON.parse(load('stats', '{}'));
@@ -107,10 +108,15 @@ const weakLine = p => sentences(words(p)).some(missCount);
 function show(n) {
   i = Math.max(0, Math.min(lines.length - 1, n));
   lines.forEach((p, k) => p.classList.toggle('cur', k === i));
-  lines[i]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   save('line', i);
   if (playing) play();
   if (learn) enter();
+  centre();
+}
+
+// Centre the sentence under test; without one, the whole line.
+function centre() {
+  (cur().querySelector('.now, .hide') || cur()).scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function play() {
@@ -164,9 +170,10 @@ function grade(ok) {
     for (const back of items.slice(Math.max(0, n - 2), n)) cleared.delete(id(back));
   }
   cur().classList.toggle('weak', weakLine(cur()));
+  if (!drilling) save(runKey(), JSON.stringify([...cleared]));  // resume mid-speech, not just mid-line
   const back = items[Math.max(0, n - 2)];
   if (!ok && back !== now) return show(back.li);
-  if (item()) { paint(); render(); }
+  if (item()) { paint(); render(); centre(); }
   else { paint(); next(); }
 }
 
@@ -199,12 +206,14 @@ function startLearn(weakOnly) {
     p.classList.toggle('mine', !role.value || speaker(p) === role.value);
     p.classList.toggle('weak', mine(p) && weakLine(p));
   });
-  cleared = new Set();
+  cleared = new Set(drilling ? [] : JSON.parse(load(runKey(), '[]')));
   items = lines.flatMap((p, li) => mine(p)
     ? sentences(words(p)).map((text, si) => ({ li, si, text })).filter(it => !drilling || missCount(it.text))
     : []);
   save('role', role.value);
+  const at = items.find(it => !cleared.has(id(it)));  // pick up where the run left off
   if (drilling) { const t = lines.findIndex(p => mine(p) && weakLine(p)); show(t < 0 ? i : t); }
+  else if (at && at.li !== i) show(at.li);
   else enter();
 }
 
@@ -243,13 +252,13 @@ if (src.value.trim()) $('start').click();
 
 // One handler for keyboard shortcuts and the phone button bar. Returns false for unused keys.
 function act(k) {
-  if (quizzing() && !shown && (k === ' ' || k === 'arrowdown')) { shown = true; paint(); render(); }
+  if (quizzing() && !shown && (k === ' ' || k === 'arrowdown')) { shown = true; paint(); render(); centre(); }
   else if (quizzing() && shown && (k === ' ' || k === 'y' || k === 'arrowright')) {
     const line = i;
     grade(true);
     // One press per sentence: it marks the sentence you just read as right and
     // reveals the next one, which you have already said.
-    if (quizzing() && i === line) { shown = true; paint(); render(); }
+    if (quizzing() && i === line) { shown = true; paint(); render(); centre(); }
   }
   else if (quizzing() && shown && k === 'n') grade(false);
   else if (k === ' ' || k === 'arrowdown') next();
