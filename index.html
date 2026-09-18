@@ -22,7 +22,7 @@
   /* Lines ahead are invisible, not blurred: a blur still shows how long they are. */
   body.learn #read p.cur ~ p, body.learn #read p.cur ~ hr { visibility: hidden; }
   #read .now { color: var(--hi); }
-  #read p.weak { text-decoration: underline wavy #e448; text-underline-offset: 6px; }
+  #read .weak { text-decoration: underline wavy #e448; text-underline-offset: 6px; }
   #read p.got { box-shadow: -8px 0 0 #3c6; }
   #read p.missed { box-shadow: -8px 0 0 #e44; }
   #pad { display: none; }
@@ -143,7 +143,9 @@ function paint() {
     const done = cleared.has(id(it)) || (it === now && shown);
     // One fixed row of blocks for the sentence under test, and nothing past it: a
     // sentence's length, and how many are still to come, give too much away.
-    html += done ? `<span class="${it === now && shown ? 'now' : ''}">${esc(it.text)}</span>` : '<span class="hide">▒▒▒▒▒</span>';
+    // A sentence you keep missing is marked on its own, not across the whole line.
+    const cls = (done ? (it === now && shown ? 'now' : '') : 'hide') + (missCount(it.text) ? ' weak' : '');
+    html += `<span class="${cls}">${esc(done ? it.text : '▒▒▒▒▒')}</span>`;
     if (!done) { p.innerHTML = html; return center(); }
     rest = rest.slice(at + it.text.length);
   }
@@ -169,7 +171,6 @@ function grade(ok) {
     // A miss costs the two sentences before it, which you have to get again.
     for (const back of items.slice(Math.max(0, n - 2), n)) cleared.delete(id(back));
   }
-  cur().classList.toggle('weak', weakLine(cur()));
   const back = items[Math.max(0, n - 2)];
   if (!ok && back !== now) return show(back.li);
   if (item()) { paint(); render(); }
@@ -214,7 +215,6 @@ function startLearn(weakOnly) {
   hud.hidden = false; document.body.classList.add('learn');
   lines.forEach(p => {
     p.classList.toggle('mine', !role.value || speaker(p) === role.value);
-    p.classList.toggle('weak', mine(p) && weakLine(p));
   });
   cleared = new Set();
   items = lines.flatMap((p, li) => mine(p)
@@ -227,7 +227,7 @@ function startLearn(weakOnly) {
 
 function stopLearn() {
   learn = drilling = false; items = []; cleared = new Set(); hud.hidden = true; document.body.classList.remove('learn');
-  lines.forEach(p => { p.textContent = p.dataset.text; p.classList.remove('mine', 'weak'); });
+  lines.forEach(p => { p.textContent = p.dataset.text; p.classList.remove('mine'); });
 }
 
 role.onchange = () => { role.blur(); startLearn(drilling); };
