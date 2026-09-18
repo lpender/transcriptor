@@ -94,12 +94,14 @@ const record = (t, ok) => {
   save('stats', JSON.stringify(stats));
 };
 
-// Split a speech into sentences, keeping abbreviations like "Mr." attached.
+// Split a speech at the punctuation that breaks up speech — full stops, commas,
+// semicolons, colons and dashes — but never at apostrophes or quotes. Abbreviations
+// like "Mr." and stray scraps stay attached to the piece before them.
 function sentences(text) {
   const out = [];
-  for (const s of text.match(/[^.!?…]+[.!?…]*\s*/g) || [text]) {
+  for (const s of text.match(/[^.!?…,;:—–]+[.!?…,;:—–]*[\s]*/g) || [text]) {
     const last = out[out.length - 1];
-    if (last && (/\b(Mr|Mrs|Ms|Dr|St|U\.S)\.\s*$/.test(last) || /^[a-z]/.test(s.trim()) || norm(last).length < 3)) out[out.length - 1] += s;
+    if (last && (/\b(Mr|Mrs|Ms|Dr|St|U\.S)\.\s*$/.test(last) || norm(last).length < 3 || norm(s).length < 3)) out[out.length - 1] += s;
     else out.push(s);
   }
   return out.map(s => s.trim()).filter(Boolean);
