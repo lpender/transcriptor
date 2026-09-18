@@ -18,8 +18,9 @@
   #hud select, #hud button { font-size: 16px; margin: 0; padding: 4px 12px; }
   #hint { color: #999; }
   #read hr { border: 0; border-top: 2px solid #444; margin: 1.2em 20%; }
-  #read .hide { filter: blur(10px); }
-  body.learn #read p.cur ~ p, body.learn #read p.cur ~ hr { filter: blur(10px); }  /* no reading ahead while learning */
+  #read .hide { color: #3a3a3a; letter-spacing: .1em; }
+  /* Lines ahead are invisible, not blurred: a blur still shows how long they are. */
+  body.learn #read p.cur ~ p, body.learn #read p.cur ~ hr { visibility: hidden; }
   #read .now { color: var(--hi); }
   #read p.weak { text-decoration: underline wavy #e448; text-underline-offset: 6px; }
   #read p.got { box-shadow: -8px 0 0 #3c6; }
@@ -136,12 +137,13 @@ function paint() {
   const p = cur(), mine = atLine();
   if (!mine.length) return void (p.textContent = p.dataset.text);
   const now = item();
-  let rest = words(p), html = speaker(p) + ':';
+  let rest = p.dataset.text.slice(speaker(p).length + 1), html = speaker(p) + ':';  // the original text, not what is on screen
   for (const it of mine) {
     const at = rest.indexOf(it.text);
     html += esc(rest.slice(0, at));
-    const cls = cleared.has(id(it)) ? '' : it === now && shown ? 'now' : 'hide';
-    html += `<span class="${cls}">${esc(it.text)}</span>`;
+    const done = cleared.has(id(it)) || (it === now && shown);
+    // Hidden sentences are a fixed row of blocks, so their length gives nothing away.
+    html += done ? `<span class="${it === now && shown ? 'now' : ''}">${esc(it.text)}</span>` : '<span class="hide">▒▒▒▒▒</span>';
     rest = rest.slice(at + it.text.length);
   }
   p.innerHTML = html + esc(rest);
