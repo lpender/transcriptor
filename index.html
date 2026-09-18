@@ -255,9 +255,15 @@ function act(k) {
 
 document.addEventListener('keydown', e => {
   if (read.hidden || e.target === role) return;
-  if (act(e.key.toLowerCase())) e.preventDefault();
+  const k = e.key.toLowerCase();
+  // Space and the arrows always stop here, even when unused, so the page never scrolls
+  // or hands the key to the browser.
+  if (act(k) | (k === ' ' || k.startsWith('arrow'))) e.preventDefault();
 });
-document.querySelectorAll('#pad button').forEach(b => b.onclick = () => act(b.dataset.key));
+document.querySelectorAll('#pad button').forEach(b => {
+  b.tabIndex = -1;  // taps must not leave focus on a button, where Space would press it again
+  b.onclick = () => { b.blur(); act(b.dataset.key); };
+});
 </script>
 </body>
 </html>
