@@ -167,7 +167,8 @@ function paint() {
     // One fixed row of blocks for the sentence under test, and nothing past it: a
     // sentence's length, and how many are still to come, give too much away.
     // A sentence you keep missing is marked on its own, not across the whole line.
-    const cls = (done ? (it === now && shown ? 'now' : '') : 'hide') + (missCount(it.text) ? ' weak' : '');
+    // The weak mark is a warning on what is still coming, never on one you just cleared.
+    const cls = done ? (it === now && shown ? 'now' : '') : 'hide' + (missCount(it.text) ? ' weak' : '');
     html += `<span class="${cls}">${done ? mark(it.text) : '▒▒▒▒▒'}</span>`;
     if (!done) { p.innerHTML = html; return center(); }
     rest = rest.slice(at + it.text.length);
