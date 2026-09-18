@@ -142,8 +142,10 @@ function paint() {
     const at = rest.indexOf(it.text);
     html += esc(rest.slice(0, at));
     const done = cleared.has(id(it)) || (it === now && shown);
-    // Hidden sentences are a fixed row of blocks, so their length gives nothing away.
+    // One fixed row of blocks for the sentence under test, and nothing past it: a
+    // sentence's length, and how many are still to come, give too much away.
     html += done ? `<span class="${it === now && shown ? 'now' : ''}">${esc(it.text)}</span>` : '<span class="hide">▒▒▒▒▒</span>';
+    if (!done) return p.innerHTML = html;
     rest = rest.slice(at + it.text.length);
   }
   p.innerHTML = html + esc(rest);
