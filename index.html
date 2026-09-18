@@ -116,7 +116,7 @@ function startLearn(only) {
     p.classList.remove('got', 'missed');
   });
   save('role', role.value);
-  drill ? step(-1) : show(0);
+  drill ? step(-1) : show(i);  // learning starts where you are, not back at the top
 }
 
 function stopLearn() {
