@@ -16,9 +16,10 @@
   #read p.cur ~ p { color: var(--fg); }
   #hud { position: fixed; top: 0; left: 0; right: 0; padding: 8px 16px; background: #000c; font: 16px/1.4 system-ui, sans-serif; display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
   #hud select, #hud button { font-size: 16px; margin: 0; padding: 4px 12px; }
-  #answer { display: block; width: 100%; box-sizing: border-box; margin: 0 0 .6em; font: inherit; background: #222; color: var(--fg); border: 1px solid var(--hi); padding: 4px 8px; }
   #hint { color: #999; }
-  body.learn #read p.mine:not(.got):not(.missed) { filter: blur(10px); }
+  #read .hide { filter: blur(10px); }
+  #read .now { color: var(--hi); }
+  #read p.weak { text-decoration: underline wavy #e448; text-underline-offset: 6px; }
   #read p.got { box-shadow: -8px 0 0 #3c6; }
   #read p.missed { box-shadow: -8px 0 0 #e44; }
   #pad { display: none; }
@@ -33,13 +34,14 @@
 </head>
 <body>
 <div id="edit">
-  <p>Paste script. One line per step. Then Start. Keys: Space/↓ next, ↑/Backspace back, E edit script, L learn mode, P play aloud. Click a line to jump.</p>
+  <p>Paste script. One line per step. Then Start. Keys: Space/↓ next, ↑/Backspace back, E edit script, L learn mode, P play aloud, W drill weak lines. Click a line to jump.</p>
   <textarea id="src"></textarea>
   <button id="start">Start</button>
 </div>
 <div id="hud" hidden>
   <label>Your role <select id="role"></select></label>
   <b id="score"></b>
+  <button id="drillBtn"></button>
   <span id="hint"></span>
 </div>
 <div id="read" hidden></div>
@@ -53,28 +55,46 @@
 <script src="clips.js"></script>
 <script>
 const $ = id => document.getElementById(id);
-const src = $('src'), read = $('read'), edit = $('edit'), hud = $('hud'), role = $('role'), score = $('score'), hint = $('hint');
-const answer = Object.assign(document.createElement('input'), { id: 'answer', placeholder: 'Type your line, Enter to check',
-  autocomplete: 'off', autocapitalize: 'off', spellcheck: false, enterKeyHint: 'done' });
-answer.setAttribute('autocorrect', 'off');
+const src = $('src'), read = $('read'), edit = $('edit'), hud = $('hud'), role = $('role'), score = $('score'), hint = $('hint'), drillBtn = $('drillBtn');
 let lines = [], i = 0;
 // Passive mode: play each line's ElevenLabs clip (made by tts.py) and advance.
 const audio = new Audio();
 let playing = false;
-// Learn mode: your role's lines are blurred; type each one from memory to score it.
-let learn = false, drill = null, got = 0, tried = 0, streak = 0;
+// Learn mode: reveal your lines a sentence at a time and grade yourself on each.
+let learn = false, drilling = false, got = 0, tried = 0, streak = 0;
+let parts = [], part = 0, shown = false;
 const load = (k, d) => { try { return localStorage.getItem(k) ?? d; } catch { return d; } };
 const save = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
 const speaker = p => p.textContent.split(':')[0];
 const words = p => p.textContent.slice(speaker(p).length + 1);
-// Only letters and digits count: case, spaces and punctuation are ignored.
 const norm = t => t.toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
 const cur = () => lines[i];
 const has = (p, c) => p.classList.contains(c);
-const pending = p => has(p, 'mine') && !has(p, 'got') && !has(p, 'missed');
+const mine = p => has(p, 'mine');
 const bestKey = () => 'best:' + role.value;
 
-try { src.value = load('script') || window.SCRIPT || ''; } catch {}
+// How often each sentence has been missed, kept across visits so the weak ones can be drilled.
+const stats = JSON.parse(load('stats', '{}'));
+const key = t => norm(t).slice(0, 60);
+const missCount = t => stats[key(t)]?.missed || 0;
+const record = (t, ok) => {
+  const s = stats[key(t)] ||= { seen: 0, missed: 0 };
+  s.seen++;
+  s.missed = ok ? Math.max(0, s.missed - 1) : s.missed + 1;  // two clean runs clear one miss
+  save('stats', JSON.stringify(stats));
+};
+
+// Split a speech into sentences, keeping abbreviations like "Mr." attached.
+function sentences(text) {
+  const out = [];
+  for (const s of text.match(/[^.!?…]+[.!?…]*\s*/g) || [text]) {
+    const last = out[out.length - 1];
+    if (last && (/\b(Mr|Mrs|Ms|Dr|St|U\.S)\.\s*$/.test(last) || /^[a-z]/.test(s.trim()) || norm(last).length < 3)) out[out.length - 1] += s;
+    else out.push(s);
+  }
+  return out.map(s => s.trim()).filter(Boolean);
+}
+const weakLine = p => sentences(words(p)).some(missCount);
 
 function show(n) {
   i = Math.max(0, Math.min(lines.length - 1, n));
@@ -82,14 +102,11 @@ function show(n) {
   lines[i]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   save('line', i);
   if (playing) play();
-  if (!learn) return;
-  if (pending(cur())) { answer.value = ''; cur().after(answer); answer.focus({ preventScroll: true }); }
-  else answer.remove();
-  render();
+  if (learn) enter();
 }
 
 function play() {
-  if (learn && pending(cur())) return;  // your line: wait for your answer, then carry on
+  if (learn && quizzing()) return;  // your line: grade it first, then carry on
   const clip = window.CLIPS?.[cur().textContent];
   if (!clip) return console.error('No clip for line', i, '- run tts.py'), stopPlay();
   audio.src = clip;
@@ -98,58 +115,91 @@ function play() {
 function stopPlay() { playing = false; audio.pause(); }
 audio.onended = () => setTimeout(() => playing && (i < lines.length - 1 ? show(i + 1) : stopPlay()), 300);
 
-function render() {
-  score.textContent = `${got}/${tried} · streak ${streak} · best ${load(bestKey(), 0)}` + (drill ? ' · drilling missed' : '');
-  const missed = lines.filter(p => has(p, 'missed')).length;
-  if (pending(cur())) hint.textContent = 'Enter to check · Esc to leave the box';
-  else if (has(cur(), 'missed')) hint.textContent = 'Missed. Space to continue';
-  else if (lines.some(pending)) hint.textContent = 'Space next · L exit';
-  else hint.textContent = missed ? `Done: ${got}/${tried}. R to drill ${missed} missed` : `Perfect ${got}/${tried}! R to go again`;
+const quizzing = () => learn && mine(cur()) && part < parts.length;
+
+// Start (or leave) the current line: your lines get hidden a sentence at a time.
+function enter() {
+  lines.forEach(p => { if (p !== cur()) p.textContent = p.dataset.text; });
+  parts = mine(cur()) ? sentences(words(cur())).map((text, n) => ({ text, quiz: !drilling || missCount(text) > 0 })).filter(s => s.quiz) : [];
+  part = 0; shown = false;
+  paint(); render();
 }
 
-function startLearn(only) {
-  learn = true; got = tried = streak = 0;
-  drill = only?.length ? only : null;
-  document.body.classList.add('learn'); hud.hidden = false;
+// Redraw the current line: graded sentences plain, the one under test revealed or blurred.
+function paint() {
+  const p = cur();
+  if (!parts.length) return void (p.textContent = p.dataset.text);
+  let rest = words(p), html = speaker(p) + ':';
+  parts.forEach((s, n) => {
+    const at = rest.indexOf(s.text);
+    html += esc(rest.slice(0, at));
+    html += `<span class="${n < part ? '' : n === part && shown ? 'now' : 'hide'}">${esc(s.text)}</span>`;
+    rest = rest.slice(at + s.text.length);
+  });
+  p.innerHTML = html + esc(rest);
+}
+const esc = t => t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+
+function grade(ok) {
+  record(parts[part].text, ok);
+  tried++;
+  if (ok) { got++; streak++; if (streak > +load(bestKey(), 0)) save(bestKey(), streak); }
+  else streak = 0;
+  part++; shown = false;
+  cur().classList.toggle('weak', weakLine(cur()));
+  if (part < parts.length) { paint(); render(); }
+  else { paint(); next(); }
+}
+
+// Next line; while drilling weak lines, skip ahead to the next one that needs work.
+function next() {
+  if (!drilling) return show(i + 1);
+  const t = lines.findIndex((p, k) => k > i && mine(p) && weakLine(p));
+  show(t < 0 ? i : t);
+}
+
+function render() {
+  const weak = lines.filter(p => mine(p) && weakLine(p)).length;
+  score.textContent = learn ? `${got}/${tried} · streak ${streak} · best ${load(bestKey(), 0)}` : '';
+  drillBtn.textContent = weak ? `Drill ${weak} weak (W)` : 'No weak lines yet';
+  drillBtn.disabled = !weak;
+  hint.textContent = !learn ? '' : quizzing()
+    ? (shown ? 'Y got it · N missed' : `Say it, then Space to reveal${parts.length > 1 ? ` (sentence ${part + 1} of ${parts.length})` : ''}`)
+    : drilling && !weak ? 'Weak lines cleared! W or L to stop' : 'Space next · L exit';
+  const b = [...document.querySelectorAll('#pad button')];
+  b[0].textContent = quizzing() && shown ? '✗ Missed' : '▲ Back';
+  b[0].dataset.key = quizzing() && shown ? 'n' : 'arrowup';
+  b[3].textContent = quizzing() ? (shown ? '✓ Got it' : 'Reveal') : 'Next ▼';
+  b[3].dataset.key = quizzing() && shown ? 'y' : ' ';
+}
+
+function startLearn(weakOnly) {
+  learn = true; drilling = !!weakOnly;
+  got = tried = streak = 0;
+  hud.hidden = false;
   lines.forEach(p => {
-    p.classList.toggle('mine', (!role.value || speaker(p) === role.value) && (!drill || drill.includes(p)));
-    p.classList.remove('got', 'missed');
+    p.classList.toggle('mine', !role.value || speaker(p) === role.value);
+    p.classList.toggle('weak', mine(p) && weakLine(p));
   });
   save('role', role.value);
-  drill ? step(-1) : show(i);  // learning starts where you are, not back at the top
+  if (drilling) { const t = lines.findIndex(p => mine(p) && weakLine(p)); show(t < 0 ? i : t); }
+  else enter();
 }
 
 function stopLearn() {
-  learn = false; drill = null;
-  document.body.classList.remove('learn'); hud.hidden = true; answer.remove();
-  lines.forEach(p => p.classList.remove('mine', 'got', 'missed'));
+  learn = drilling = false; parts = []; hud.hidden = true;
+  lines.forEach(p => { p.textContent = p.dataset.text; p.classList.remove('mine', 'weak'); });
 }
 
-// Next line; while drilling, jump to the cue line before the next missed line.
-function step(from) {
-  if (!drill) return show(from + 1);
-  const t = lines.findIndex((p, k) => k > from && pending(p));
-  show(t < 0 ? lines.length - 1 : from < t - 1 ? t - 1 : t);
-}
-
-answer.addEventListener('keydown', e => {
-  if (e.key === 'Escape') answer.blur();
-  if (e.key !== 'Enter') return;
-  const ok = norm(answer.value) === norm(words(cur()));
-  cur().classList.add(ok ? 'got' : 'missed');
-  tried++;
-  if (ok) { got++; streak++; if (streak > +load(bestKey(), 0)) save(bestKey(), streak); step(i); }
-  else { streak = 0; answer.remove(); render(); }
-});
-
-role.onchange = () => { role.blur(); startLearn(); };
+role.onchange = () => { role.blur(); startLearn(drilling); };
+drillBtn.onclick = () => { drillBtn.blur(); act('w'); };
 
 $('start').onclick = () => {
   const sameScript = load('script') === src.value;  // a new script starts from the top
   save('script', src.value);
   read.replaceChildren(...src.value.split('\n').filter(l => l.trim()).map((t, k) => {
     const p = document.createElement('p');
-    p.textContent = t;
+    p.textContent = p.dataset.text = t;
     p.onclick = () => show(k);
     return p;
   }));
@@ -163,23 +213,26 @@ $('start').onclick = () => {
   show(sameScript ? +load('line', 0) : 0);
 };
 
+try { src.value = load('script') || window.SCRIPT || ''; } catch {}
 if (src.value.trim()) $('start').click();
 
 // One handler for keyboard shortcuts and the phone button bar. Returns false for unused keys.
 function act(k) {
-  if ((k === ' ' || k === 'arrowdown') && learn && pending(cur())) answer.focus();
-  else if (k === ' ' || k === 'arrowdown') step(i);
+  if (quizzing() && !shown && (k === ' ' || k === 'arrowdown')) { shown = true; paint(); render(); }
+  else if (quizzing() && shown && (k === 'y' || k === ' ' || k === 'arrowright')) grade(true);
+  else if (quizzing() && shown && k === 'n') grade(false);
+  else if (k === ' ' || k === 'arrowdown') next();
   else if (k === 'arrowup' || k === 'backspace') show(i - 1);
   else if (k === 'e') { stopPlay(); stopLearn(); read.hidden = true; edit.hidden = false; }
   else if (k === 'p') (playing = !playing) ? play() : stopPlay();
   else if (k === 'l') learn ? stopLearn() : startLearn();
-  else if (k === 'r' && learn && !lines.some(pending)) startLearn(lines.filter(p => has(p, 'missed')));
+  else if (k === 'w') learn && drilling ? startLearn() : startLearn(true);
   else return false;
   return true;
 }
 
 document.addEventListener('keydown', e => {
-  if (read.hidden || e.target === answer || e.target === role) return;
+  if (read.hidden || e.target === role) return;
   if (act(e.key.toLowerCase())) e.preventDefault();
 });
 document.querySelectorAll('#pad button').forEach(b => b.onclick = () => act(b.dataset.key));
