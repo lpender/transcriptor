@@ -30,7 +30,7 @@
   /* Phones: no keyboard shortcuts, so a thumb bar stands in for them. */
   @media (pointer: coarse) {
     #pad { display: flex; position: fixed; left: 0; right: 0; bottom: 0; gap: 8px; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); background: #000d; }
-    #pad button { flex: 1; margin: 0; padding: 14px 0; font: 18px system-ui, sans-serif; background: #333; color: var(--fg); border: 0; border-radius: 10px; }
+    #pad button { flex: 1; margin: 0; padding: 14px 0; font: 16px system-ui, sans-serif; background: #333; color: var(--fg); border: 0; border-radius: 10px; }
     #read[hidden] + #pad { display: none; }
   }
   [hidden] { display: none !important; }
@@ -51,8 +51,9 @@
 <div id="read" hidden></div>
 <div id="pad">
   <button data-key="arrowup">▲ Back</button>
-  <button data-key="p">Play / Stop</button>
+  <button data-key="p">Play</button>
   <button data-key="l">Learn</button>
+  <button data-key="k">Keys</button>
   <button data-key=" ">Next ▼</button>
 </div>
 <script src="script.js"></script>
@@ -228,10 +229,12 @@ function render() {
     ? (shown ? 'Space right, next · N missed (costs you two)' : `Say it, then Space to reveal${atLine().length > 1 ? ` (sentence ${atLine().indexOf(item()) + 1} of ${atLine().length})` : ''}`)
     : drilling && !weak ? 'Weak lines cleared! W or L to stop' : 'Space next · L exit';
   const b = [...document.querySelectorAll('#pad button')];
+  b[1].style.opacity = playing ? 1 : .6;
+  b[2].style.opacity = learn ? 1 : .6;
+  b[3].style.opacity = keywords ? 1 : .6;
   b[0].textContent = quizzing() && shown ? '✗ Missed' : '▲ Back';
   b[0].dataset.key = quizzing() && shown ? 'n' : 'arrowup';
-  b[3].textContent = quizzing() ? (shown ? '✓ Got it' : 'Reveal') : 'Next ▼';
-  b[3].dataset.key = ' ';
+  b[4].textContent = quizzing() ? (shown ? '✓ Got it' : 'Reveal') : 'Next ▼';
 }
 
 function startLearn(weakOnly) {
@@ -302,9 +305,10 @@ function act(k) {
   else if (k === 'e') { stopPlay(); stopLearn(); read.hidden = true; edit.hidden = false; }
   else if (k === 'p') (playing = !playing) ? play() : stopPlay();
   else if (k === 'l') learn ? stopLearn() : startLearn();
-  else if (k === 'k') { keywords = !keywords; save('keywords', keywords); lines.forEach(p => p !== cur() && plain(p)); learn ? paint() : plain(cur()); render(); }
+  else if (k === 'k') { keywords = !keywords; save('keywords', keywords); lines.forEach(p => p !== cur() && plain(p)); learn ? paint() : plain(cur()); }
   else if (k === 'w') learn && drilling ? startLearn() : startLearn(true);
   else return false;
+  render();  // the phone's buttons change with the mode, so redraw them after every action
   return true;
 }
 
