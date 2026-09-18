@@ -26,6 +26,9 @@
   #read .weak { text-decoration: underline wavy #e448; text-underline-offset: 6px; }
   #read p.got { box-shadow: -8px 0 0 #3c6; }
   #read p.missed { box-shadow: -8px 0 0 #e44; }
+  #sound { position: fixed; right: 16px; bottom: 16px; font-size: 24px; line-height: 1; padding: 10px 14px; border: 0; border-radius: 50%; background: #2a2a2a; color: var(--fg); cursor: pointer; }
+  #read[hidden] ~ #sound { display: none; }
+  @media (pointer: coarse) { #sound { display: none; } }  /* the thumb bar has its own Play */
   #pad { display: none; }
   /* Phones: no keyboard shortcuts, so a thumb bar stands in for them. */
   @media (pointer: coarse) {
@@ -49,6 +52,7 @@
   <span id="hint"></span>
 </div>
 <div id="read" hidden></div>
+<button id="sound" title="Read the script aloud (P)">🔇</button>
 <div id="pad">
   <button data-key="arrowup">▲ Back</button>
   <button data-key="p">Play</button>
@@ -230,6 +234,7 @@ function render() {
   hint.textContent = !learn ? '' : quizzing()
     ? (shown ? 'Space right, next · N missed (costs you two)' : `Say it, then Space to reveal${atLine().length > 1 ? ` (sentence ${atLine().indexOf(item()) + 1} of ${atLine().length})` : ''}`)
     : drilling && !weak ? 'Weak lines cleared! W or L to stop' : 'Space next · L exit';
+  $('sound').textContent = playing ? '🔊' : '🔇';
   const b = [...document.querySelectorAll('#pad button')];
   b[1].style.opacity = playing ? 1 : .6;
   b[2].style.opacity = learn ? 1 : .6;
@@ -321,6 +326,7 @@ document.addEventListener('keydown', e => {
   // or hands the key to the browser.
   if (act(k) | (k === ' ' || k.startsWith('arrow'))) e.preventDefault();
 });
+$('sound').onclick = () => { $('sound').blur(); act('p'); };
 document.querySelectorAll('#pad button').forEach(b => {
   b.tabIndex = -1;  // taps must not leave focus on a button, where Space would press it again
   b.onclick = () => { b.blur(); act(b.dataset.key); };
