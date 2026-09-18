@@ -22,6 +22,8 @@ script = json.loads(re.search(r"window\.SCRIPT = (.*);", pathlib.Path("script.js
 clips = {}
 pathlib.Path("clips").mkdir(exist_ok=True)
 for line in script.split("\n"):
+    if ":" not in line:
+        continue  # scene break
     speaker, text = line.split(":", 1)
     voice = VOICES[speaker]  # KeyError on a new character: add a voice above.
     path = f"clips/{hashlib.sha1((voice + text).encode()).hexdigest()[:16]}.mp3"

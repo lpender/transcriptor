@@ -17,8 +17,9 @@
   #hud { position: fixed; top: 0; left: 0; right: 0; padding: 8px 16px; background: #000c; font: 16px/1.4 system-ui, sans-serif; display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
   #hud select, #hud button { font-size: 16px; margin: 0; padding: 4px 12px; }
   #hint { color: #999; }
+  #read hr { border: 0; border-top: 2px solid #444; margin: 1.2em 20%; }
   #read .hide { filter: blur(10px); }
-  body.learn #read p.cur ~ p { filter: blur(10px); }  /* no reading ahead while learning */
+  body.learn #read p.cur ~ p, body.learn #read p.cur ~ hr { filter: blur(10px); }  /* no reading ahead while learning */
   #read .now { color: var(--hi); }
   #read p.weak { text-decoration: underline wavy #e448; text-underline-offset: 6px; }
   #read p.got { box-shadow: -8px 0 0 #3c6; }
@@ -198,13 +199,16 @@ drillBtn.onclick = () => { drillBtn.blur(); act('w'); };
 $('start').onclick = () => {
   const sameScript = load('script') === src.value;  // a new script starts from the top
   save('script', src.value);
-  read.replaceChildren(...src.value.split('\n').filter(l => l.trim()).map((t, k) => {
+  save('pasted', src.value !== (window.SCRIPT || ''));  // a pasted script wins over the bundled one
+  // "***" marks a scene break: a divider you pass over, not a line you step on.
+  read.replaceChildren(...src.value.split('\n').filter(l => l.trim()).map(t => {
+    if (t.trim() === '***') return document.createElement('hr');
     const p = document.createElement('p');
     p.textContent = p.dataset.text = t;
-    p.onclick = () => show(k);
+    p.onclick = () => show(lines.indexOf(p));
     return p;
   }));
-  lines = [...read.children];
+  lines = [...read.querySelectorAll('p')];
   if (!lines.length) return;
   const names = [...new Set(lines.map(speaker))];
   role.replaceChildren(new Option('Everyone (all lines)', ''), ...names.map(n => new Option(n)));
@@ -214,7 +218,7 @@ $('start').onclick = () => {
   show(sameScript ? +load('line', 0) : 0);
 };
 
-try { src.value = load('script') || window.SCRIPT || ''; } catch {}
+src.value = (load('pasted') === 'true' ? load('script') : window.SCRIPT) || load('script') || '';
 if (src.value.trim()) $('start').click();
 
 // One handler for keyboard shortcuts and the phone button bar. Returns false for unused keys.

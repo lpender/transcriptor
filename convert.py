@@ -33,9 +33,12 @@ speeches = []
 for half in pages():
     for line in half.rstrip("\f").replace("\f", "f").splitlines():
         indent = len(line) - len(line.lstrip())
-        if re.match(r"[A-Z]+:", line):
+        if "***" in line:
+            if speeches and speeches[-1] != "***":  # a break can appear on both page halves
+                speeches.append("***")  # scene break; index.html draws a divider
+        elif re.match(r"[A-Z]+:", line):
             speeches.append(line.strip())
-        elif line.strip() and indent <= 4 and speeches and "***" not in line and not line.strip().isupper():
+        elif line.strip() and indent <= 4 and speeches and speeches[-1] != "***" and not line.strip().isupper():
             if not re.match(r"[A-Z]", line.strip()) or indent > 0:
                 speeches[-1] += ("" if speeches[-1].endswith("-") else " ") + line.strip()
 
