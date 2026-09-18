@@ -102,7 +102,9 @@ function sentences(text) {
   const out = [];
   for (const s of text.match(/[^.!?…,;:—–]+[.!?…,;:—–]*[\s]*/g) || [text]) {
     const last = out[out.length - 1];
-    if (last && (/\b(Mr|Mrs|Ms|Dr|St|U\.S)\.\s*$/.test(last) || norm(last).length < 3 || norm(s).length < 3)) out[out.length - 1] += s;
+    // One word on its own is not worth testing, so it joins the piece before it.
+    const oneWord = t => (t.match(/[\p{L}\p{N}]+/gu) || []).length < 2;
+    if (last && (/\b(Mr|Mrs|Ms|Dr|St|U\.S)\.\s*$/.test(last) || oneWord(last) || oneWord(s))) out[out.length - 1] += s;
     else out.push(s);
   }
   return out.map(s => s.trim()).filter(Boolean);
