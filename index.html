@@ -19,6 +19,7 @@
   #hint { color: #999; }
   #read hr { border: 0; border-top: 2px solid #444; margin: 1.2em 20%; }
   #read .hide { color: #3a3a3a; letter-spacing: .1em; }
+  #read .cue { color: #7f9c8a; font-style: italic; letter-spacing: normal; }
   /* Lines ahead are invisible, not blurred: a blur still shows how long they are. */
   body.learn #read p.cur ~ p, body.learn #read p.cur ~ hr { visibility: hidden; }
   #read .now { color: var(--hi); }
@@ -37,7 +38,7 @@
 </head>
 <body>
 <div id="edit">
-  <p>Paste script. One line per step. Then Start. Keys: Space/↓ next, ↑/Backspace back, E edit script, L learn mode, P play aloud, W drill weak lines. Click a line to jump.</p>
+  <p>Paste script. One line per step. Then Start. Keys: Space/↓ next, ↑/Backspace back, E edit script, L learn mode, P play aloud, W drill weak lines, C keyword cues. Click a line to jump.</p>
   <textarea id="src"></textarea>
   <button id="start">Start</button>
 </div>
@@ -45,6 +46,7 @@
   <label>Your role <select id="role"></select></label>
   <b id="score"></b>
   <button id="drillBtn"></button>
+  <button id="cueBtn"></button>
   <span id="hint"></span>
 </div>
 <div id="read" hidden></div>
@@ -58,7 +60,7 @@
 <script src="clips.js"></script>
 <script>
 const $ = id => document.getElementById(id);
-const src = $('src'), read = $('read'), edit = $('edit'), hud = $('hud'), role = $('role'), score = $('score'), hint = $('hint'), drillBtn = $('drillBtn');
+const src = $('src'), read = $('read'), edit = $('edit'), hud = $('hud'), role = $('role'), score = $('score'), hint = $('hint'), drillBtn = $('drillBtn'), cueBtn = $('cueBtn');
 let lines = [], i = 0;
 // Passive mode: play each line's ElevenLabs clip (made by tts.py) and advance.
 const audio = new Audio();
@@ -80,6 +82,24 @@ const cur = () => lines[i];
 const has = (p, c) => p.classList.contains(c);
 const mine = p => has(p, 'mine');
 const bestKey = () => 'best:' + role.value;
+let cues = load('cues') === 'true';
+
+// Cue mode: instead of blocks, prompt with the sentence's rarest words, on the
+// theory that two or three odd images are easier to hold than a whole line.
+const SKIP = new Set('a an the and or but so if then that this these those there here it its is am are was were be been being do does did done have has had will would can could shall should may might must no not of to in on at for with from by as your you i me my he she we they him her them his hers their our us what who when why how all any some out up down off over just very really maybe think know got said says tell told like well yeah okay yes now one about into more than other such get went come came see saw make made take took give gave much many because'.split(' '));
+let freq = {};
+function cue(text) {
+  const seen = new Set();
+  const picks = text.split(/[^\p{L}\p{N}'-]+/u).filter(w => {
+    const k = w.toLowerCase();
+    return w.length > 2 && !k.includes("'") && !SKIP.has(k) && !seen.has(k) && seen.add(k);
+  });
+  if (!picks.length) return text.trim().split(/\s+/)[0] || '…';
+  const keep = Math.min(3, Math.max(1, Math.round(picks.length / 3)));
+  // Rarest first, and a longer word beats a shorter one of the same rarity.
+  const best = [...picks].sort((a, b) => (freq[a.toLowerCase()] || 0) - (freq[b.toLowerCase()] || 0) || b.length - a.length).slice(0, keep);
+  return picks.filter(w => best.includes(w)).join(' · ').toLowerCase();
+}
 const runKey = () => 'run:' + role.value;
 
 // How often each sentence has been missed, kept across visits so the weak ones can be drilled.
@@ -150,7 +170,8 @@ function paint() {
     const done = cleared.has(id(it)) || (it === now && shown);
     // One fixed row of blocks for the sentence under test, and nothing past it: a
     // sentence's length, and how many are still to come, give too much away.
-    html += done ? `<span class="${it === now && shown ? 'now' : ''}">${esc(it.text)}</span>` : '<span class="hide">▒▒▒▒▒</span>';
+    html += done ? `<span class="${it === now && shown ? 'now' : ''}">${esc(it.text)}</span>`
+      : `<span class="hide${cues ? ' cue' : ''}">${cues ? esc(cue(it.text)) : '▒▒▒▒▒'}</span>`;
     if (!done) return p.innerHTML = html;
     rest = rest.slice(at + it.text.length);
   }
@@ -188,6 +209,7 @@ function render() {
   const weak = lines.filter(p => mine(p) && weakLine(p)).length;
   score.textContent = learn ? `${cleared.size}/${items.length} clear · best ${load(bestKey(), 0)}` : '';
   drillBtn.textContent = weak ? `Drill ${weak} weak (W)` : 'No weak lines yet';
+  cueBtn.textContent = cues ? 'Cues on (C)' : 'Cues off (C)';
   drillBtn.disabled = !weak;
   hint.textContent = !learn ? '' : quizzing()
     ? (shown ? 'Space right, next · N missed (costs you two)' : `Say it, then Space to reveal${atLine().length > 1 ? ` (sentence ${atLine().indexOf(item()) + 1} of ${atLine().length})` : ''}`)
@@ -224,6 +246,7 @@ function stopLearn() {
 
 role.onchange = () => { role.blur(); startLearn(drilling); };
 drillBtn.onclick = () => { drillBtn.blur(); act('w'); };
+cueBtn.onclick = () => { cueBtn.blur(); act('c'); };
 
 $('start').onclick = () => {
   const sameScript = load('script') === src.value;  // a new script starts from the top
@@ -238,6 +261,8 @@ $('start').onclick = () => {
     return p;
   }));
   lines = [...read.querySelectorAll('p')];
+  freq = {};
+  for (const w of src.value.toLowerCase().match(/[\p{L}\p{N}'-]+/gu) || []) freq[w] = (freq[w] || 0) + 1;
   if (!lines.length) return;
   const names = [...new Set(lines.map(speaker))];
   role.replaceChildren(new Option('Everyone (all lines)', ''), ...names.map(n => new Option(n)));
@@ -266,6 +291,7 @@ function act(k) {
   else if (k === 'e') { stopPlay(); stopLearn(); read.hidden = true; edit.hidden = false; }
   else if (k === 'p') (playing = !playing) ? play() : stopPlay();
   else if (k === 'l') learn ? stopLearn() : startLearn();
+  else if (k === 'c') { cues = !cues; save('cues', cues); paint(); render(); }
   else if (k === 'w') learn && drilling ? startLearn() : startLearn(true);
   else return false;
   return true;
