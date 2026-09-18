@@ -26,16 +26,13 @@
   #read .weak { text-decoration: underline wavy #e448; text-underline-offset: 6px; }
   #read p.got { box-shadow: -8px 0 0 #3c6; }
   #read p.missed { box-shadow: -8px 0 0 #e44; }
-  #sound { position: fixed; right: 16px; bottom: 16px; font-size: 24px; line-height: 1; padding: 10px 14px; border: 0; border-radius: 50%; background: #2a2a2a; color: var(--fg); cursor: pointer; }
-  #read[hidden] ~ #sound { display: none; }
-  @media (pointer: coarse) { #sound { display: none; } }  /* the thumb bar has its own Play */
-  #pad { display: none; }
-  /* Phones: no keyboard shortcuts, so a thumb bar stands in for them. */
-  @media (pointer: coarse) {
-    #pad { display: flex; position: fixed; left: 0; right: 0; bottom: 0; gap: 8px; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); background: #000d; }
-    #pad button { flex: 1; margin: 0; padding: 14px 0; font: 16px system-ui, sans-serif; background: #333; color: var(--fg); border: 0; border-radius: 10px; }
-    #read[hidden] + #pad { display: none; }
-  }
+  /* Every control has a button; the keys are shortcuts for them, not the only way in. */
+  #pad { display: flex; position: fixed; left: 0; right: 0; bottom: 0; gap: 8px; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); background: #000d; }
+  #pad button { flex: 1; margin: 0; padding: 14px 0; font: 16px system-ui, sans-serif; background: #333; color: var(--fg); border: 0; border-radius: 10px; cursor: pointer; }
+  #pad button:disabled { opacity: .35; }
+  #pad button.on { background: #4a4526; }
+  #pad small { display: block; color: #aaa; font-size: 12px; }
+  #read[hidden] + #pad { display: none; }
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -48,17 +45,17 @@
 <div id="hud" hidden>
   <label>Your role <select id="role"></select></label>
   <b id="score"></b>
-  <button id="drillBtn"></button>
   <span id="hint"></span>
 </div>
 <div id="read" hidden></div>
-<button id="sound" title="Read the script aloud (P)">🔇</button>
 <div id="pad">
-  <button data-key="arrowup">▲ Back</button>
-  <button data-key="p">Play</button>
-  <button data-key="l">Learn</button>
-  <button data-key="k">Keys</button>
-  <button data-key=" ">Next ▼</button>
+  <button data-key="arrowup">▲ Back<small>↑</small></button>
+  <button data-key="p">Play<small>P</small></button>
+  <button data-key="l">Learn<small>L</small></button>
+  <button data-key="k">Keys<small>K</small></button>
+  <button data-key="w" id="drillBtn">Drill weak<small>W</small></button>
+  <button data-key="e">Edit<small>E</small></button>
+  <button data-key=" ">Next ▼<small>space</small></button>
 </div>
 <script src="script.js"></script>
 <script src="clips.js"></script>
@@ -229,19 +226,20 @@ function next() {
 function render() {
   const weak = lines.filter(p => mine(p) && weakLine(p)).length;
   score.textContent = learn ? `${cleared.size}/${items.length} clear · best ${load(bestKey(), 0)}` : '';
-  drillBtn.textContent = weak ? `Drill ${weak} weak (W)` : 'No weak lines yet';
+  drillBtn.innerHTML = (weak ? `Drill ${weak} weak` : 'Drill weak') + '<small>W</small>';
   drillBtn.disabled = !weak;
   hint.textContent = !learn ? '' : quizzing()
     ? (shown ? 'Space right, next · N missed (costs you two)' : `Say it, then Space to reveal${atLine().length > 1 ? ` (sentence ${atLine().indexOf(item()) + 1} of ${atLine().length})` : ''}`)
     : drilling && !weak ? 'Weak lines cleared! W or L to stop' : 'Space next · L exit';
-  $('sound').textContent = playing ? '🔊' : '🔇';
   const b = [...document.querySelectorAll('#pad button')];
-  b[1].style.opacity = playing ? 1 : .6;
-  b[2].style.opacity = learn ? 1 : .6;
-  b[3].style.opacity = keywords ? 1 : .6;
-  b[0].textContent = quizzing() && shown ? '✗ Missed' : '▲ Back';
+  b[1].innerHTML = (playing ? '🔊 Stop' : '🔇 Play') + '<small>P</small>';
+  b[2].innerHTML = (learn ? 'Stop learning' : 'Learn') + '<small>L</small>';
+  b[3].innerHTML = (keywords ? 'Keys on' : 'Keys off') + '<small>K</small>';
+  b[2].classList.toggle('on', learn);
+  b[3].classList.toggle('on', keywords);
+  b[0].innerHTML = quizzing() && shown ? '✗ Missed<small>N</small>' : '▲ Back<small>↑</small>';
   b[0].dataset.key = quizzing() && shown ? 'n' : 'arrowup';
-  b[4].textContent = quizzing() ? (shown ? '✓ Got it' : 'Reveal') : 'Next ▼';
+  b[6].innerHTML = (quizzing() ? (shown ? '✓ Got it' : 'Reveal') : 'Next ▼') + '<small>space</small>';
 }
 
 function startLearn(weakOnly) {
@@ -265,7 +263,6 @@ function stopLearn() {
 }
 
 role.onchange = () => { role.blur(); startLearn(drilling); };
-drillBtn.onclick = () => { drillBtn.blur(); act('w'); };
 
 $('start').onclick = () => {
   const sameScript = load('script') === src.value;  // a new script starts from the top
@@ -291,6 +288,7 @@ $('start').onclick = () => {
   stopLearn();
   edit.hidden = true; read.hidden = false;
   show(sameScript ? +load('line', 0) : 0);
+  render();
 };
 
 src.value = (load('pasted') === 'true' ? load('script') : window.SCRIPT) || load('script') || '';
@@ -326,7 +324,6 @@ document.addEventListener('keydown', e => {
   // or hands the key to the browser.
   if (act(k) | (k === ' ' || k.startsWith('arrow'))) e.preventDefault();
 });
-$('sound').onclick = () => { $('sound').blur(); act('p'); };
 document.querySelectorAll('#pad button').forEach(b => {
   b.tabIndex = -1;  // taps must not leave focus on a button, where Space would press it again
   b.onclick = () => { b.blur(); act(b.dataset.key); };
