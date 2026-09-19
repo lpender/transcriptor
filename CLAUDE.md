@@ -18,6 +18,8 @@ ELEVEN_LABS_API_KEY=... python3 tts.py # script.js -> clips/ + clips.js (spends 
 - `tts.py` spends Lee's ElevenLabs credits — say the scope and wait for a yes.
 - After a render, delete clips no longer named in `clips.js`.
 - Bump `CACHE` in `sw.js` on every deploy, or installed copies keep the old build.
+- Push after every commit: Pages deploys straight from `main`, so a local-only
+  commit is not shipped.
 - The source PDF is copyrighted; it stays git-ignored.
 
 ## Read when
