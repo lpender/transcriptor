@@ -9,7 +9,10 @@ Stress comes from CAPITALS, which the model reads as emphasis. The play
 already capitalises its own ("You said it TWICE"); stress.json adds
 more, mapping a line to how it should be spoken:
 
-    {"NELSON: That's what I said.": "That's what I SAID."}
+    {"NELSON: That's what I said.": "That's what \"I\" said."}
+
+Quotation marks stress a word that capitals cannot, such as "I" or a
+word already in capitals. The text on screen is never changed.
 
 Needs ELEVEN_LABS_API_KEY in the environment.
 """
