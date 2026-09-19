@@ -90,6 +90,8 @@ const save = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
 let myRoles = new Set(JSON.parse(load('roles', '[]')));
 // Voices switched off for reading aloud, so you speak those parts yourself.
 let muted = new Set(JSON.parse(load('muted', '[]')));
+// Parts blocked out on the page, so you recite them instead of reading them.
+let covered = new Set(JSON.parse(load('covered', '[]')));
 const speaker = p => p.textContent.split(':')[0];
 const words = p => p.textContent.slice(speaker(p).length + 1);
 const cur = () => lines[i];
@@ -130,7 +132,11 @@ const mark = text => {
   const keys = keyWords(text);
   return text.replace(/[\p{L}\p{N}'-]+/gu, w => keys.has(norm(w)) ? `<b>${esc(w)}</b>` : esc(w));
 };
-const plain = p => p.innerHTML = keywords ? sentences(p.dataset.text).map(mark).join(' ') : esc(p.dataset.text);
+const plain = p => {
+  // A covered part shows only its speaker until you tap the line to look.
+  if (covered.has(speaker(p)) && !p.dataset.open) return p.innerHTML = `${esc(speaker(p))}: <span class="hide">▒▒▒▒▒</span>`;
+  p.innerHTML = keywords ? sentences(p.dataset.text).map(mark).join(' ') : esc(p.dataset.text);
+};
 
 function show(n) {
   i = (n % lines.length + lines.length) % lines.length;  // past the end is back to the top
@@ -278,9 +284,10 @@ function render() {
   const weak = lines.filter(p => mine(p) && weakLine(p)).length;
   score.textContent = learn ? `${cleared.size}/${items.length} clear · best ${load(bestKey(), 0)}` : '';
   for (const label of roles.querySelectorAll('label')) {
-    const off = muted.has(label.dataset.name);
-    label.querySelector('.bell').textContent = off ? '🔇' : '🔊';
-    label.style.opacity = off ? .6 : 1;
+    const name = label.dataset.name, off = muted.has(name);
+    label.querySelector('.bell:not(.eye)').textContent = off ? '🔇' : '🔊';
+    label.querySelector('.eye').textContent = covered.has(name) ? '🙈' : '👁';
+    label.style.opacity = off && covered.has(name) ? .6 : 1;
   }
   drillBtn.innerHTML = (weak ? `Drill ${weak} weak` : 'Drill weak') + '<small>W</small>';
   drillBtn.disabled = !weak;
@@ -328,6 +335,15 @@ function buildRoles(names) {
       learn ? startLearn(drilling) : stopLearn();
       render();
     };
+    const eye = document.createElement('button');
+    eye.className = 'bell eye';
+    eye.title = `Block out ${n}'s lines`;
+    eye.onclick = () => {
+      covered.has(n) ? covered.delete(n) : covered.add(n);
+      save('covered', JSON.stringify([...covered]));
+      lines.forEach(p => { delete p.dataset.open; if (!learn || p !== cur()) plain(p); });
+      eye.blur(); render();
+    };
     const bell = document.createElement('button');
     bell.className = 'bell';
     bell.title = `Silence ${n}'s voice`;
@@ -338,7 +354,7 @@ function buildRoles(names) {
     };
     bell.textContent = muted.has(n) ? '🔇' : '🔊';
     const label = document.createElement('label');
-    label.append(box, n, bell);
+    label.append(box, n, eye, bell);
     label.dataset.name = n;
     return label;
   }));
@@ -354,7 +370,10 @@ $('start').onclick = () => {
     const p = document.createElement('p');
     p.dataset.text = t;
     p.textContent = t;
-    p.onclick = () => show(lines.indexOf(p));
+    p.onclick = () => {
+      if (covered.has(speaker(p)) && !p.dataset.open) { p.dataset.open = '1'; return plain(p); }
+      show(lines.indexOf(p));
+    };
     return p;
   }));
   lines = [...read.querySelectorAll('p')];
