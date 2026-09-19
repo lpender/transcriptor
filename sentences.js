@@ -1,21 +1,31 @@
-// The one definition of a testable piece of a line, shared by the app and by
-// tts.py (which runs it through node when timing a clip's sentences).
+// How a script is cut up, shared by the app, convert.py and tts.py so the piece
+// you read, the piece you are tested on and the piece you hear are the same.
+//
+//   blocks()    — one sentence: what a line on screen is
+//   sentences() — finer, down to commas and dashes: what learn mode tests
 const norm = t => t.toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
 
-// Split a speech at the punctuation that breaks up speech — full stops, commas,
-// semicolons, colons and dashes — but never at apostrophes or quotes. Abbreviations
-// like "Mr." and stray scraps stay attached to the piece before them.
-function sentences(text) {
+// A scrap of one or two words is not worth its own piece, so it joins the one
+// before it. "I'm" counts as one word, and "Mr." never ends a piece.
+const scrap = t => (t.match(/[\p{L}\p{N}'’-]+/gu) || []).length < 3;
+const trails = t => /\b(Mr|Mrs|Ms|Dr|St|U\.S)\.\s*$/.test(t);
+
+function cut(text, at) {
   const out = [];
-  for (const s of text.match(/[^.!?…,;:—–]+[.!?…,;:—–]*[\s]*/g) || [text]) {
+  for (const s of text.match(at) || [text]) {
     const last = out[out.length - 1];
-    // A scrap of one or two words is not worth testing, so it joins the piece before it.
-    const scrap = t => (t.match(/[\p{L}\p{N}'’-]+/gu) || []).length < 3;  // "I'm" is one word
-    if (last && (/\b(Mr|Mrs|Ms|Dr|St|U\.S)\.\s*$/.test(last) || scrap(last) || scrap(s))) out[out.length - 1] += s;
+    if (last && (trails(last) || scrap(last) || scrap(s))) out[out.length - 1] += s;
     else out.push(s);
   }
   return out.map(s => s.trim()).filter(Boolean);
 }
 
-if (typeof module !== 'undefined') module.exports = { sentences, norm };
-if (typeof window !== 'undefined') Object.assign(window, { sentences, norm });
+// Sentence ends only: full stops, question and exclamation marks, ellipses.
+const blocks = text => cut(text, /[^.!?…]+[.!?…]*[\s]*/g);
+
+// Every break in the speech — the above plus commas, semicolons, colons and
+// dashes — but never an apostrophe, a quote or a hyphen inside a word.
+const sentences = text => cut(text, /[^.!?…,;:—–]+[.!?…,;:—–]*[\s]*/g);
+
+if (typeof module !== 'undefined') module.exports = { blocks, sentences, norm };
+if (typeof window !== 'undefined') Object.assign(window, { blocks, sentences, norm });

@@ -1,4 +1,4 @@
-"""Convert Waiting Coen.pdf into script.js: one spoken line per step.
+"""Convert Waiting Coen.pdf into script.js: one sentence per step.
 
 Each PDF page is a two-page landscape spread, so each half is extracted
 separately to keep reading order. Speeches start at column 0 as
@@ -43,6 +43,25 @@ for half in pages():
                 speeches[-1] += ("" if speeches[-1].endswith("-") else " ") + line.strip()
 
 speeches = [re.sub(r"\s{2,}", " ", repair(s)) for s in speeches]  # the PDF pads spaced-out text
+
+
+def pieces(speech):
+    """A speech as one block per sentence, each labelled with the speaker.
+
+    A monologue you step through a screenful at a time is useless, and the split
+    is sentences.js — the same one the app tests you with and tts.py times.
+    """
+    if speech == "***":
+        return [speech]
+    speaker, text = speech.split(":", 1)
+    out = subprocess.run(
+        ["node", "-e", "const {blocks} = require('./sentences.js');"
+                       "console.log(JSON.stringify(blocks(process.argv[1])))", "--", text.strip()],
+        capture_output=True, text=True, check=True).stdout
+    return [f"{speaker}: {piece}" for piece in json.loads(out)] or [speech]
+
+
+speeches = [piece for speech in speeches for piece in pieces(speech)]
 
 open("script.js", "w").write("window.SCRIPT = " + json.dumps("\n".join(speeches), ensure_ascii=False) + ";\n")
 print(f"{len(speeches)} speeches -> script.js")

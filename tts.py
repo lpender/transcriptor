@@ -32,6 +32,7 @@ MODEL = "eleven_v3"  # v3 follows capitals and punctuation for emphasis far bett
 STRESS = json.loads(pathlib.Path("stress.json").read_text()) if os.path.exists("stress.json") else {}
 
 script = json.loads(re.search(r"window\.SCRIPT = (.*);", pathlib.Path("script.js").read_text())[1])
+LINES = [l for l in script.split("\n") if ":" in l]
 clips = {}
 pathlib.Path("clips").mkdir(exist_ok=True)
 
@@ -55,9 +56,7 @@ def spans(text, alignment):
         out.append([round(starts[first], 3), round(ends[last], 3)])
         at = last + 1
     return out
-for line in script.split("\n"):
-    if ":" not in line:
-        continue  # scene break
+for n, line in enumerate(LINES):
     speaker, text = line.split(":", 1)
     voice = VOICES[speaker]  # KeyError on a new character: add a voice above.
     # A line cut off mid-word ends in a dash, which the voice reads as a strange
@@ -68,7 +67,7 @@ for line in script.split("\n"):
     if not (os.path.exists(path) and os.path.exists(timing)):
         req = urllib.request.Request(
             f"https://api.elevenlabs.io/v1/text-to-speech/{voice}/with-timestamps?output_format=mp3_44100_128",
-            data=json.dumps({"text": spoken, "model_id": MODEL}).encode(),
+            data=json.dumps({"text": spoken, "model_id": MODEL}).encode(),  # v3 rejects previous_text/next_text
             headers={"xi-api-key": KEY, "Content-Type": "application/json"})
         said = json.load(urllib.request.urlopen(req))
         pathlib.Path(path).write_bytes(base64.b64decode(said["audio_base64"]))
