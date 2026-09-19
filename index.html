@@ -163,13 +163,16 @@ let part = 0;    // which sentence of the current line is sounding
 let moving = false;  // crossing lines: play once at the end, not at every step
 let loop = null;     // [first, last] lines to rehearse over and over
 
+// Why the sound is not playing, said in the header rather than the console.
+const trouble = why => { hint.textContent = why; console.warn(why); };
+
 function play() {
   if (learn && quizzing()) return;  // your line: grade it first, then carry on
   const clip = clipOf(cur());
   // A silenced voice still plays, silently, so the gap is exactly as long as the line.
   audio.muted = muted.has(speaker(cur()));
   // A line with no clip (a script edited since tts.py last ran) is skipped, not a full stop.
-  if (!clip) { console.warn('No clip for line', i, '- run tts.py'); return void setTimeout(() => playing && step(1), 600); }
+  if (!clip) { trouble(`No clip for line ${i + 1} — rerun tts.py`); return void setTimeout(() => playing && step(1), 600); }
   const span = spansOf(cur())[part = Math.min(part, spansOf(cur()).length - 1)];
   const at = span ? span[0] : 0;
   advanced = false;
@@ -179,13 +182,23 @@ function play() {
     audio.addEventListener('loadedmetadata', () => { audio.currentTime = at; }, { once: true });
   } else audio.currentTime = at;
   // A play() cut short by the next one rejects; only a browser refusing sound stops us.
-  audio.play().catch(e => { if (e.name === 'NotAllowedError') stopPlay(); });
+  audio.play().catch(e => {
+    if (e.name === 'AbortError') return;  // cut short by the next line, which is fine
+    trouble(`Sound blocked: ${e.name}. Press Play again.`);
+    stopPlay();
+  });
+  // Nothing playing and nothing moving: say so rather than sit there clicking.
+  clearTimeout(stuck);
+  stuck = setTimeout(() => {
+    if (playing && audio.paused) trouble(`Stuck on line ${i + 1}: ${audio.src.split('/').pop()} will not play (state ${audio.readyState})`);
+  }, 2000);
 }
 function stopPlay() { playing = false; audio.pause(); }
+audio.onerror = () => playing && trouble(`Cannot load ${audio.src.split('/').pop()} (error ${audio.error?.code})`);
 
 // A sentence ends before the clip does, so playback is stopped at its end time.
 // Both this and the clip's own end can fire, hence the latch: one move per piece.
-let advanced = false;
+let advanced = false, stuck = 0;
 audio.ontimeupdate = () => {
   const span = spansOf(cur())[part];
   if (playing && span && !advanced && audio.currentTime >= span[1]) { advanced = true; audio.pause(); advance(); }
@@ -308,11 +321,12 @@ function render() {
   }
   drillBtn.innerHTML = (weak ? `Drill ${weak} weak` : 'Drill weak') + '<small>W</small>';
   drillBtn.disabled = !weak;
-  hint.textContent = loop && !learn ? `Looping ${loop[1] - loop[0] + 1} lines · Esc to stop` : !learn ? '' : quizzing()
+  hint.textContent = playing && muted.has(speaker(cur())) ? `${speaker(cur())} is silenced — tap 🔇 to hear them`
+    : loop && !learn ? `Looping ${loop[1] - loop[0] + 1} lines · Esc to stop` : !learn ? '' : quizzing()
     ? (shown ? 'Space right, next · N missed (costs you two)' : `Say it, then Space to reveal${atLine().length > 1 ? ` (sentence ${atLine().indexOf(item()) + 1} of ${atLine().length})` : ''}`)
     : drilling && !weak ? 'Weak lines cleared! W or L to stop' : 'Space next · L exit';
   const b = [...document.querySelectorAll('#pad button')];
-  b[1].innerHTML = (playing ? '🔊 Stop' : '🔇 Play') + '<small>P</small>';
+  b[1].innerHTML = (playing ? '⏸ Stop' : '▶ Play') + '<small>P</small>';
   b[2].innerHTML = (learn ? 'Stop learning' : 'Learn') + '<small>L</small>';
   b[3].innerHTML = (keywords ? 'Keys on' : 'Keys off') + '<small>K</small>';
   b[2].classList.toggle('on', learn);
