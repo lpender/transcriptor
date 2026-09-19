@@ -181,7 +181,7 @@
       <button class="chip wide" data-key="e">Paste a different script<span class="key">E</span></button>
     </div>
     <div class="row">
-      <button class="chip wide" id="reloadBtn">Reload the app<span class="key">8MB</span></button>
+      <button class="chip wide" id="reloadBtn">Check for a new version<span class="key">↻</span></button>
     </div>
     <button id="closeSheet">Close</button>
   </div>
@@ -569,6 +569,12 @@ $('start').onclick = () => {
 
 src.value = (load('pasted') === 'true' ? load('script') : window.SCRIPT) || load('script') || '';
 if (src.value.trim()) $('start').click();
+// An empty box means script.js never arrived — say so, rather than looking broken.
+else if (!window.SCRIPT) {
+  edit.querySelector('p').textContent = navigator.onLine
+    ? 'The script did not load. Reload the page to fetch it again, or paste one below.'
+    : 'The script is not on this device and you are offline. Connect and reload, or paste one below.';
+}
 
 // One handler for keyboard shortcuts and the phone button bar. Returns false for unused keys.
 function act(k) {
@@ -661,13 +667,13 @@ document.querySelectorAll('[data-key]').forEach(b => {
 });
 $('menuBtn').onclick = () => { $('menuBtn').blur(); render(); sheet.showModal(); };
 $('closeSheet').onclick = () => sheet.close();
-// A phone has no reload button worth reaching for, and an installed copy keeps its
-// own cache: this throws both away and starts clean.
+// An installed copy has no address bar to refresh from. This asks the worker for a
+// new version and reloads; it never throws the saved copy away, or a reload on a
+// train would leave you with nothing to read.
 $('reloadBtn').onclick = async () => {
   $('reloadBtn').firstChild.textContent = 'Reloading…';
   try {
-    for (const reg of await navigator.serviceWorker?.getRegistrations() || []) await reg.unregister();
-    for (const key of await caches.keys()) await caches.delete(key);
+    for (const reg of await navigator.serviceWorker?.getRegistrations() || []) await reg.update();
   } catch (e) { console.warn(e); }
   location.reload();
 };
