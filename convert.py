@@ -42,7 +42,7 @@ for half in pages():
             if not re.match(r"[A-Z]", line.strip()) or indent > 0:
                 speeches[-1] += ("" if speeches[-1].endswith("-") else " ") + line.strip()
 
-speeches = [repair(s) for s in speeches]
+speeches = [re.sub(r"\s{2,}", " ", repair(s)) for s in speeches]  # the PDF pads spaced-out text
 
 open("script.js", "w").write("window.SCRIPT = " + json.dumps("\n".join(speeches), ensure_ascii=False) + ";\n")
 print(f"{len(speeches)} speeches -> script.js")
