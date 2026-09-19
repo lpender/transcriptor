@@ -9,14 +9,14 @@ const norm = t => t.toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
 // word, and "Mr." never ends a piece. A line on screen can be as short as two words
 // ("Miss busy-screwing-up-somebody-else's-inforMAtion."); a piece to be tested on
 // needs three, or you are quizzed on "No sir."
-const words = t => (t.match(/[\p{L}\p{N}'’-]+/gu) || []).length;
+const wordCount = t => (t.match(/[\p{L}\p{N}'’-]+/gu) || []).length;
 const trails = t => /\b(Mr|Mrs|Ms|Dr|St|U\.S)\.\s*$/.test(t);
 
 function cut(text, at, least) {
   const out = [];
   for (const s of text.match(at) || [text]) {
     const last = out[out.length - 1];
-    if (last && (trails(last) || words(last) < least || words(s) < least)) out[out.length - 1] += s;
+    if (last && (trails(last) || wordCount(last) < least || wordCount(s) < least)) out[out.length - 1] += s;
     else out.push(s);
   }
   return out.map(s => s.trim()).filter(Boolean);
