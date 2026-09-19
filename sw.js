@@ -1,6 +1,6 @@
 // Everything, audio included, is cached on first visit so the app works on a train.
 // Bump CACHE to publish a new version; the old one is deleted on activate.
-const CACHE = 'transcriptor-4';
+const CACHE = 'transcriptor-5';
 const CORE = ['.', 'index.html', 'sentences.js', 'script.js', 'clips.js', 'manifest.json', 'icon-192.png', 'icon-512.png'];
 
 self.window = self;  // clips.js assigns to window; in a worker that is this scope
@@ -24,14 +24,26 @@ self.addEventListener('activate', e => {
   })());
 });
 
-// Cache first: offline is the point, and a new version arrives with a new CACHE.
+// Audio never changes once rendered, so it comes from the cache. The page and its
+// data are fetched first when online: serving a stale script.js beside a fresh
+// clips.js leaves every line without a clip, and a reload cannot clear it.
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  const audio = e.request.url.endsWith('.mp3');
   e.respondWith((async () => {
-    const hit = await caches.match(e.request, { ignoreSearch: true });
-    if (hit) return hit;
-    const res = await fetch(e.request);
-    if (res.ok) (await caches.open(CACHE)).put(e.request, res.clone());
-    return res;
+    const cache = await caches.open(CACHE);
+    if (audio) {
+      const hit = await cache.match(e.request, { ignoreSearch: true });
+      if (hit) return hit;
+    }
+    try {
+      const res = await fetch(e.request);
+      if (res.ok) cache.put(e.request, res.clone());
+      return res;
+    } catch (offline) {
+      const hit = await cache.match(e.request, { ignoreSearch: true });
+      if (hit) return hit;
+      throw offline;
+    }
   })());
 });
