@@ -194,6 +194,21 @@ function play() {
   }, 2000);
 }
 function stopPlay() { playing = false; audio.pause(); }
+
+// A short falling blip when playback jumps backwards, so a loop is audible.
+let tones;
+function blip() {
+  tones ||= new (window.AudioContext || window.webkitAudioContext)();
+  const osc = tones.createOscillator(), gain = tones.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(880, tones.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(440, tones.currentTime + 0.12);
+  gain.gain.setValueAtTime(0.14, tones.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, tones.currentTime + 0.16);
+  osc.connect(gain).connect(tones.destination);
+  osc.start();
+  osc.stop(tones.currentTime + 0.17);
+}
 audio.onerror = () => playing && trouble(`Cannot load ${audio.src.split('/').pop()} (error ${audio.error?.code})`);
 
 // A sentence ends before the clip does, so playback is stopped at its end time.
@@ -209,7 +224,7 @@ function step(n) {
   moving = true;
   while (n > 0) {
     if (part + 1 < spansOf(cur()).length) part++;
-    else if (loop && i >= loop[1]) { part = 0; show(loop[0]); }  // round the block again
+    else if (loop && i >= loop[1]) { part = 0; blip(); show(loop[0]); }  // round the block again
     else { part = 0; show(i + 1); }
     n--;
   }
@@ -227,7 +242,7 @@ const advance = () => setTimeout(() => {
   if (!playing) return;
   const chunk = +$('chunk').value, rewind = +$('rewind').value;
   since++;
-  if (chunk && since >= chunk) { since = 0; step(1 - rewind); }
+  if (chunk && since >= chunk) { since = 0; if (rewind) blip(); step(1 - rewind); }
   else step(1);
 }, 300);
 for (const id of ['chunk', 'rewind']) {
