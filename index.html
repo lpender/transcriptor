@@ -2,7 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>Script Follower</title>
 <style>
   :root { --bg: #111; --fg: #eee; --dim: #555; --hi: #ffd84d; }
@@ -158,12 +164,8 @@ let moving = false;  // crossing lines: play once at the end, not at every step
 function play() {
   if (learn && quizzing()) return;  // your line: grade it first, then carry on
   const clip = clipOf(cur());
-  // A silenced voice leaves a gap as long as the line, so you can say it in time.
-  if (muted.has(speaker(cur())) && clip) {
-    const span = spansOf(cur())[part] || [0, audio.duration || 2];
-    audio.pause();
-    return void setTimeout(() => playing && audio.onended(), (span[1] - span[0]) * 1000);
-  }
+  // A silenced voice still plays, silently, so the gap is exactly as long as the line.
+  audio.muted = muted.has(speaker(cur()));
   // A line with no clip (a script edited since tts.py last ran) is skipped, not a full stop.
   if (!clip) { console.warn('No clip for line', i, '- run tts.py'); return void setTimeout(() => playing && step(1), 600); }
   const span = spansOf(cur())[part = Math.min(part, spansOf(cur()).length - 1)];
@@ -429,6 +431,11 @@ document.addEventListener('keydown', e => {
   // or hands the key to the browser.
   if (act(k) | (k === ' ' || k.startsWith('arrow'))) e.preventDefault();
 });
+// Install the worker that keeps the script and every clip on the device.
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  navigator.serviceWorker.register('sw.js').catch(e => console.warn('No offline cache:', e));
+}
+
 document.querySelectorAll('#pad button').forEach(b => {
   b.tabIndex = -1;  // taps must not leave focus on a button, where Space would press it again
   b.onclick = () => { b.blur(); act(b.dataset.key); };
