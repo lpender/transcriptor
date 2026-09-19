@@ -11,73 +11,179 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Script Follower</title>
 <style>
-  :root { --bg: #111; --fg: #eee; --dim: #555; --hi: #ffd84d; }
-  body { margin: 0; background: var(--bg); color: var(--fg); font: clamp(20px, 5.5vw, 32px)/1.5 Georgia, serif; touch-action: manipulation; }
-  #edit { max-width: 800px; margin: 40px auto; padding: 0 16px; font-size: 16px; }
-  textarea { width: 100%; height: 60vh; font: 16px/1.4 monospace; background: #222; color: var(--fg); border: 1px solid #444; padding: 8px; box-sizing: border-box; }
-  button { font-size: 16px; padding: 8px 16px; margin-top: 8px; }
-  #read { max-width: 900px; margin: 0 auto; padding: 50vh 16px; }
-  #read p { margin: 0 0 .6em; color: var(--dim); transition: color .2s; cursor: pointer; }
-  #read p.cur { color: var(--hi); }
-  #read p.looped { background: #ffd84d1a; box-shadow: 8px 0 0 #ffd84d1a, -8px 0 0 #ffd84d1a; }
-  #read p.cur ~ p { color: var(--fg); }
-  #hud { position: fixed; top: 0; left: 0; right: 0; padding: 8px 16px; background: #000c; font: 16px/1.4 system-ui, sans-serif; display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
-  #hud label { display: inline-flex; align-items: center; gap: 4px; }
-  #hud input { accent-color: var(--hi); }
-  #roles { display: inline-flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-  .bell { background: none; border: 0; padding: 0 2px; margin: 0; font-size: 14px; cursor: pointer; }
-  #hint { color: #999; }
-  #read hr { border: 0; border-top: 2px solid #444; margin: 1.2em 20%; }
-  #read .hide { color: #3a3a3a; letter-spacing: .1em; }
-  /* Lines ahead are invisible, not blurred: a blur still shows how long they are. */
-  body.learn #read p.cur ~ p, body.learn #read p.cur ~ hr { visibility: hidden; }
-  #read .now { color: var(--hi); }
-  #read b { font-weight: 700; color: #fff; }
-  #read .weak { text-decoration: underline wavy #e448; text-underline-offset: 6px; }
-  #read p.got { box-shadow: -8px 0 0 #3c6; }
-  #read p.missed { box-shadow: -8px 0 0 #e44; }
-  /* Every control has a button; the keys are shortcuts for them, not the only way in. */
-  #pad { display: flex; position: fixed; left: 0; right: 0; bottom: 0; gap: 8px; padding: 8px 8px calc(8px + env(safe-area-inset-bottom)); background: #000d; }
-  #pad button { flex: 1; margin: 0; padding: 14px 0; font: 16px system-ui, sans-serif; background: #333; color: var(--fg); border: 0; border-radius: 10px; cursor: pointer; }
-  #pad button:disabled { opacity: .35; }
-  #pad button.on { background: #4a4526; }
-  #pad small { display: block; color: #aaa; font-size: 12px; }
-  #pad label { display: flex; align-items: center; gap: 4px; color: #aaa; font: 13px system-ui, sans-serif; }
-  #pad input { width: 44px; padding: 8px 4px; font: 16px system-ui, sans-serif; background: #333; color: var(--fg); border: 0; border-radius: 8px; text-align: center; }
-  #read[hidden] + #pad { display: none; }
+  /* A prompter's script: manila paper, typewriter ribbon, read in a dark room. */
+  :root {
+    --ink: #13120E;        /* backstage dark, warm not blue */
+    --surface: #1E1C16;
+    --edge: #322E24;
+    --paper: #EFE7D6;      /* typing paper */
+    --faded: #8C8371;      /* carbon copy, lines already past */
+    --ribbon: #C8462F;     /* typewriter ribbon red */
+    --stamp: #8FA05A;      /* approved */
+    --cue: #B9AE94;        /* character cues */
+    --tap: 52px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ink); color: var(--paper);
+    font: 400 clamp(19px, 4.6vw, 27px)/1.6 Georgia, 'Iowan Old Style', serif;
+    touch-action: manipulation; -webkit-text-size-adjust: 100%;
+  }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--ribbon); outline-offset: 2px; }
   [hidden] { display: none !important; }
+
+  /* ---- the script ---- */
+  #read { max-width: 34em; margin: 0 auto; padding: 45vh 20px calc(50vh + var(--tap)); }
+  #read p {
+    margin: 0 0 .85em; color: var(--faded); cursor: pointer;
+    transition: color .25s ease; padding-left: 14px; border-left: 2px solid transparent;
+  }
+  #read p.cur { color: var(--paper); border-left-color: var(--ribbon); }
+  #read p.cur ~ p { color: #5C5648; }
+  #read b { font-weight: 700; color: #FFF8E8; }
+  #read .hide { color: #3A362C; letter-spacing: .12em; }
+  #read .now { color: #FFF3DC; }
+  #read .weak { text-decoration: underline wavy var(--ribbon); text-underline-offset: 7px; text-decoration-thickness: 1px; }
+  #read hr { border: 0; border-top: 1px solid var(--edge); margin: 2em 30%; }
+  body.learn #read p.cur ~ p, body.learn #read p.cur ~ hr { visibility: hidden; }
+
+  /* ---- top strip: only what is true right now ---- */
+  #hud {
+    position: fixed; inset: 0 0 auto; z-index: 2;
+    padding: calc(env(safe-area-inset-top) + 8px) 16px 8px;
+    background: linear-gradient(var(--ink) 72%, transparent);
+    font: 500 14px/1.45 ui-monospace, 'SF Mono', Menlo, monospace;
+    display: flex; gap: 14px; align-items: baseline;
+  }
+  #score { color: var(--cue); letter-spacing: .04em; white-space: nowrap; }
+  #hint { color: var(--faded); font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* ---- the bar you keep your thumb on ---- */
+  #bar {
+    position: fixed; inset: auto 0 0; z-index: 3; display: flex; gap: 10px;
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    background: linear-gradient(transparent, var(--ink) 34%);
+    max-width: 44em; margin: 0 auto;
+  }
+  #bar button {
+    min-height: var(--tap); border: 1px solid var(--edge); border-radius: 12px;
+    background: var(--surface); color: var(--paper);
+    font: 500 15px/1 ui-monospace, 'SF Mono', Menlo, monospace; letter-spacing: .02em;
+  }
+  #bar #mainBtn { flex: 1; font-size: 17px; border-color: #4A4335; background: #262218; }
+  #bar #backBtn { width: var(--tap); font-size: 19px; }
+  #bar #menuBtn { width: 68px; }
+  #bar #missBtn { width: 76px; border-color: #5A2C21; color: #E8917C; }
+  #bar button:disabled { opacity: .3; }
+
+  /* ---- the rest lives here ---- */
+  #sheet {
+    border: 0; padding: 0; margin: auto auto 0; width: min(100%, 34em);
+    background: var(--surface); color: var(--paper);
+    border-radius: 16px 16px 0 0; border-top: 1px solid var(--edge);
+    animation: rise .18s ease-out;
+  }
+  #sheet::backdrop { background: #000A; }
+  @keyframes rise { from { transform: translateY(14px); opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { #sheet { animation: none; } }
+  .sheet-in { padding: 14px 16px calc(18px + env(safe-area-inset-bottom)); }
+  .sheet-in h2 {
+    margin: 18px 0 8px; font: 500 12px/1 ui-monospace, Menlo, monospace;
+    letter-spacing: .14em; color: var(--faded); text-transform: uppercase;
+  }
+  .sheet-in h2:first-child { margin-top: 4px; }
+  .row { display: flex; gap: 8px; align-items: center; padding: 3px 0; }
+  .row .who { flex: 1; font: 500 15px/1.2 ui-monospace, Menlo, monospace; letter-spacing: .04em; }
+  .chip {
+    min-height: 40px; padding: 0 12px; border-radius: 10px;
+    border: 1px solid var(--edge); background: transparent; color: var(--faded);
+    font: 500 13px/1 ui-monospace, Menlo, monospace;
+  }
+  .chip[aria-pressed="true"] { background: #2E2A1F; border-color: #5E5540; color: var(--paper); }
+  .chip.wide { flex: 1; text-align: left; padding: 0 14px; min-height: 46px; font-size: 14px; }
+  .chip .key { float: right; color: var(--faded); }
+  .chip:disabled { opacity: .35; }
+  .loop { display: flex; align-items: center; gap: 8px; color: var(--faded); font: 400 14px/1 ui-monospace, Menlo, monospace; padding: 6px 0 2px; }
+  .loop input {
+    width: 58px; min-height: 40px; text-align: center; border-radius: 10px;
+    border: 1px solid var(--edge); background: var(--ink); color: var(--paper);
+    font: 500 15px ui-monospace, Menlo, monospace;
+  }
+  #closeSheet { width: 100%; margin-top: 16px; min-height: 46px; border-radius: 10px; border: 1px solid var(--edge); background: transparent; color: var(--paper); font: 500 14px ui-monospace, Menlo, monospace; }
+
+  /* ---- pasting a script ---- */
+  #edit { max-width: 40em; margin: 0 auto; padding: 24px 20px 40px; font: 400 15px/1.55 ui-monospace, Menlo, monospace; color: var(--faded); }
+  #edit p { color: var(--cue); }
+  textarea {
+    width: 100%; height: 58vh; padding: 12px; border-radius: 10px;
+    background: #100F0B; color: var(--paper); border: 1px solid var(--edge);
+    font: 400 14px/1.5 ui-monospace, Menlo, monospace;
+  }
+  #start { margin-top: 12px; min-height: var(--tap); padding: 0 20px; border-radius: 10px; border: 1px solid #5E5540; background: #262218; color: var(--paper); font: 500 15px ui-monospace, Menlo, monospace; }
 </style>
 </head>
 <body>
 <div id="edit">
-  <p>Paste script. One line per step. Then Start. Keys: Space/↓ next, ↑/Backspace back, E edit script, L learn mode, P play aloud, W drill weak lines, K key words. Click a line to jump.</p>
-  <textarea id="src"></textarea>
-  <button id="start">Start</button>
+  <p>Paste a script — one speech per line, each starting with the character's name and a colon. Your place, your parts and your score are kept in this browser.</p>
+  <textarea id="src" spellcheck="false"></textarea>
+  <button id="start">Start reading</button>
 </div>
+
 <div id="hud" hidden>
-  <span id="roles">My parts</span>
   <b id="score"></b>
   <span id="hint"></span>
 </div>
+
 <div id="read" hidden></div>
-<div id="pad">
-  <button data-key="arrowup">▲ Back<small>↑</small></button>
-  <button data-key="p">Play<small>P</small></button>
-  <button data-key="l">Learn<small>L</small></button>
-  <button data-key="k">Keys<small>K</small></button>
-  <button data-key="w" id="drillBtn">Drill weak<small>W</small></button>
-  <button data-key="e">Edit<small>E</small></button>
-  <button data-key=" ">Next ▼<small>space</small></button>
-  <label title="While reading aloud: while reading aloud: play this many sentences, then go back this many">
-    play <input id="chunk" type="number" min="0" max="99"> back <input id="rewind" type="number" min="0" max="99">
-  </label>
+
+<div id="bar" hidden>
+  <button id="backBtn" data-key="arrowup" title="Back (up arrow)" aria-label="Back">&uarr;</button>
+  <button id="mainBtn" data-key=" ">Next</button>
+  <button id="missBtn" data-key="n" hidden>Missed</button>
+  <button id="menuBtn" title="Everything else">More</button>
 </div>
+
+<dialog id="sheet">
+  <div class="sheet-in">
+    <h2>Parts</h2>
+    <div id="roles"></div>
+
+    <h2>Aloud</h2>
+    <div class="row">
+      <button class="chip wide" data-key="p" id="playChip">Read aloud<span class="key">P</span></button>
+    </div>
+    <label class="loop" title="While reading aloud: play this many sentences, then jump back this many">
+      play <input id="chunk" type="number" min="0" max="99" inputmode="numeric"> then go back
+      <input id="rewind" type="number" min="0" max="99" inputmode="numeric">
+    </label>
+
+    <h2>Practice</h2>
+    <div class="row">
+      <button class="chip wide" data-key="l" id="learnChip">Learn my lines<span class="key">L</span></button>
+    </div>
+    <div class="row">
+      <button class="chip wide" data-key="w" id="drillBtn">Drill weak lines<span class="key">W</span></button>
+    </div>
+    <div class="row">
+      <button class="chip wide" data-key="k" id="keysChip">Bold the key words<span class="key">K</span></button>
+    </div>
+
+    <h2>Script</h2>
+    <div class="row">
+      <button class="chip wide" data-key="e">Paste a different script<span class="key">E</span></button>
+    </div>
+    <button id="closeSheet">Close</button>
+  </div>
+</dialog>
 <script src="sentences.js"></script>
 <script src="script.js"></script>
 <script src="clips.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const src = $('src'), read = $('read'), edit = $('edit'), hud = $('hud'), roles = $('roles'), score = $('score'), hint = $('hint'), drillBtn = $('drillBtn');
+const bar = $('bar'), sheet = $('sheet'), backBtn = $('backBtn'), mainBtn = $('mainBtn'), missBtn = $('missBtn');
 let lines = [], i = 0;
 // Passive mode: play each line's ElevenLabs clip (made by tts.py) and advance.
 const audio = new Audio();
@@ -142,7 +248,8 @@ const mark = text => {
 const plain = p => {
   // A covered part shows only its speaker until you tap the line to look.
   if (covered.has(speaker(p)) && !p.dataset.open) return p.innerHTML = `${esc(speaker(p))}: <span class="hide">▒▒▒▒▒</span>`;
-  p.innerHTML = keywords ? sentences(p.dataset.text).map(mark).join(' ') : esc(p.dataset.text);
+  const who = speaker(p), said = p.dataset.text.slice(who.length + 1);
+  p.innerHTML = `${esc(who)}: ${keywords ? sentences(said).map(mark).join(' ') : esc(said.trim())}`;
 };
 
 function show(n) {
@@ -334,28 +441,32 @@ function next() {
 
 function render() {
   const weak = lines.filter(p => mine(p) && weakLine(p)).length;
-  score.textContent = learn ? `${cleared.size}/${items.length} clear · best ${load(bestKey(), 0)}` : '';
-  for (const label of roles.querySelectorAll('label')) {
-    const name = label.dataset.name, off = muted.has(name);
-    label.querySelector('.bell:not(.eye)').textContent = off ? '🔇' : '🔊';
-    label.querySelector('.eye').textContent = covered.has(name) ? '🙈' : '👁';
-    label.style.opacity = off && covered.has(name) ? .6 : 1;
+  const on = (el, yes) => el.setAttribute('aria-pressed', yes ? 'true' : 'false');
+
+  // The bar: back, the one thing to press, and a miss when there is one to record.
+  mainBtn.textContent = quizzing() ? (shown ? 'Got it' : 'Reveal') : 'Next';
+  missBtn.hidden = !(quizzing() && shown);
+  backBtn.innerHTML = '&uarr;';
+  hud.hidden = !(learn || loop || playing);
+
+  score.textContent = learn ? `${cleared.size} of ${items.length} clear · best ${load(bestKey(), 0)}` : '';
+  hint.textContent = playing && muted.has(speaker(cur())) ? `${speaker(cur())} is silenced`
+    : loop && !learn ? `Looping ${loop[1] - loop[0] + 1} lines — Esc to stop`
+    : !learn ? (playing ? 'Reading aloud' : '')
+    : quizzing() ? (shown ? 'Right, or say you missed it' : `Say it, then reveal${atLine().length > 1 ? ` (${atLine().indexOf(item()) + 1} of ${atLine().length})` : ''}`)
+    : drilling && !weak ? 'Weak lines cleared' : 'Keep going';
+
+  for (const chip of roles.querySelectorAll('.chip')) {
+    const name = chip.dataset.role;
+    on(chip, chip.dataset.state === 'Mine' ? myRoles.has(name)
+      : chip.dataset.state === 'Show' ? !covered.has(name) : !muted.has(name));
   }
-  drillBtn.innerHTML = (weak ? `Drill ${weak} weak` : 'Drill weak') + '<small>W</small>';
+  $('playChip').firstChild.textContent = playing ? 'Stop reading aloud' : 'Read aloud';
+  $('learnChip').firstChild.textContent = learn ? 'Stop learning' : 'Learn my lines';
+  $('keysChip').firstChild.textContent = keywords ? 'Hide the key words' : 'Bold the key words';
+  drillBtn.firstChild.textContent = weak ? `Drill ${weak} weak line${weak > 1 ? 's' : ''}` : 'No weak lines yet';
   drillBtn.disabled = !weak;
-  hint.textContent = playing && muted.has(speaker(cur())) ? `${speaker(cur())} is silenced — tap 🔇 to hear them`
-    : loop && !learn ? `Looping ${loop[1] - loop[0] + 1} lines · Esc to stop` : !learn ? '' : quizzing()
-    ? (shown ? 'Space right, next · N missed (costs you two)' : `Say it, then Space to reveal${atLine().length > 1 ? ` (sentence ${atLine().indexOf(item()) + 1} of ${atLine().length})` : ''}`)
-    : drilling && !weak ? 'Weak lines cleared! W or L to stop' : 'Space next · L exit';
-  const b = [...document.querySelectorAll('#pad button')];
-  b[1].innerHTML = (playing ? '⏸ Stop' : '▶ Play') + '<small>P</small>';
-  b[2].innerHTML = (learn ? 'Stop learning' : 'Learn') + '<small>L</small>';
-  b[3].innerHTML = (keywords ? 'Keys on' : 'Keys off') + '<small>K</small>';
-  b[2].classList.toggle('on', learn);
-  b[3].classList.toggle('on', keywords);
-  b[0].innerHTML = quizzing() && shown ? '✗ Missed<small>N</small>' : '▲ Back<small>↑</small>';
-  b[0].dataset.key = quizzing() && shown ? 'n' : 'arrowup';
-  b[6].innerHTML = (quizzing() ? (shown ? '✓ Got it' : 'Reveal') : 'Next ▼') + '<small>space</small>';
+  on($('playChip'), playing); on($('learnChip'), learn); on($('keysChip'), keywords);
 }
 
 function startLearn(weakOnly) {
@@ -379,37 +490,42 @@ function stopLearn() {
 
 // A checkbox per character for the parts you are learning, and a speaker beside
 // each one to silence that voice while the script is read aloud.
+// One row per character: whether you are learning it, whether you can see it,
+// and whether you hear it. Named in words, since an icon here is a guess.
 function buildRoles(names) {
-  roles.replaceChildren('My parts', ...names.map(n => {
-    const box = Object.assign(document.createElement('input'), { type: 'checkbox', checked: myRoles.has(n) });
-    box.onchange = () => {
-      box.checked ? myRoles.add(n) : myRoles.delete(n);
-      save('roles', JSON.stringify([...myRoles]));
-      learn ? startLearn(drilling) : stopLearn();
-      render();
-    };
-    const eye = document.createElement('button');
-    eye.className = 'bell eye';
-    eye.title = `Block out ${n}'s lines`;
-    eye.onclick = () => {
-      covered.has(n) ? covered.delete(n) : covered.add(n);
-      save('covered', JSON.stringify([...covered]));
-      lines.forEach(p => { delete p.dataset.open; if (!learn || p !== cur()) plain(p); });
-      eye.blur(); render();
-    };
-    const bell = document.createElement('button');
-    bell.className = 'bell';
-    bell.title = `Silence ${n}'s voice`;
-    bell.onclick = () => {
-      muted.has(n) ? muted.delete(n) : muted.add(n);
-      save('muted', JSON.stringify([...muted]));
-      bell.blur(); render();
-    };
-    bell.textContent = muted.has(n) ? '🔇' : '🔊';
-    const label = document.createElement('label');
-    label.append(box, n, eye, bell);
-    label.dataset.name = n;
-    return label;
+  const toggle = (name, label, title, flip) => {
+    const chip = document.createElement('button');
+    chip.className = 'chip';
+    chip.textContent = label;
+    chip.title = title;
+    chip.dataset.role = name;
+    chip.dataset.state = label;
+    chip.onclick = () => { flip(); chip.blur(); render(); };
+    return chip;
+  };
+  roles.replaceChildren(...names.map(n => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.dataset.name = n;
+    const who = document.createElement('span');
+    who.className = 'who';
+    who.textContent = n;
+    row.append(who,
+      toggle(n, 'Mine', `Learn ${n}'s lines`, () => {
+        myRoles.has(n) ? myRoles.delete(n) : myRoles.add(n);
+        save('roles', JSON.stringify([...myRoles]));
+        learn ? startLearn(drilling) : stopLearn();
+      }),
+      toggle(n, 'Show', `Show ${n}'s lines`, () => {
+        covered.has(n) ? covered.delete(n) : covered.add(n);
+        save('covered', JSON.stringify([...covered]));
+        lines.forEach(p => { delete p.dataset.open; if (!learn || p !== cur()) plain(p); });
+      }),
+      toggle(n, 'Hear', `Play ${n}'s voice`, () => {
+        muted.has(n) ? muted.delete(n) : muted.add(n);
+        save('muted', JSON.stringify([...muted]));
+      }));
+    return row;
   }));
 }
 
@@ -436,7 +552,7 @@ $('start').onclick = () => {
   lines.forEach(plain);
   buildRoles([...new Set(lines.map(speaker))]);
   stopLearn();
-  edit.hidden = true; read.hidden = hud.hidden = false;
+  edit.hidden = true; read.hidden = bar.hidden = false;
   show(sameScript ? +load('line', 0) : 0);
   render();
 };
@@ -457,7 +573,7 @@ function act(k) {
   else if (quizzing() && shown && k === 'n') grade(false);
   else if (k === ' ' || k === 'arrowdown') next();
   else if (k === 'arrowup' || k === 'backspace') learn ? back() : show(i - 1);
-  else if (k === 'e') { hud.hidden = true; stopPlay(); stopLearn(); read.hidden = true; edit.hidden = false; }
+  else if (k === 'e') { hud.hidden = bar.hidden = true; stopPlay(); stopLearn(); read.hidden = true; edit.hidden = false; }
   else if (k === 'escape' && loop) { loop = null; markLoop(null); }
   else if (k === 'p') { since = 0; part = 0; (playing = !playing) ? play() : stopPlay(); }
   else if (k === 'l') learn ? stopLearn() : startLearn();
@@ -470,6 +586,7 @@ function act(k) {
 
 document.addEventListener('keydown', e => {
   // A number box keeps the keys while you type in it, but only the digits.
+  if (sheet.open && e.key !== 'Escape') return;  // the sheet has its own buttons
   if (e.target.tagName === 'INPUT' && /^[0-9]$/.test(e.key)) return;
   if (e.target.tagName === 'INPUT') e.target.blur();
   if (read.hidden) return;
@@ -510,10 +627,13 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   navigator.serviceWorker.register('sw.js').catch(e => console.warn('No offline cache:', e));
 }
 
-document.querySelectorAll('#pad button').forEach(b => {
+document.querySelectorAll('[data-key]').forEach(b => {
   b.tabIndex = -1;  // taps must not leave focus on a button, where Space would press it again
   b.onclick = () => { b.blur(); act(b.dataset.key); };
 });
+$('menuBtn').onclick = () => { $('menuBtn').blur(); render(); sheet.showModal(); };
+$('closeSheet').onclick = () => sheet.close();
+sheet.onclick = e => { if (e.target === sheet) sheet.close(); };  // tap the dark to dismiss
 </script>
 </body>
 </html>
