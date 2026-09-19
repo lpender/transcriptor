@@ -143,8 +143,9 @@ function show(n) {
 
 function play() {
   if (learn && quizzing()) return;  // your line: grade it first, then carry on
-  const clip = window.CLIPS?.[cur().textContent];
-  if (!clip) return console.error('No clip for line', i, '- run tts.py'), stopPlay();
+  const clip = window.CLIPS?.[cur().dataset.text];
+  // A line with no clip (a script edited since tts.py last ran) is skipped, not a full stop.
+  if (!clip) { console.warn('No clip for line', i, '- run tts.py'); return void setTimeout(() => playing && show(i + 1), 600); }
   audio.src = clip;
   audio.play().catch(stopPlay);
 }

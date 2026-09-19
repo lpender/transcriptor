@@ -26,11 +26,14 @@ for line in script.split("\n"):
         continue  # scene break
     speaker, text = line.split(":", 1)
     voice = VOICES[speaker]  # KeyError on a new character: add a voice above.
-    path = f"clips/{hashlib.sha1((voice + text).encode()).hexdigest()[:16]}.mp3"
+    # A line cut off mid-word ends in a dash, which the voice reads as a strange
+    # noise after a pause, so it is spoken without it.
+    spoken = text.strip().rstrip("—–-").strip()
+    path = f"clips/{hashlib.sha1((voice + spoken).encode()).hexdigest()[:16]}.mp3"
     if not os.path.exists(path):
         req = urllib.request.Request(
             f"https://api.elevenlabs.io/v1/text-to-speech/{voice}?output_format=mp3_44100_128",
-            data=json.dumps({"text": text.strip(), "model_id": "eleven_multilingual_v2"}).encode(),
+            data=json.dumps({"text": spoken, "model_id": "eleven_multilingual_v2"}).encode(),
             headers={"xi-api-key": KEY, "Content-Type": "application/json"})
         pathlib.Path(path).write_bytes(urllib.request.urlopen(req).read())
         print("rendered", line[:60])
