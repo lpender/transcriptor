@@ -429,7 +429,10 @@ function act(k) {
 }
 
 document.addEventListener('keydown', e => {
-  if (read.hidden || e.target.tagName === 'INPUT') return;
+  // A number box keeps the keys while you type in it, but only the digits.
+  if (e.target.tagName === 'INPUT' && /^[0-9]$/.test(e.key)) return;
+  if (e.target.tagName === 'INPUT') e.target.blur();
+  if (read.hidden) return;
   const k = e.key.toLowerCase();
   // Space and the arrows always stop here, even when unused, so the page never scrolls
   // or hands the key to the browser.
