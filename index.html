@@ -134,7 +134,7 @@ const mark = text => {
 const plain = p => p.innerHTML = keywords ? sentences(p.dataset.text).map(mark).join(' ') : esc(p.dataset.text);
 
 function show(n) {
-  i = Math.max(0, Math.min(lines.length - 1, n));
+  i = (n % lines.length + lines.length) % lines.length;  // past the end is back to the top
   lines.forEach((p, k) => p.classList.toggle('cur', k === i));
   save('line', i);
   if (playing) play();
@@ -149,7 +149,7 @@ function play() {
   audio.play().catch(stopPlay);
 }
 function stopPlay() { playing = false; audio.pause(); }
-audio.onended = () => setTimeout(() => playing && (i < lines.length - 1 ? show(i + 1) : stopPlay()), 300);
+audio.onended = () => setTimeout(() => playing && show(i + 1), 300);
 
 const quizzing = () => learn && !!item();
 
@@ -221,8 +221,9 @@ function back() {
 // Next line; while drilling weak lines, skip ahead to the next one that needs work.
 function next() {
   if (!drilling) return show(i + 1);
-  const t = lines.findIndex((p, k) => k > i && mine(p) && weakLine(p));
-  show(t < 0 ? i : t);
+  const weak = (from, to) => lines.findIndex((p, k) => k > from && k < to && mine(p) && weakLine(p));
+  const t = weak(i, lines.length);
+  show(t < 0 ? weak(-1, i + 1) : t);  // round again from the top when none are left ahead
 }
 
 function render() {
