@@ -93,7 +93,9 @@ reader pasted their own.
   centred, and the ends join up: past the last line is the first.
 - **Reading aloud.** Plays each line's clip and advances. Two boxes set a loop:
   play N lines, drop back M, so it creeps forward while repeating. A line with
-  no clip is skipped rather than stopping playback.
+  no clip is skipped rather than stopping playback. With learn mode on, the
+  voice reads everyone else and stops at each of your lines until you have
+  said and graded it; stopping learn mode mid-wait lets the voice read on.
 - **Learn mode.** Your lines are hidden as `▒▒▒▒▒` blocks — fixed width, so
   length gives nothing away — and lines ahead are invisible. Reveal, then grade
   yourself: right clears the piece and reveals the next in the same press, a

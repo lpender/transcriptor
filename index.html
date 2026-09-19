@@ -292,7 +292,10 @@ let loop = null;     // [first, last] lines to rehearse over and over
 const trouble = why => { hint.textContent = why; console.warn(why); };
 
 function play() {
-  if (learn && quizzing()) return;  // your line: grade it first, then carry on
+  // Your line: the voice stops and waits for you to say it and grade it. Anything
+  // still sounding is cut, or its end would carry the reading past your line; and
+  // the stuck-check from the last line must not fire while you are speaking.
+  if (quizzing()) { audio.pause(); clearTimeout(stuck); return; }
   const clip = clipOf(cur());
   // A silenced voice still plays, silently, so the gap is exactly as long as the line.
   audio.muted = muted.has(speaker(cur()));
@@ -468,10 +471,12 @@ function render() {
   hud.hidden = !(learn || loop || playing);
 
   score.textContent = learn ? `${cleared.size} of ${items.length} clear · best ${load(bestKey(), 0)}` : '';
-  hint.textContent = playing && muted.has(speaker(cur())) ? `${speaker(cur())} is silenced`
-    : loop && !learn ? `Looping ${loop[1] - loop[0] + 1} lines — Esc to stop`
-    : !learn ? (playing ? 'Reading aloud' : '')
-    : quizzing() ? (shown ? 'Right, or say you missed it' : `Say it, then reveal${atLine().length > 1 ? ` (${atLine().indexOf(item()) + 1} of ${atLine().length})` : ''}`)
+  // What to do now, most pressing first: your line beats everything else.
+  hint.textContent = quizzing() ? (shown ? 'Right, or say you missed it' : `Say it, then reveal${atLine().length > 1 ? ` (${atLine().indexOf(item()) + 1} of ${atLine().length})` : ''}`)
+    : playing && muted.has(speaker(cur())) ? `${speaker(cur())} is silenced`
+    : loop ? `Looping ${loop[1] - loop[0] + 1} lines — Esc to stop`
+    : playing ? 'Reading aloud'
+    : !learn ? ''
     : drilling && !weak ? 'Weak lines cleared' : 'Keep going';
 
   for (const chip of roles.querySelectorAll('.chip')) {
@@ -499,11 +504,13 @@ function startLearn(weakOnly) {
     : []);
   if (drilling) { const t = lines.findIndex(p => mine(p) && weakLine(p)); show(t < 0 ? i : t); }
   else enter();
+  if (playing) play();  // reading aloud carries on, but now it waits on your lines
 }
 
 function stopLearn() {
   learn = drilling = false; items = []; cleared = new Set(); document.body.classList.remove('learn');
   lines.forEach(p => { plain(p); p.classList.toggle('mine', !myRoles.size || myRoles.has(speaker(p))); });
+  if (playing) { part = 0; play(); }  // a line the voice was waiting on is now its to read
 }
 
 // A checkbox per character for the parts you are learning, and a speaker beside
