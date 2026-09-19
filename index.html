@@ -124,14 +124,21 @@
     background: #100F0B; color: var(--paper); border: 1px solid var(--edge);
     font: 400 14px/1.5 ui-monospace, Menlo, monospace;
   }
-  #start { margin-top: 12px; min-height: var(--tap); padding: 0 20px; border-radius: 10px; border: 1px solid #5E5540; background: #262218; color: var(--paper); font: 500 15px ui-monospace, Menlo, monospace; }
+  #edit .row { gap: 10px; margin-top: 12px; }
+  #diag { margin: 18px 0 0; padding: 10px 12px; border: 1px solid var(--edge); border-radius: 10px;
+          color: var(--faded); font: 400 12px/1.6 ui-monospace, Menlo, monospace; white-space: pre-wrap; }
+  #fetchBtn, #start { margin-top: 0; min-height: var(--tap); padding: 0 20px; border-radius: 10px; border: 1px solid #5E5540; background: #262218; color: var(--paper); font: 500 15px ui-monospace, Menlo, monospace; }
 </style>
 </head>
 <body>
 <div id="edit">
   <p>Paste a script — one speech per line, each starting with the character's name and a colon. Your place, your parts and your score are kept in this browser.</p>
   <textarea id="src" spellcheck="false"></textarea>
-  <button id="start">Start reading</button>
+  <div class="row">
+    <button id="start">Start reading</button>
+    <button id="fetchBtn">Fetch the script</button>
+  </div>
+  <pre id="diag"></pre>
 </div>
 
 <div id="hud" hidden>
@@ -574,10 +581,9 @@ const saved = (load('script') || '').trim() ? load('script') : '';
 src.value = (load('pasted') === 'true' && saved ? saved : window.SCRIPT) || saved || '';
 if (src.value.trim()) $('start').click();
 // An empty box means script.js never arrived — say so, rather than looking broken.
-else if (!window.SCRIPT) {
-  edit.querySelector('p').textContent = navigator.onLine
-    ? 'The script did not load. Reload the page to fetch it again, or paste one below.'
-    : 'The script is not on this device and you are offline. Connect and reload, or paste one below.';
+else {
+  edit.querySelector('p').textContent = 'The script did not load. Press "Fetch the script", or paste one below.';
+  diagnose();
 }
 
 // One handler for keyboard shortcuts and the phone button bar. Returns false for unused keys.
@@ -659,6 +665,43 @@ read.addEventListener('pointerup', e => {
   if (!playing) { playing = true; play(); }
   render();
 });
+
+// When the paste box is showing and should not be, this says what the page can see.
+async function diagnose() {
+  const caught = f => f().catch(e => e.name + ': ' + e.message);
+  const say = [
+    `built-in script: ${window.SCRIPT ? window.SCRIPT.split('\n').length + ' lines' : 'MISSING'}`,
+    `clips: ${window.CLIPS ? Object.keys(window.CLIPS).length : 'MISSING'}`,
+    `saved: ${(load('script') || '').length} chars, pasted=${load('pasted')}`,
+    `online: ${navigator.onLine}`,
+    `page: ${location.href}`,
+  ];
+  say.push(`worker: ${navigator.serviceWorker?.controller ? 'controlling' : 'none'}`);
+  try { say.push(`caches: ${(await caches.keys()).join(', ') || 'none'}`); } catch (e) { say.push('caches: ' + e.name); }
+  say.push(`fetch script.js: ${await caught(async () => {
+    const r = await fetch('script.js?probe=' + Date.now(), { cache: 'no-store' });
+    return r.status + ' ' + (await r.text()).length + ' chars';
+  })}`);
+  $('diag').textContent = say.join('\n');
+}
+
+// The way back when the built-in script did not arrive: go and get it.
+$('fetchBtn').onclick = async () => {
+  $('fetchBtn').textContent = 'Fetching…';
+  try {
+    const res = await fetch('script.js?fresh=' + Date.now(), { cache: 'no-store' });
+    const text = await res.text();
+    const [, json] = text.match(/window\.SCRIPT = (.*);/) || [];
+    if (!json) throw new Error('script.js did not look right');
+    window.SCRIPT = JSON.parse(json);
+    src.value = window.SCRIPT;
+    save('pasted', false);
+    $('start').click();
+  } catch (e) {
+    $('fetchBtn').textContent = 'Fetch the script';
+    $('diag').textContent = 'Could not fetch: ' + e.message;
+  }
+};
 
 // Install the worker that keeps the script and every clip on the device.
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
