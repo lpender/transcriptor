@@ -15,7 +15,10 @@
   #read p.cur { color: var(--hi); }
   #read p.cur ~ p { color: var(--fg); }
   #hud { position: fixed; top: 0; left: 0; right: 0; padding: 8px 16px; background: #000c; font: 16px/1.4 system-ui, sans-serif; display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
-  #hud select, #hud button { font-size: 16px; margin: 0; padding: 4px 12px; }
+  #hud label { display: inline-flex; align-items: center; gap: 4px; }
+  #hud input { accent-color: var(--hi); }
+  #roles { display: inline-flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .bell { background: none; border: 0; padding: 0 2px; margin: 0; font-size: 14px; cursor: pointer; }
   #hint { color: #999; }
   #read hr { border: 0; border-top: 2px solid #444; margin: 1.2em 20%; }
   #read .hide { color: #3a3a3a; letter-spacing: .1em; }
@@ -45,7 +48,7 @@
   <button id="start">Start</button>
 </div>
 <div id="hud" hidden>
-  <label>Your role <select id="role"></select></label>
+  <span id="roles">My parts</span>
   <b id="score"></b>
   <span id="hint"></span>
 </div>
@@ -58,15 +61,16 @@
   <button data-key="w" id="drillBtn">Drill weak<small>W</small></button>
   <button data-key="e">Edit<small>E</small></button>
   <button data-key=" ">Next ▼<small>space</small></button>
-  <label title="While reading aloud: play this many lines, then go back this many">
+  <label title="While reading aloud: while reading aloud: play this many sentences, then go back this many">
     play <input id="chunk" type="number" min="0" max="99"> back <input id="rewind" type="number" min="0" max="99">
   </label>
 </div>
+<script src="sentences.js"></script>
 <script src="script.js"></script>
 <script src="clips.js"></script>
 <script>
 const $ = id => document.getElementById(id);
-const src = $('src'), read = $('read'), edit = $('edit'), hud = $('hud'), role = $('role'), score = $('score'), hint = $('hint'), drillBtn = $('drillBtn');
+const src = $('src'), read = $('read'), edit = $('edit'), hud = $('hud'), roles = $('roles'), score = $('score'), hint = $('hint'), drillBtn = $('drillBtn');
 let lines = [], i = 0;
 // Passive mode: play each line's ElevenLabs clip (made by tts.py) and advance.
 const audio = new Audio();
@@ -81,13 +85,17 @@ const atLine = () => items.filter(it => it.li === i);
 const item = () => atLine().find(it => !cleared.has(id(it)));
 const load = (k, d) => { try { return localStorage.getItem(k) ?? d; } catch { return d; } };
 const save = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+// The parts you are learning. Several at once, and they matter outside learn mode
+// too: playback can go silent for them so you say them yourself.
+let myRoles = new Set(JSON.parse(load('roles', '[]')));
+// Voices switched off for reading aloud, so you speak those parts yourself.
+let muted = new Set(JSON.parse(load('muted', '[]')));
 const speaker = p => p.textContent.split(':')[0];
 const words = p => p.textContent.slice(speaker(p).length + 1);
-const norm = t => t.toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
 const cur = () => lines[i];
 const has = (p, c) => p.classList.contains(c);
 const mine = p => has(p, 'mine');
-const bestKey = () => 'best:' + role.value;
+const bestKey = () => 'best:' + [...myRoles].sort().join('+');
 
 // How often each sentence has been missed, kept across visits so the weak ones can be drilled.
 const stats = JSON.parse(load('stats', '{}'));
@@ -100,20 +108,6 @@ const record = (t, ok) => {
   save('stats', JSON.stringify(stats));
 };
 
-// Split a speech at the punctuation that breaks up speech — full stops, commas,
-// semicolons, colons and dashes — but never at apostrophes or quotes. Abbreviations
-// like "Mr." and stray scraps stay attached to the piece before them.
-function sentences(text) {
-  const out = [];
-  for (const s of text.match(/[^.!?…,;:—–]+[.!?…,;:—–]*[\s]*/g) || [text]) {
-    const last = out[out.length - 1];
-    // A scrap of one or two words is not worth testing, so it joins the piece before it.
-    const scrap = t => (t.match(/[\p{L}\p{N}'’-]+/gu) || []).length < 3;  // "I'm" is one word
-    if (last && (/\b(Mr|Mrs|Ms|Dr|St|U\.S)\.\s*$/.test(last) || scrap(last) || scrap(s))) out[out.length - 1] += s;
-    else out.push(s);
-  }
-  return out.map(s => s.trim()).filter(Boolean);
-}
 const weakLine = p => sentences(words(p)).some(missCount);
 
 // Key words: the rarest words in a sentence, about one in five, bolded as hooks to
@@ -142,26 +136,63 @@ function show(n) {
   i = (n % lines.length + lines.length) % lines.length;  // past the end is back to the top
   lines.forEach((p, k) => p.classList.toggle('cur', k === i));
   save('line', i);
-  if (playing) play();
+  if (playing) { part = 0; play(); }
   if (learn) enter(); else center();
 }
 
+// Sound plays a sentence at a time, not a whole speech, so a monologue can be
+// looped in pieces. Each clip carries when its sentences start and end.
+// A clip is { f: file, s: [[start, end], ...] }; clips.js from before timing was
+// added is a bare filename, which still plays as one piece.
+const clipOf = p => { const c = window.CLIPS?.[p.dataset.text]; return typeof c === 'string' ? { f: c } : c; };
+const spansOf = p => clipOf(p)?.s?.length ? clipOf(p).s : [null];  // null: the whole clip
+let part = 0;  // which sentence of the current line is sounding
+
 function play() {
   if (learn && quizzing()) return;  // your line: grade it first, then carry on
-  const clip = window.CLIPS?.[cur().dataset.text];
+  const clip = clipOf(cur());
+  // A silenced voice leaves a gap as long as the line, so you can say it in time.
+  if (muted.has(speaker(cur())) && clip) {
+    const span = spansOf(cur())[part] || [0, audio.duration || 2];
+    audio.pause();
+    return void setTimeout(() => playing && audio.onended(), (span[1] - span[0]) * 1000);
+  }
   // A line with no clip (a script edited since tts.py last ran) is skipped, not a full stop.
-  if (!clip) { console.warn('No clip for line', i, '- run tts.py'); return void setTimeout(() => playing && show(i + 1), 600); }
-  audio.src = clip;
+  if (!clip) { console.warn('No clip for line', i, '- run tts.py'); return void setTimeout(() => playing && step(1), 600); }
+  const span = spansOf(cur())[part = Math.min(part, spansOf(cur()).length - 1)];
+  if (audio.src !== new URL(clip.f, location).href) audio.src = clip.f;
+  audio.currentTime = span ? span[0] : 0;
   audio.play().catch(stopPlay);
 }
 function stopPlay() { playing = false; audio.pause(); }
+
+// A sentence ends before the clip does, so playback is stopped at its end time.
+audio.ontimeupdate = () => {
+  const span = spansOf(cur())[part];
+  if (playing && span && audio.currentTime >= span[1]) { audio.pause(); audio.onended(); }
+};
+
+// Move n sentences through the script, crossing into other lines as needed.
+function step(n) {
+  while (n > 0) {
+    if (part + 1 < spansOf(cur()).length) part++;
+    else { part = 0; show(i + 1); }
+    n--;
+  }
+  while (n < 0) {
+    if (part > 0) part--;
+    else { show(i - 1); part = spansOf(cur()).length - 1; }
+    n++;
+  }
+  play();
+}
 // Drilling by ear: read a few lines, drop back a few, and creep forward over the script.
 audio.onended = () => setTimeout(() => {
   if (!playing) return;
   const chunk = +$('chunk').value, rewind = +$('rewind').value;
   since++;
-  if (chunk && since >= chunk) { since = 0; show(i + 1 - rewind); }
-  else show(i + 1);
+  if (chunk && since >= chunk) { since = 0; step(1 - rewind); }
+  else step(1);
 }, 300);
 for (const id of ['chunk', 'rewind']) {
   $(id).value = load(id, id === 'chunk' ? 0 : 0);
@@ -246,6 +277,11 @@ function next() {
 function render() {
   const weak = lines.filter(p => mine(p) && weakLine(p)).length;
   score.textContent = learn ? `${cleared.size}/${items.length} clear · best ${load(bestKey(), 0)}` : '';
+  for (const label of roles.querySelectorAll('label')) {
+    const off = muted.has(label.dataset.name);
+    label.querySelector('.bell').textContent = off ? '🔇' : '🔊';
+    label.style.opacity = off ? .6 : 1;
+  }
   drillBtn.innerHTML = (weak ? `Drill ${weak} weak` : 'Drill weak') + '<small>W</small>';
   drillBtn.disabled = !weak;
   hint.textContent = !learn ? '' : quizzing()
@@ -266,23 +302,47 @@ function startLearn(weakOnly) {
   learn = true; drilling = !!weakOnly;
   hud.hidden = false; document.body.classList.add('learn');
   lines.forEach(p => {
-    p.classList.toggle('mine', !role.value || speaker(p) === role.value);
+    p.classList.toggle('mine', !myRoles.size || myRoles.has(speaker(p)));
   });
   cleared = new Set();
   items = lines.flatMap((p, li) => mine(p)
     ? sentences(words(p)).map((text, si) => ({ li, si, text })).filter(it => !drilling || missCount(it.text))
     : []);
-  save('role', role.value);
   if (drilling) { const t = lines.findIndex(p => mine(p) && weakLine(p)); show(t < 0 ? i : t); }
   else enter();
 }
 
 function stopLearn() {
-  learn = drilling = false; items = []; cleared = new Set(); hud.hidden = true; document.body.classList.remove('learn');
-  lines.forEach(p => { plain(p); p.classList.remove('mine'); });
+  learn = drilling = false; items = []; cleared = new Set(); document.body.classList.remove('learn');
+  lines.forEach(p => { plain(p); p.classList.toggle('mine', !myRoles.size || myRoles.has(speaker(p))); });
 }
 
-role.onchange = () => { role.blur(); startLearn(drilling); };
+// A checkbox per character for the parts you are learning, and a speaker beside
+// each one to silence that voice while the script is read aloud.
+function buildRoles(names) {
+  roles.replaceChildren('My parts', ...names.map(n => {
+    const box = Object.assign(document.createElement('input'), { type: 'checkbox', checked: myRoles.has(n) });
+    box.onchange = () => {
+      box.checked ? myRoles.add(n) : myRoles.delete(n);
+      save('roles', JSON.stringify([...myRoles]));
+      learn ? startLearn(drilling) : stopLearn();
+      render();
+    };
+    const bell = document.createElement('button');
+    bell.className = 'bell';
+    bell.title = `Silence ${n}'s voice`;
+    bell.onclick = () => {
+      muted.has(n) ? muted.delete(n) : muted.add(n);
+      save('muted', JSON.stringify([...muted]));
+      bell.blur(); render();
+    };
+    bell.textContent = muted.has(n) ? '🔇' : '🔊';
+    const label = document.createElement('label');
+    label.append(box, n, bell);
+    label.dataset.name = n;
+    return label;
+  }));
+}
 
 $('start').onclick = () => {
   const sameScript = load('script') === src.value;  // a new script starts from the top
@@ -302,11 +362,9 @@ $('start').onclick = () => {
   freq = {};
   for (const w of src.value.match(/[\p{L}\p{N}'-]+/gu) || []) freq[norm(w)] = (freq[norm(w)] || 0) + 1;
   lines.forEach(plain);
-  const names = [...new Set(lines.map(speaker))];
-  role.replaceChildren(new Option('Everyone (all lines)', ''), ...names.map(n => new Option(n)));
-  role.value = names.includes(load('role')) ? load('role') : '';
+  buildRoles([...new Set(lines.map(speaker))]);
   stopLearn();
-  edit.hidden = true; read.hidden = false;
+  edit.hidden = true; read.hidden = hud.hidden = false;
   show(sameScript ? +load('line', 0) : 0);
   render();
 };
@@ -327,8 +385,8 @@ function act(k) {
   else if (quizzing() && shown && k === 'n') grade(false);
   else if (k === ' ' || k === 'arrowdown') next();
   else if (k === 'arrowup' || k === 'backspace') learn ? back() : show(i - 1);
-  else if (k === 'e') { stopPlay(); stopLearn(); read.hidden = true; edit.hidden = false; }
-  else if (k === 'p') { since = 0; (playing = !playing) ? play() : stopPlay(); }
+  else if (k === 'e') { hud.hidden = true; stopPlay(); stopLearn(); read.hidden = true; edit.hidden = false; }
+  else if (k === 'p') { since = 0; part = 0; (playing = !playing) ? play() : stopPlay(); }
   else if (k === 'l') learn ? stopLearn() : startLearn();
   else if (k === 'k') { keywords = !keywords; save('keywords', keywords); lines.forEach(p => p !== cur() && plain(p)); learn ? paint() : plain(cur()); }
   else if (k === 'w') learn && drilling ? startLearn() : startLearn(true);
@@ -338,7 +396,7 @@ function act(k) {
 }
 
 document.addEventListener('keydown', e => {
-  if (read.hidden || e.target === role || e.target.tagName === 'INPUT') return;
+  if (read.hidden || e.target.tagName === 'INPUT') return;
   const k = e.key.toLowerCase();
   // Space and the arrows always stop here, even when unused, so the page never scrolls
   // or hands the key to the browser.
