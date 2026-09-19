@@ -172,6 +172,7 @@ function play() {
   if (!clip) { console.warn('No clip for line', i, '- run tts.py'); return void setTimeout(() => playing && step(1), 600); }
   const span = spansOf(cur())[part = Math.min(part, spansOf(cur()).length - 1)];
   const at = span ? span[0] : 0;
+  advanced = false;
   // Seeking before the file has loaded throws, so a new clip is cued once it is ready.
   if (audio.src !== new URL(clip.f, location).href) {
     audio.src = clip.f;
@@ -183,9 +184,11 @@ function play() {
 function stopPlay() { playing = false; audio.pause(); }
 
 // A sentence ends before the clip does, so playback is stopped at its end time.
+// Both this and the clip's own end can fire, hence the latch: one move per piece.
+let advanced = false;
 audio.ontimeupdate = () => {
   const span = spansOf(cur())[part];
-  if (playing && span && audio.currentTime >= span[1]) { audio.pause(); audio.onended(); }
+  if (playing && span && !advanced && audio.currentTime >= span[1]) { advanced = true; audio.pause(); advance(); }
 };
 
 // Move n sentences through the script, crossing into other lines as needed.
@@ -206,7 +209,8 @@ function step(n) {
   if (playing) play();
 }
 // Drilling by ear: read a few lines, drop back a few, and creep forward over the script.
-audio.onended = () => setTimeout(() => {
+audio.onended = () => { if (!advanced) { advanced = true; advance(); } };
+const advance = () => setTimeout(() => {
   if (!playing) return;
   const chunk = +$('chunk').value, rewind = +$('rewind').value;
   since++;
