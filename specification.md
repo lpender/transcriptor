@@ -100,7 +100,8 @@ reader pasted their own.
   length gives nothing away — and lines ahead are invisible. Reveal, then grade
   yourself: right clears the piece and reveals the next in the same press, a
   miss takes back the two before it. The score is how far you get; the best run
-  is kept per role.
+  is kept per role. Tapping back to an earlier line, or jumping to a scene,
+  restarts from there: every line from it onward is hidden and owed again.
 - **Pieces.** A line is tested in pieces split at full stops, commas,
   semicolons, colons and dashes, never at apostrophes, quotes or hyphens inside
   words. A piece under three words joins the one before it, and abbreviations

@@ -452,6 +452,13 @@ function back() {
   prev.li === i ? (paint(), render()) : show(prev.li);
 }
 
+// Go to a line by choice, not by stepping. While learning, that is a restart from
+// there: everything from that line on is owed again, so the run is one honest pass.
+function jump(n) {
+  if (learn) for (const it of items) if (it.li >= n) cleared.delete(id(it));
+  show(n);
+}
+
 // Next line; while drilling weak lines, skip ahead to the next one that needs work.
 function next() {
   if (!drilling) return show(i + 1);
@@ -567,7 +574,7 @@ $('start').onclick = () => {
     p.textContent = t;
     p.onclick = () => {
       if (covered.has(speaker(p)) && !p.dataset.open) { p.dataset.open = '1'; return plain(p); }
-      show(lines.indexOf(p));
+      jump(lines.indexOf(p));
     };
     return p;
   }));
@@ -643,7 +650,7 @@ function buildScenes() {
     chip.className = 'chip';
     const said = lines[at].dataset.text;
     chip.innerHTML = `${k ? 'Scene ' + (k + 1) : 'The top'} <span>${esc(said.slice(0, 34))}…</span>`;
-    chip.onclick = () => { stopPlay(); loop = null; markLoop(null); show(at); sheet.close(); };
+    chip.onclick = () => { stopPlay(); loop = null; markLoop(null); jump(at); sheet.close(); };
     return chip;
   }));
 }
