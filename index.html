@@ -539,6 +539,7 @@ function buildRoles(names) {
 }
 
 $('start').onclick = () => {
+  if (!src.value.trim()) return;  // nothing to read, and nothing worth saving
   const sameScript = load('script') === src.value;  // a new script starts from the top
   save('script', src.value);
   save('pasted', src.value !== (window.SCRIPT || ''));  // a pasted script wins over the bundled one
@@ -567,7 +568,10 @@ $('start').onclick = () => {
   render();
 };
 
-src.value = (load('pasted') === 'true' ? load('script') : window.SCRIPT) || load('script') || '';
+// A pasted script wins, but only if there is one: an empty saved script once stuck
+// the app on the paste box with no way back to the built-in one.
+const saved = (load('script') || '').trim() ? load('script') : '';
+src.value = (load('pasted') === 'true' && saved ? saved : window.SCRIPT) || saved || '';
 if (src.value.trim()) $('start').click();
 // An empty box means script.js never arrived — say so, rather than looking broken.
 else if (!window.SCRIPT) {
