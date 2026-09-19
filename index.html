@@ -220,11 +220,13 @@ audio.ontimeupdate = () => {
 };
 
 // Move n sentences through the script, crossing into other lines as needed.
-function step(n) {
+// A jump backwards is marked by a blip in the clear, then a beat, then the lines.
+function step(n, rewound) {
   moving = true;
+  let back = rewound || n < 0;
   while (n > 0) {
     if (part + 1 < spansOf(cur()).length) part++;
-    else if (loop && i >= loop[1]) { part = 0; blip(); show(loop[0]); }  // round the block again
+    else if (loop && i >= loop[1]) { part = 0; show(loop[0]); back = true; }  // round the block again
     else { part = 0; show(i + 1); }
     n--;
   }
@@ -234,7 +236,11 @@ function step(n) {
     n++;
   }
   moving = false;
-  if (playing) play();
+  if (!playing) return;
+  if (!back) return play();
+  audio.pause();
+  blip();
+  setTimeout(() => playing && play(), 600);
 }
 // Drilling by ear: read a few lines, drop back a few, and creep forward over the script.
 audio.onended = () => { if (!advanced) { advanced = true; advance(); } };
@@ -242,7 +248,8 @@ const advance = () => setTimeout(() => {
   if (!playing) return;
   const chunk = +$('chunk').value, rewind = +$('rewind').value;
   since++;
-  if (chunk && since >= chunk) { since = 0; if (rewind) blip(); step(1 - rewind); }
+  // Going back even to the same line is a rewind: it earns the blip and a beat.
+  if (chunk && since >= chunk) { since = 0; step(1 - rewind, rewind > 0); }
   else step(1);
 }, 300);
 for (const id of ['chunk', 'rewind']) {
