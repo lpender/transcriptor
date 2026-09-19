@@ -142,7 +142,7 @@ function show(n) {
   i = (n % lines.length + lines.length) % lines.length;  // past the end is back to the top
   lines.forEach((p, k) => p.classList.toggle('cur', k === i));
   save('line', i);
-  if (playing) { part = 0; play(); }
+  if (playing && !moving) { part = 0; play(); }
   if (learn) enter(); else center();
 }
 
@@ -152,7 +152,8 @@ function show(n) {
 // added is a bare filename, which still plays as one piece.
 const clipOf = p => { const c = window.CLIPS?.[p.dataset.text]; return typeof c === 'string' ? { f: c } : c; };
 const spansOf = p => clipOf(p)?.s?.length ? clipOf(p).s : [null];  // null: the whole clip
-let part = 0;  // which sentence of the current line is sounding
+let part = 0;    // which sentence of the current line is sounding
+let moving = false;  // crossing lines: play once at the end, not at every step
 
 function play() {
   if (learn && quizzing()) return;  // your line: grade it first, then carry on
@@ -166,9 +167,14 @@ function play() {
   // A line with no clip (a script edited since tts.py last ran) is skipped, not a full stop.
   if (!clip) { console.warn('No clip for line', i, '- run tts.py'); return void setTimeout(() => playing && step(1), 600); }
   const span = spansOf(cur())[part = Math.min(part, spansOf(cur()).length - 1)];
-  if (audio.src !== new URL(clip.f, location).href) audio.src = clip.f;
-  audio.currentTime = span ? span[0] : 0;
-  audio.play().catch(stopPlay);
+  const at = span ? span[0] : 0;
+  // Seeking before the file has loaded throws, so a new clip is cued once it is ready.
+  if (audio.src !== new URL(clip.f, location).href) {
+    audio.src = clip.f;
+    audio.addEventListener('loadedmetadata', () => { audio.currentTime = at; }, { once: true });
+  } else audio.currentTime = at;
+  // A play() cut short by the next one rejects; only a browser refusing sound stops us.
+  audio.play().catch(e => { if (e.name === 'NotAllowedError') stopPlay(); });
 }
 function stopPlay() { playing = false; audio.pause(); }
 
@@ -180,6 +186,7 @@ audio.ontimeupdate = () => {
 
 // Move n sentences through the script, crossing into other lines as needed.
 function step(n) {
+  moving = true;
   while (n > 0) {
     if (part + 1 < spansOf(cur()).length) part++;
     else { part = 0; show(i + 1); }
@@ -190,7 +197,8 @@ function step(n) {
     else { show(i - 1); part = spansOf(cur()).length - 1; }
     n++;
   }
-  play();
+  moving = false;
+  if (playing) play();
 }
 // Drilling by ear: read a few lines, drop back a few, and creep forward over the script.
 audio.onended = () => setTimeout(() => {
