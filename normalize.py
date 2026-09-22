@@ -23,10 +23,13 @@ def levels(path):
     return tuple(float(re.search(rf"{k}_volume: ([-\d.]+) dB", out)[1]) for k in ("mean", "max"))
 
 
+# Files Lee wants off their group's level, in dB, decided by ear in the room.
+OFFSETS = {"HorridToneLowSynth": +3}
+
 for target, name in ((t, n) for t, names in GROUPS.items() for n in names):
     path = f"sound/{name}.mp3"
     mean, peak = levels(path)
-    gain = target - mean
+    gain = target + OFFSETS.get(name, 0) - mean
     if abs(gain) < 1:  # a re-encode drifts half a dB; do not chase it
         print(f"{name:24} {mean:6.1f} dB  ok"); continue
     if peak + gain > -1:
