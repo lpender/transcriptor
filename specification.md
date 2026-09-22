@@ -96,6 +96,15 @@ reader pasted their own.
   no clip is skipped rather than stopping playback. With learn mode on, the
   voice reads everyone else and stops at each of your lines until you have
   said and graded it; stopping learn mode mid-wait lets the voice read on.
+- **The show's sound.** `cues.js` lists James's sound design scene by scene:
+  a bed of room tone that loops under the dialogue and, for most scenes, a
+  piece of music that opens it and hands over to the bed when it ends. Scenes
+  take cues in order; a cue marked `hold` (before the show, the silent
+  reception, the end) is a stop of its own in the script column, pressed
+  through like a line but never voiced or learned. Changing scene fades the
+  old sound over a second; the same scene again is left alone. Reading aloud
+  waits on a stop's music before moving on. Toggled with S; the header names
+  the scene sounding. Files live in `sound/` and are cached on first play.
 - **Learn mode.** Your lines are hidden as `▒▒▒▒▒` blocks — fixed width, so
   length gives nothing away — and lines ahead are invisible. Say the line, then
   press: Next onto your line reveals its first sentence, and each right answer

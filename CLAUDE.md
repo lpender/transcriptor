@@ -5,7 +5,8 @@ character, and test yourself on it sentence by sentence. Kind: **tool**.
 Live at https://lpender.github.io/transcriptor/ (GitHub Pages, branch `main`).
 
 No build, no dependencies. `index.html` is the whole app; `script.js`,
-`clips.js` and `clips/` are generated and committed.
+`clips.js` and `clips/` are generated and committed. `cues.js` and `sound/`
+are James's sound design, placed by hand.
 
 ```bash
 python3 -m http.server 8799            # serve; file:// breaks nothing but test served

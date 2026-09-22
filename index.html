@@ -47,6 +47,7 @@
   #read .now { color: #FFF3DC; }
   #read .weak { text-decoration: underline wavy var(--ribbon); text-underline-offset: 7px; text-decoration-thickness: 1px; }
   #read hr { border: 0; border-top: 1px solid var(--edge); margin: 2em 30%; }
+  #read p.cue { font-style: italic; text-align: center; padding-left: 0; border-left: 0; font-size: .85em; letter-spacing: .04em; }
   body.learn #read p.cur ~ p, body.learn #read p.cur ~ hr { visibility: hidden; }
 
   /* ---- top strip: only what is true right now ---- */
@@ -171,6 +172,11 @@
       <input id="rewind" type="number" min="0" max="99" inputmode="numeric">
     </label>
 
+    <h2>Show</h2>
+    <div class="row">
+      <button class="chip wide" data-key="s" id="soundChip">Play the sound design<span class="key">S</span></button>
+    </div>
+
     <h2>Practice</h2>
     <div class="row">
       <button class="chip wide" data-key="l" id="learnChip">Learn my lines<span class="key">L</span></button>
@@ -198,6 +204,7 @@
 <script src="sentences.js"></script>
 <script src="script.js"></script>
 <script src="clips.js"></script>
+<script src="cues.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const src = $('src'), read = $('read'), edit = $('edit'), hud = $('hud'), roles = $('roles'), score = $('score'), hint = $('hint'), drillBtn = $('drillBtn');
@@ -224,6 +231,9 @@ let muted = new Set(JSON.parse(load('muted', '[]')));
 // Parts blocked out on the page, so you recite them instead of reading them.
 let covered = new Set(JSON.parse(load('covered', '[]')));
 const speaker = p => p.textContent.split(':')[0];
+const isCue = p => 'cue' in p.dataset;  // a stop of the show's own, not a speech
+// A line you are learning: one of your parts, or every part when none is chosen.
+const learnable = p => !isCue(p) && (!myRoles.size || myRoles.has(speaker(p)));
 const words = p => p.textContent.slice(speaker(p).length + 1);
 const cur = () => lines[i];
 const has = (p, c) => p.classList.contains(c);
@@ -264,6 +274,7 @@ const mark = text => {
   return text.replace(/[\p{L}\p{N}'-]+/gu, w => keys.has(norm(w)) ? `<b>${esc(w)}</b>` : esc(w));
 };
 const plain = p => {
+  if (isCue(p)) return p.textContent = p.dataset.text;
   // A covered part shows only its speaker until you tap the line to look.
   if (covered.has(speaker(p)) && !p.dataset.open) return p.innerHTML = `${esc(speaker(p))}: <span class="hide">▒▒▒▒▒</span>`;
   const who = speaker(p), said = p.dataset.text.slice(who.length + 1);
@@ -274,6 +285,7 @@ function show(n) {
   i = (n % lines.length + lines.length) % lines.length;  // past the end is back to the top
   lines.forEach((p, k) => p.classList.toggle('cur', k === i));
   save('line', i);
+  cue(+cur().dataset.scene);
   if (playing && !moving) { part = 0; play(); }
   if (learn) enter(); else center();
 }
@@ -296,6 +308,12 @@ function play() {
   // still sounding is cut, or its end would carry the reading past your line; and
   // the stuck-check from the last line must not fire while you are speaking.
   if (quizzing()) { audio.pause(); clearTimeout(stuck); return; }
+  if (isCue(cur())) {  // a stop of the show's own: let its music finish, or take a beat
+    const at = i, m = tracks.find(a => !a.loop && !a.paused);
+    const go = () => playing && i === at && step(1);
+    m ? m.addEventListener('ended', go, { once: true }) : setTimeout(go, 600);
+    return;
+  }
   const clip = clipOf(cur());
   // A silenced voice still plays, silently, so the gap is exactly as long as the line.
   audio.muted = muted.has(speaker(cur()));
@@ -338,6 +356,42 @@ function blip() {
   osc.stop(tones.currentTime + 0.17);
 }
 audio.onerror = () => playing && trouble(`Cannot load ${audio.src.split('/').pop()} (error ${audio.error?.code})`);
+
+// The show's sound (cues.js): each scene has a bed of room tone, most open with a
+// piece of music that hands over to the bed when it ends. Changing scene fades
+// what was sounding over a second. Rehearsal voices play over the top.
+let sound = load('sound') === 'true', cueAt = -1, tracks = [];
+function fade(a) {
+  const from = a.volume;
+  let t = 0;
+  const tick = setInterval(() => {
+    t += 0.1;
+    a.volume = Math.max(0, from * (1 - t));
+    if (t >= 1) { clearInterval(tick); a.pause(); }
+  }, 100);
+}
+function hush() { tracks.forEach(fade); tracks = []; cueAt = -1; }
+function cue(n) {
+  if (!sound || n === cueAt) return;  // the same scene again is left sounding
+  const c = window.CUES?.[n];
+  if (!c) return;
+  hush();
+  cueAt = n;
+  const start = (f, loop) => {
+    const a = new Audio('sound/' + f);
+    a.loop = loop;
+    tracks.push(a);
+    a.play().catch(e => {
+      // The page cannot start sound until it has been pressed; the chip is a press.
+      if (e.name !== 'NotAllowedError') return trouble(`Cannot play ${f}: ${e.name}`);
+      sound = false; hush(); render(); trouble('Sound needs a press first: press S');
+    });
+    return a;
+  };
+  if (c.music) start(c.music, false).onended = () => c.bed && cueAt === n && start(c.bed, true);
+  else if (c.bed) start(c.bed, true);
+  render();  // the header names the scene that is sounding
+}
 
 // A sentence ends before the clip does, so playback is stopped at its end time.
 // Both this and the clip's own end can fire, hence the latch: one move per piece.
@@ -480,7 +534,7 @@ function render() {
   mainBtn.textContent = quizzing() ? (shown ? 'Got it' : 'Reveal') : 'Next';
   missBtn.hidden = !(quizzing() && shown);
   backBtn.innerHTML = '&uarr;';
-  hud.hidden = !(learn || loop || playing);
+  hud.hidden = !(learn || loop || playing || sound);
 
   score.textContent = learn ? `${cleared.size} of ${items.length} clear · best ${load(bestKey(), 0)}` : '';
   // What to do now, most pressing first: your line beats everything else.
@@ -488,7 +542,7 @@ function render() {
     : playing && muted.has(speaker(cur())) ? `${speaker(cur())} is silenced`
     : loop ? `Looping ${loop[1] - loop[0] + 1} lines — Esc to stop`
     : playing ? 'Reading aloud'
-    : !learn ? ''
+    : !learn ? (sound && window.CUES?.[cueAt] ? `♫ ${window.CUES[cueAt].name}` : '')
     : drilling && !weak ? 'Weak lines cleared' : 'Keep going';
 
   for (const chip of roles.querySelectorAll('.chip')) {
@@ -497,19 +551,18 @@ function render() {
       : chip.dataset.state === 'Show' ? !covered.has(name) : !muted.has(name));
   }
   $('playChip').firstChild.textContent = playing ? 'Stop reading aloud' : 'Read aloud';
+  $('soundChip').firstChild.textContent = sound ? 'Stop the sound design' : 'Play the sound design';
   $('learnChip').firstChild.textContent = learn ? 'Stop learning' : 'Learn my lines';
   $('keysChip').firstChild.textContent = keywords ? 'Hide the key words' : 'Bold the key words';
   drillBtn.firstChild.textContent = weak ? `Drill ${weak} weak line${weak > 1 ? 's' : ''}` : 'No weak lines yet';
   drillBtn.disabled = !weak;
-  on($('playChip'), playing); on($('learnChip'), learn); on($('keysChip'), keywords);
+  on($('playChip'), playing); on($('learnChip'), learn); on($('keysChip'), keywords); on($('soundChip'), sound);
 }
 
 function startLearn(weakOnly) {
   learn = true; drilling = !!weakOnly;
   hud.hidden = false; document.body.classList.add('learn');
-  lines.forEach(p => {
-    p.classList.toggle('mine', !myRoles.size || myRoles.has(speaker(p)));
-  });
+  lines.forEach(p => p.classList.toggle('mine', learnable(p)));
   cleared = new Set();
   items = lines.flatMap((p, li) => mine(p)
     ? sentences(words(p)).map((text, si) => ({ li, si, text })).filter(it => !drilling || missCount(it.text))
@@ -521,7 +574,7 @@ function startLearn(weakOnly) {
 
 function stopLearn() {
   learn = drilling = false; items = []; cleared = new Set(); document.body.classList.remove('learn');
-  lines.forEach(p => { plain(p); p.classList.toggle('mine', !myRoles.size || myRoles.has(speaker(p))); });
+  lines.forEach(p => { plain(p); p.classList.toggle('mine', learnable(p)); });
   if (playing) { part = 0; play(); }  // a line the voice was waiting on is now its to read
 }
 
@@ -572,23 +625,38 @@ $('start').onclick = () => {
   save('script', src.value);
   save('pasted', src.value !== (window.SCRIPT || ''));  // a pasted script wins over the bundled one
   // "***" marks a scene break: a divider you pass over, not a line you step on.
-  read.replaceChildren(...src.value.split('\n').filter(l => l.trim()).map(t => {
-    if (t.trim() === '***') return document.createElement('hr');
+  // Each scene takes the next sound cue in turn; a cue with `hold` is a stop of
+  // its own, placed before the scene that follows it in cues.js.
+  const line = (text, scene) => {
     const p = document.createElement('p');
-    p.dataset.text = t;
-    p.textContent = t;
+    p.dataset.text = text;
+    p.dataset.scene = scene;
+    p.textContent = text;
     p.onclick = () => {
       if (covered.has(speaker(p)) && !p.dataset.open) { p.dataset.open = '1'; return plain(p); }
       jump(lines.indexOf(p));
     };
     return p;
-  }));
+  };
+  const holds = [], sceneCue = [];
+  (window.CUES || []).forEach((c, n) => c.hold ? holds.push({ before: sceneCue.length, n }) : sceneCue.push(n));
+  const stops = at => holds.filter(h => h.before === at).flatMap(h => {
+    const p = line('♫ ' + window.CUES[h.n].name, h.n);
+    p.dataset.cue = '';
+    p.className = 'cue';
+    return [document.createElement('hr'), p];
+  });
+  const scenes = src.value.split(/^\*\*\*$/m).map(s => s.split('\n').filter(l => l.trim()));
+  read.replaceChildren(...scenes.flatMap((ls, s) => [
+    ...stops(s), document.createElement('hr'), ...ls.map(l => line(l, sceneCue[s])),
+  ]), ...holds.filter(h => h.before >= scenes.length).flatMap(h => stops(h.before)));
+  read.firstChild.remove();  // no divider above the first thing
   lines = [...read.querySelectorAll('p')];
   if (!lines.length) return;
   freq = {};
   for (const w of src.value.match(/[\p{L}\p{N}'-]+/gu) || []) freq[norm(w)] = (freq[norm(w)] || 0) + 1;
   lines.forEach(plain);
-  buildRoles([...new Set(lines.map(speaker))]);
+  buildRoles([...new Set(lines.filter(p => !isCue(p)).map(speaker))]);
   buildScenes();
   stopLearn();
   edit.hidden = true; read.hidden = bar.hidden = false;
@@ -624,6 +692,7 @@ function act(k) {
   else if (k === 'escape' && loop) { loop = null; markLoop(null); }
   else if (k === 'p') { since = 0; part = 0; (playing = !playing) ? play() : stopPlay(); }
   else if (k === 'l') learn ? stopLearn() : startLearn();
+  else if (k === 's') { sound = !sound; save('sound', sound); sound ? cue(+cur().dataset.scene) : hush(); }
   else if (k === 'k') { keywords = !keywords; save('keywords', keywords); lines.forEach(p => p !== cur() && plain(p)); learn ? paint() : plain(cur()); }
   else if (k === 'w') learn && drilling ? startLearn() : startLearn(true);
   else return false;
@@ -653,8 +722,8 @@ function buildScenes() {
   scenes.replaceChildren(...starts.map((at, k) => {
     const chip = document.createElement('button');
     chip.className = 'chip';
-    const said = lines[at].dataset.text;
-    chip.innerHTML = `${k ? 'Scene ' + (k + 1) : 'The top'} <span>${esc(said.slice(0, 34))}…</span>`;
+    const said = lines[at].dataset.text, name = window.CUES?.[+lines[at].dataset.scene]?.name;
+    chip.innerHTML = `${name || (k ? 'Scene ' + (k + 1) : 'The top')} <span>${isCue(lines[at]) ? '' : esc(said.slice(0, 34)) + '…'}</span>`;
     chip.onclick = () => { stopPlay(); loop = null; markLoop(null); jump(at); sheet.close(); };
     return chip;
   }));

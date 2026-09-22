@@ -1,7 +1,7 @@
 // Everything, audio included, is cached on first visit so the app works on a train.
 // Bump CACHE to publish a new version; the old one is deleted on activate.
-const CACHE = 'transcriptor-23';
-const CORE = ['.', 'index.html', 'sentences.js', 'script.js', 'clips.js', 'manifest.json', 'icon-192.png', 'icon-512.png'];
+const CACHE = 'transcriptor-24';
+const CORE = ['.', 'index.html', 'sentences.js', 'script.js', 'clips.js', 'cues.js', 'manifest.json', 'icon-192.png', 'icon-512.png'];
 
 self.window = self;  // clips.js assigns to window; in a worker that is this scope
 importScripts('clips.js');
