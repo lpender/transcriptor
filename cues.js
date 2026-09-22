@@ -11,7 +11,7 @@
 window.CUES = [
   { name: 'Before the show', music: 'WaitingIntro.mp3', bed: 'QuietRoom.mp3', hold: true },
   { name: 'Reception', music: 'OfficeFansCelli.mp3', bed: 'OfficeFans.mp3' },
-  { name: 'Pause', hold: true },  // a stop with no sound: a beat of silence before the meeting
+  { name: 'Pause', music: 'OfficeFansCelli.mp3', hold: true },  // Reception's music again, alone, before the meeting
   { name: 'First meeting', music: 'HorridToneLowSynth.mp3', bed: 'HorridTone.mp3' },
   { name: 'Nelson chews out the receptionist', music: 'BustedFanTortureTrills.mp3', bed: 'BustedFanTorture.mp3' },  // James: "not sure about this one"
   { name: 'Second meeting, McMartin', music: 'StrangeHumDeepNote.mp3', bed: 'StrangeHum.mp3' },
