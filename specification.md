@@ -100,7 +100,10 @@ reader pasted their own.
   a bed of room tone that loops under the dialogue and, for most scenes, a
   piece of music that plays once over it. Every track has a switch for its
   scene in the More sheet (M and R flip the current scene's), and S silences
-  the lot; the app starts silent. Tapping a scene's name there goes to its
+  the lot; the app starts silent. Two sliders set how loud all the music and
+  all the room tone play, kept across visits. The beds are levelled to one
+  loudness by `normalize.py` (a flat gain each, no compression) so one slider
+  fits them all; the music keeps James's levels. Tapping a scene's name there goes to its
   first line and keeps the sheet open. The header names the scene sounding.
   Scenes take cues in order; a cue marked `hold` (before the show, the silent
   reception, the end) is a stop of its own in the script column, pressed

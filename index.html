@@ -118,6 +118,7 @@
     border: 1px solid var(--edge); background: var(--ink); color: var(--paper);
     font: 500 15px ui-monospace, Menlo, monospace;
   }
+  .loop input[type=range] { flex: 1; width: auto; border: 0; background: none; accent-color: var(--ribbon); padding: 0; }
   #cues .who { background: none; border: 0; padding: 8px 0; text-align: left; min-height: var(--tap); }
   #closeSheet { width: 100%; margin-top: 16px; min-height: 46px; border-radius: 10px; border: 1px solid var(--edge); background: transparent; color: var(--paper); font: 500 14px ui-monospace, Menlo, monospace; }
 
@@ -178,6 +179,8 @@
     <div class="row">
       <button class="chip wide" data-key="s" id="hushChip">Sound on<span class="key">S</span></button>
     </div>
+    <label class="loop" title="How loud the music plays">music <input id="vol:music" type="range" min="0" max="1" step="0.02"></label>
+    <label class="loop" title="How loud the room tone plays">room <input id="vol:bed" type="range" min="0" max="1" step="0.02"></label>
     <div id="cues"></div>
 
     <h2>Practice</h2>
@@ -362,6 +365,13 @@ audio.onerror = () => playing && trouble(`Cannot load ${audio.src.split('/').pop
 // for its scene, and one switch silences the lot. Changing scene cuts what was
 // sounding with a short fade. Rehearsal voices play over the top.
 let hushed = load('hushed', 'true') === 'true', cueAt = -1, tracks = {};
+// One volume for all the music and one for all the room tone, kept across visits.
+const vol = kind => +load('vol:' + kind, kind === 'bed' ? 0.6 : 1);
+for (const kind of ['music', 'bed']) {
+  const slider = $('vol:' + kind);
+  slider.value = vol(kind);
+  slider.oninput = () => { save('vol:' + kind, slider.value); if (tracks[kind]) tracks[kind].volume = +slider.value; };
+}
 const off = new Set(JSON.parse(load('cuesOff', '[]')));  // "scene:kind" switched off
 const enabled = (n, kind) => !!window.CUES?.[n]?.[kind] && !off.has(n + ':' + kind);
 function fade(a) {
@@ -378,6 +388,7 @@ function start(kind) {
   if (hushed || !enabled(cueAt, kind)) return;
   const f = window.CUES[cueAt][kind], a = new Audio('sound/' + f);
   a.loop = kind === 'bed';
+  a.volume = vol(kind);
   tracks[kind] = a;
   a.onplaying = a.onended = () => render();
   a.play().catch(e => {
