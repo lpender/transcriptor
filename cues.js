@@ -4,12 +4,14 @@
 //
 // A cue with `hold` is a stop of its own, with no lines: the app puts it in the
 // script column where it falls in this order, so you press through it like a
-// line. The others attach to the script's scenes ("***" breaks) in order.
+// line. One with no music and no bed is a silence. The others attach to the
+// script's scenes ("***" breaks) in order.
 //
 // Alternatives James offered are noted; swap the file names to try them.
 window.CUES = [
   { name: 'Before the show', music: 'WaitingIntro.mp3', bed: 'QuietRoom.mp3', hold: true },
   { name: 'Reception', music: 'OfficeFansCelli.mp3', bed: 'OfficeFans.mp3' },
+  { name: 'Pause', hold: true },  // a stop with no sound: a beat of silence before the meeting
   { name: 'First meeting', music: 'HorridToneLowSynth.mp3', bed: 'HorridTone.mp3' },
   { name: 'Nelson chews out the receptionist', music: 'BustedFanTortureTrills.mp3', bed: 'BustedFanTorture.mp3' },  // James: "not sure about this one"
   { name: 'Second meeting, McMartin', music: 'StrangeHumDeepNote.mp3', bed: 'StrangeHum.mp3' },
