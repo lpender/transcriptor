@@ -1,6 +1,6 @@
 // The show's sound design, by James, scene by scene. Each scene has a bed of room
-// tone that loops under the dialogue, and most open with a piece of music that
-// grows out of that tone; the bed takes over when the music ends.
+// tone that loops under the dialogue, and most a piece of music that grows out of
+// that tone and plays once over it. Music and bed are switched on their own.
 //
 // A cue with `hold` is a stop of its own, with no lines: the app puts it in the
 // script column where it falls in this order, so you press through it like a

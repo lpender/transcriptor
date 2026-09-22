@@ -97,8 +97,9 @@
   .sheet-in h2:first-child { margin-top: 4px; }
   .row { display: flex; gap: 8px; align-items: center; padding: 3px 0; }
   .row .who { flex: 1; font: 500 15px/1.2 ui-monospace, Menlo, monospace; letter-spacing: .04em; }
-  #roles .row { padding: 3px 8px; margin: 0 -8px; border-radius: 8px; }
-  #roles .row:nth-child(odd) { background: rgba(255, 255, 255, .035); }
+  #roles .row, #cues .row { padding: 3px 8px; margin: 0 -8px; border-radius: 8px; }
+  #roles .row:nth-child(odd), #cues .row:nth-child(odd) { background: rgba(255, 255, 255, .035); }
+  #cues .row.cur .who { color: var(--cue); }
   .chip {
     min-height: 40px; padding: 0 12px; border-radius: 10px;
     border: 1px solid var(--edge); background: transparent; color: var(--faded);
@@ -174,8 +175,9 @@
 
     <h2>Show</h2>
     <div class="row">
-      <button class="chip wide" data-key="s" id="soundChip">Play the sound design<span class="key">S</span></button>
+      <button class="chip wide" data-key="s" id="hushChip">Sound on<span class="key">S</span></button>
     </div>
+    <div id="cues"></div>
 
     <h2>Practice</h2>
     <div class="row">
@@ -309,7 +311,7 @@ function play() {
   // the stuck-check from the last line must not fire while you are speaking.
   if (quizzing()) { audio.pause(); clearTimeout(stuck); return; }
   if (isCue(cur())) {  // a stop of the show's own: let its music finish, or take a beat
-    const at = i, m = tracks.find(a => !a.loop && !a.paused);
+    const at = i, m = tracks.music && !tracks.music.paused && tracks.music;
     const go = () => playing && i === at && step(1);
     m ? m.addEventListener('ended', go, { once: true }) : setTimeout(go, 600);
     return;
@@ -357,40 +359,75 @@ function blip() {
 }
 audio.onerror = () => playing && trouble(`Cannot load ${audio.src.split('/').pop()} (error ${audio.error?.code})`);
 
-// The show's sound (cues.js): each scene has a bed of room tone, most open with a
-// piece of music that hands over to the bed when it ends. Changing scene fades
-// what was sounding over a second. Rehearsal voices play over the top.
-let sound = load('sound') === 'true', cueAt = -1, tracks = [];
+// The show's sound (cues.js): each scene has a bed of room tone that loops, and
+// most a piece of music that plays once over it. Each track can be switched off
+// for its scene, and one switch silences the lot. Changing scene cuts what was
+// sounding with a short fade. Rehearsal voices play over the top.
+let hushed = load('hushed', 'true') === 'true', cueAt = -1, tracks = {};
+const off = new Set(JSON.parse(load('cuesOff', '[]')));  // "scene:kind" switched off
+const enabled = (n, kind) => !!window.CUES?.[n]?.[kind] && !off.has(n + ':' + kind);
 function fade(a) {
+  if (!a) return;
   const from = a.volume;
   let t = 0;
   const tick = setInterval(() => {
     t += 0.1;
     a.volume = Math.max(0, from * (1 - t));
     if (t >= 1) { clearInterval(tick); a.pause(); }
-  }, 100);
+  }, 10);
 }
-function hush() { tracks.forEach(fade); tracks = []; cueAt = -1; }
+function start(kind) {
+  if (hushed || !enabled(cueAt, kind)) return;
+  const f = window.CUES[cueAt][kind], a = new Audio('sound/' + f);
+  a.loop = kind === 'bed';
+  tracks[kind] = a;
+  a.play().catch(e => {
+    // The page cannot start sound until it has been pressed; the chip is a press.
+    if (e.name !== 'NotAllowedError') return trouble(`Cannot play ${f}: ${e.name}`);
+    hushed = true; stop(kind); render(); trouble('Sound needs a press first: press S');
+  });
+}
+function stop(kind) { fade(tracks[kind]); delete tracks[kind]; }
 function cue(n) {
-  if (!sound || n === cueAt) return;  // the same scene again is left sounding
-  const c = window.CUES?.[n];
-  if (!c) return;
-  hush();
+  if (n === cueAt) return;  // the same scene again is left sounding
+  stop('music'); stop('bed');
   cueAt = n;
-  const start = (f, loop) => {
-    const a = new Audio('sound/' + f);
-    a.loop = loop;
-    tracks.push(a);
-    a.play().catch(e => {
-      // The page cannot start sound until it has been pressed; the chip is a press.
-      if (e.name !== 'NotAllowedError') return trouble(`Cannot play ${f}: ${e.name}`);
-      sound = false; hush(); render(); trouble('Sound needs a press first: press S');
-    });
-    return a;
-  };
-  if (c.music) start(c.music, false).onended = () => c.bed && cueAt === n && start(c.bed, true);
-  else if (c.bed) start(c.bed, true);
+  start('music'); start('bed');
   render();  // the header names the scene that is sounding
+}
+// A track switched for its scene; if that is the scene sounding, it starts or stops now.
+function flip(n, kind) {
+  const k = n + ':' + kind;
+  off.has(k) ? off.delete(k) : off.add(k);
+  save('cuesOff', JSON.stringify([...off]));
+  if (n === cueAt) off.has(k) ? stop(kind) : start(kind);
+}
+function hush(yes) {
+  hushed = yes;
+  save('hushed', yes);
+  if (yes) { stop('music'); stop('bed'); }
+  else { start('music'); start('bed'); }
+}
+// One row per scene: its name, and a switch for each track it has.
+function buildCues() {
+  $('cues').replaceChildren(...(window.CUES || []).map((c, n) => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    const who = document.createElement('span');
+    who.className = 'who';
+    who.textContent = c.name;
+    row.append(who, ...['music', 'bed'].filter(kind => c[kind]).map(kind => {
+      const chip = document.createElement('button');
+      chip.className = 'chip';
+      chip.textContent = kind === 'music' ? 'Music' : 'Room';
+      chip.title = c[kind];
+      chip.dataset.cue = n;
+      chip.dataset.kind = kind;
+      chip.onclick = () => { flip(n, kind); chip.blur(); render(); };
+      return chip;
+    }));
+    return row;
+  }));
 }
 
 // A sentence ends before the clip does, so playback is stopped at its end time.
@@ -534,7 +571,7 @@ function render() {
   mainBtn.textContent = quizzing() ? (shown ? 'Got it' : 'Reveal') : 'Next';
   missBtn.hidden = !(quizzing() && shown);
   backBtn.innerHTML = '&uarr;';
-  hud.hidden = !(learn || loop || playing || sound);
+  hud.hidden = !(learn || loop || playing || !hushed);
 
   score.textContent = learn ? `${cleared.size} of ${items.length} clear · best ${load(bestKey(), 0)}` : '';
   // What to do now, most pressing first: your line beats everything else.
@@ -542,7 +579,7 @@ function render() {
     : playing && muted.has(speaker(cur())) ? `${speaker(cur())} is silenced`
     : loop ? `Looping ${loop[1] - loop[0] + 1} lines — Esc to stop`
     : playing ? 'Reading aloud'
-    : !learn ? (sound && window.CUES?.[cueAt] ? `♫ ${window.CUES[cueAt].name}` : '')
+    : !learn ? (!hushed && window.CUES?.[cueAt] ? `♫ ${window.CUES[cueAt].name}` : '')
     : drilling && !weak ? 'Weak lines cleared' : 'Keep going';
 
   for (const chip of roles.querySelectorAll('.chip')) {
@@ -551,12 +588,14 @@ function render() {
       : chip.dataset.state === 'Show' ? !covered.has(name) : !muted.has(name));
   }
   $('playChip').firstChild.textContent = playing ? 'Stop reading aloud' : 'Read aloud';
-  $('soundChip').firstChild.textContent = sound ? 'Stop the sound design' : 'Play the sound design';
+  $('hushChip').firstChild.textContent = hushed ? 'Sound off' : 'Sound on';
+  for (const chip of $('cues').querySelectorAll('.chip')) on(chip, !off.has(chip.dataset.cue + ':' + chip.dataset.kind));
+  for (const row of $('cues').children) row.classList.toggle('cur', [...row.querySelectorAll('.chip')].some(c => +c.dataset.cue === cueAt));
   $('learnChip').firstChild.textContent = learn ? 'Stop learning' : 'Learn my lines';
   $('keysChip').firstChild.textContent = keywords ? 'Hide the key words' : 'Bold the key words';
   drillBtn.firstChild.textContent = weak ? `Drill ${weak} weak line${weak > 1 ? 's' : ''}` : 'No weak lines yet';
   drillBtn.disabled = !weak;
-  on($('playChip'), playing); on($('learnChip'), learn); on($('keysChip'), keywords); on($('soundChip'), sound);
+  on($('playChip'), playing); on($('learnChip'), learn); on($('keysChip'), keywords); on($('hushChip'), !hushed);
 }
 
 function startLearn(weakOnly) {
@@ -658,6 +697,7 @@ $('start').onclick = () => {
   lines.forEach(plain);
   buildRoles([...new Set(lines.filter(p => !isCue(p)).map(speaker))]);
   buildScenes();
+  buildCues();
   stopLearn();
   edit.hidden = true; read.hidden = bar.hidden = false;
   show(sameScript ? +load('line', 0) : 0);
@@ -692,7 +732,8 @@ function act(k) {
   else if (k === 'escape' && loop) { loop = null; markLoop(null); }
   else if (k === 'p') { since = 0; part = 0; (playing = !playing) ? play() : stopPlay(); }
   else if (k === 'l') learn ? stopLearn() : startLearn();
-  else if (k === 's') { sound = !sound; save('sound', sound); sound ? cue(+cur().dataset.scene) : hush(); }
+  else if (k === 's') hush(!hushed);
+  else if (k === 'm' || k === 'b') flip(cueAt, k === 'm' ? 'music' : 'bed');
   else if (k === 'k') { keywords = !keywords; save('keywords', keywords); lines.forEach(p => p !== cur() && plain(p)); learn ? paint() : plain(cur()); }
   else if (k === 'w') learn && drilling ? startLearn() : startLearn(true);
   else return false;
