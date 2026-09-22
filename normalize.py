@@ -1,15 +1,20 @@
-"""Bring every room tone in sound/ to the same loudness, so one slider fits all.
+"""Bring the room tones in sound/ to one loudness and the music to another, so
+one slider fits each.
 
-James mixed the beds thirty decibels apart. Each is shifted by a flat gain to a
-mean of TARGET dB (no compression, no limiting), re-encoded at its own bitrate.
-The music is left alone: its levels are part of the composition. Run after James
-sends new files:   python3 normalize.py
+James mixed them up to thirty decibels apart. Each file is shifted by a flat
+gain to its group's mean (no compression, no limiting) and re-encoded at its own
+bitrate. Run after James sends new files:   python3 normalize.py
 """
 import re, subprocess, sys
 
-TARGET = -28.0  # dB mean; leaves 8 dB of headroom on the loudest bed
-BEDS = ["OfficeFans", "HorridTone", "BustedFanTorture", "StrangeHum", "NoDialogueRoom",
-        "FactoryHell", "Ventilation", "ComputerFanFaintBeep", "QuietRoom", "AwfulComputerTone", "Furnace"]
+# dB mean per group. The music sits 5 dB above the beds; the room slider starts
+# lower still. Both leave 5 dB of headroom on the loudest file.
+GROUPS = {
+    -28.0: ["OfficeFans", "HorridTone", "BustedFanTorture", "StrangeHum", "NoDialogueRoom",
+            "FactoryHell", "Ventilation", "ComputerFanFaintBeep", "QuietRoom", "AwfulComputerTone", "Furnace"],
+    -23.0: ["WaitingIntro", "OfficeFansCelli", "HorridToneLowSynth", "BustedFanTortureTrills", "StrangeHumDeepNote",
+            "SadDay", "FactoryHellTremolo", "ComputerFanFaintBeepStrings", "WaitingOutro"],
+}
 
 
 def levels(path):
@@ -18,14 +23,14 @@ def levels(path):
     return tuple(float(re.search(rf"{k}_volume: ([-\d.]+) dB", out)[1]) for k in ("mean", "max"))
 
 
-for name in BEDS:
+for target, name in ((t, n) for t, names in GROUPS.items() for n in names):
     path = f"sound/{name}.mp3"
     mean, peak = levels(path)
-    gain = TARGET - mean
+    gain = target - mean
     if abs(gain) < 0.5:
         print(f"{name:24} {mean:6.1f} dB  ok"); continue
     if peak + gain > -1:
-        sys.exit(f"{name}: +{gain:.1f} dB would clip (peak {peak:.1f} dB); lower TARGET")
+        sys.exit(f"{name}: +{gain:.1f} dB would clip (peak {peak:.1f} dB); lower its target")
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", path, "-af", f"volume={gain:.2f}dB",
                     "-codec:a", "libmp3lame", "-b:a", "160k", "-id3v2_version", "3", "tmp.mp3"], check=True)
     subprocess.run(["mv", "tmp.mp3", path], check=True)
