@@ -196,6 +196,9 @@
 
     <h2>Script</h2>
     <div class="row">
+      <button class="chip wide" data-key="t">Start from the top<span class="key">T</span></button>
+    </div>
+    <div class="row">
       <button class="chip wide" data-key="e">Paste a different script<span class="key">E</span></button>
     </div>
     <div class="row">
@@ -747,6 +750,7 @@ function act(k) {
   else if (k === 'p') { since = 0; part = 0; (playing = !playing) ? play() : stopPlay(); }
   else if (k === 'l') learn ? stopLearn() : startLearn();
   else if (k === 's') hush(!hushed);
+  else if (k === 't') { stopPlay(); loop = null; markLoop(null); jump(0); sheet.close(); }
   else if (k === 'm' || k === 'r') flip(cueAt, k === 'm' ? 'music' : 'bed');
   else if (k === 'k') { keywords = !keywords; save('keywords', keywords); lines.forEach(p => p !== cur() && plain(p)); learn ? paint() : plain(cur()); }
   else if (k === 'w') learn && drilling ? startLearn() : startLearn(true);

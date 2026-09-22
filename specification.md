@@ -128,6 +128,6 @@ reader pasted their own.
 - **Key words.** Bolds the words a line hangs on — skip the filler, then prefer
   long and rare in this script over short and common, about half the remaining
   words, at most four.
-- **Controls.** Every control is a button in the bar (Back, Play, Learn, Keys,
+- **Controls.** Every control is a button in the bar or the More sheet (Back, Play, Learn, Keys, Start from the top,
   Drill weak, Edit, Next) with its keyboard shortcut printed under it. Nothing
   is reachable by key alone.
