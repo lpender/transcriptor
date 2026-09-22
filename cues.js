@@ -17,5 +17,5 @@ window.CUES = [
   { name: 'Third meeting, Polhemus', music: 'FactoryHellTremolo.mp3', bed: 'FactoryHell.mp3' },  // or StrangeHum.mp3 / Ventilation.mp3
   { name: 'Nelson sings', bed: 'Ventilation.mp3' },  // James left this one open; AwfulComputerTone.mp3 is spare
   { name: 'Disclosure', music: 'ComputerFanFaintBeepStrings.mp3', bed: 'ComputerFanFaintBeep.mp3' },  // or Furnace.mp3
-  { name: 'The end', music: 'SadDay.mp3', hold: true },  // or WaitingOutro.mp3, James's own: ends abruptly, on purpose
+  { name: 'The end', music: 'WaitingOutro.mp3', hold: true },  // ends abruptly, on purpose; SadDay.mp3 was tried here
 ];
