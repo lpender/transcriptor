@@ -100,7 +100,8 @@ reader pasted their own.
   a bed of room tone that loops under the dialogue and, for most scenes, a
   piece of music that plays once over it. Every track has a switch for its
   scene in the More sheet (M and B flip the current scene's), and S silences
-  the lot; the app starts silent. The header names the scene sounding.
+  the lot; the app starts silent. Tapping a scene's name there goes to its
+  first line. The header names the scene sounding.
   Scenes take cues in order; a cue marked `hold` (before the show, the silent
   reception, the end) is a stop of its own in the script column, pressed
   through like a line but never voiced or learned. Changing scene cuts the

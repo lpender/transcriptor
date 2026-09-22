@@ -115,9 +115,7 @@
     border: 1px solid var(--edge); background: var(--ink); color: var(--paper);
     font: 500 15px ui-monospace, Menlo, monospace;
   }
-  #scenes { display: flex; flex-direction: column; gap: 6px; }
-  #scenes .chip { width: 100%; text-align: left; padding: 0 14px; min-height: 46px; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  #scenes .chip span { color: var(--faded); }
+  #cues .who { background: none; border: 0; padding: 8px 0; text-align: left; min-height: var(--tap); }
   #closeSheet { width: 100%; margin-top: 16px; min-height: 46px; border-radius: 10px; border: 1px solid var(--edge); background: transparent; color: var(--paper); font: 500 14px ui-monospace, Menlo, monospace; }
 
   /* ---- pasting a script ---- */
@@ -190,9 +188,6 @@
       <button class="chip wide" data-key="k" id="keysChip">Bold the key words<span class="key">K</span></button>
     </div>
 
-    <h2>Go to</h2>
-    <div id="scenes"></div>
-
     <h2>Script</h2>
     <div class="row">
       <button class="chip wide" data-key="e">Paste a different script<span class="key">E</span></button>
@@ -210,7 +205,7 @@
 <script>
 const $ = id => document.getElementById(id);
 const src = $('src'), read = $('read'), edit = $('edit'), hud = $('hud'), roles = $('roles'), score = $('score'), hint = $('hint'), drillBtn = $('drillBtn');
-const bar = $('bar'), sheet = $('sheet'), backBtn = $('backBtn'), mainBtn = $('mainBtn'), missBtn = $('missBtn'), scenes = $('scenes');
+const bar = $('bar'), sheet = $('sheet'), backBtn = $('backBtn'), mainBtn = $('mainBtn'), missBtn = $('missBtn');
 let lines = [], i = 0;
 // Passive mode: play each line's ElevenLabs clip (made by tts.py) and advance.
 const audio = new Audio();
@@ -411,14 +406,16 @@ function hush(yes) {
   if (yes) { stop('music'); stop('bed'); }
   else { start('music'); start('bed'); }
 }
-// One row per scene: its name, and a switch for each track it has.
+// One row per scene: its name, which takes you there, and a switch for each track it has.
 function buildCues() {
   $('cues').replaceChildren(...(window.CUES || []).map((c, n) => {
     const row = document.createElement('div');
     row.className = 'row';
-    const who = document.createElement('span');
+    const who = document.createElement('button');
     who.className = 'who';
     who.textContent = c.name;
+    who.title = 'Go to ' + c.name;
+    who.onclick = () => { stopPlay(); loop = null; markLoop(null); jump(lines.findIndex(p => +p.dataset.scene === n)); sheet.close(); };
     row.append(who, ...['music', 'bed'].filter(kind => c[kind]).map(kind => {
       const chip = document.createElement('button');
       chip.className = 'chip';
@@ -699,7 +696,6 @@ $('start').onclick = () => {
   for (const w of src.value.match(/[\p{L}\p{N}'-]+/gu) || []) freq[norm(w)] = (freq[norm(w)] || 0) + 1;
   lines.forEach(plain);
   buildRoles([...new Set(lines.filter(p => !isCue(p)).map(speaker))]);
-  buildScenes();
   buildCues();
   stopLearn();
   edit.hidden = true; read.hidden = bar.hidden = false;
@@ -755,23 +751,6 @@ document.addEventListener('keydown', e => {
   // or hands the key to the browser.
   if (act(k) | (k === ' ' || k.startsWith('arrow'))) e.preventDefault();
 });
-// Jumping about: the top, or the start of any scene. A scene break is an <hr>.
-function buildScenes() {
-  const starts = [0];
-  let n = 0;
-  for (const el of read.children) {
-    if (el.tagName === 'HR') starts.push(n);
-    else n++;
-  }
-  scenes.replaceChildren(...starts.map((at, k) => {
-    const chip = document.createElement('button');
-    chip.className = 'chip';
-    const said = lines[at].dataset.text, name = window.CUES?.[+lines[at].dataset.scene]?.name;
-    chip.innerHTML = `${name || (k ? 'Scene ' + (k + 1) : 'The top')} <span>${isCue(lines[at]) ? '' : esc(said.slice(0, 34)) + '…'}</span>`;
-    chip.onclick = () => { stopPlay(); loop = null; markLoop(null); jump(at); sheet.close(); };
-    return chip;
-  }));
-}
 
 // Drag across lines to rehearse that block: it plays them over and over.
 let dragFrom = null;
