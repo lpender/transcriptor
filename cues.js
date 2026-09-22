@@ -13,8 +13,8 @@ window.CUES = [
   { name: 'Reception', music: 'OfficeFansCelli.mp3', bed: 'OfficeFans.mp3' },
   { name: 'Pause', music: 'OfficeFansCelli.mp3', hold: true },  // Reception's music again, alone, before the meeting
   { name: 'First meeting', music: 'HorridToneLowSynth.mp3', bed: 'HorridTone.mp3' },
-  { name: 'Pause', music: 'HorridToneLowSynth.mp3', hold: true },  // after "Eight thousand and twenty-two years."
-  { name: 'Nelson chews out the receptionist', music: 'BustedFanTortureTrills.mp3', bed: 'BustedFanTorture.mp3' },  // James: "not sure about this one"
+  { name: 'Pause', music: 'BustedFanTortureTrills.mp3', hold: true },  // after "Eight thousand and twenty-two years.": the next scene's music, ahead of it
+  { name: 'Nelson chews out the receptionist', bed: 'BustedFanTorture.mp3' },  // James: "not sure about this one"; its trills play in the pause before
   { name: 'Second meeting, McMartin', music: 'StrangeHumDeepNote.mp3', bed: 'StrangeHum.mp3' },
   { name: 'Silent reception', music: 'SadDay.mp3', bed: 'NoDialogueRoom.mp3', hold: true },  // or no music, just the room
   { name: 'Third meeting, Polhemus', music: 'FactoryHellTremolo.mp3', bed: 'FactoryHell.mp3' },  // or StrangeHum.mp3 / Ventilation.mp3
