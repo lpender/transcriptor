@@ -97,9 +97,10 @@ reader pasted their own.
   voice reads everyone else and stops at each of your lines until you have
   said and graded it; stopping learn mode mid-wait lets the voice read on.
 - **Learn mode.** Your lines are hidden as `▒▒▒▒▒` blocks — fixed width, so
-  length gives nothing away — and lines ahead are invisible. Reveal, then grade
-  yourself: right clears the piece and reveals the next in the same press, a
-  miss takes back the two before it. The score is how far you get; the best run
+  length gives nothing away — and lines ahead are invisible. Say the line, then
+  press: Next onto your line reveals its first sentence, and each right answer
+  clears the piece and reveals the next in the same press. A miss takes back
+  the two before it, hidden again to say over. The score is how far you get; the best run
   is kept per role. Tapping back to an earlier line, or jumping to a scene,
   restarts from there: every line from it onward is hidden and owed again.
 - **Pieces.** A line is tested in pieces split at full stops, commas,

@@ -460,11 +460,16 @@ function jump(n) {
 }
 
 // Next line; while drilling weak lines, skip ahead to the next one that needs work.
+// Stepping onto your own line shows its first sentence at once: you said it before
+// you pressed, so one press both moves and reveals, as it does within a line.
 function next() {
-  if (!drilling) return show(i + 1);
-  const weak = (from, to) => lines.findIndex((p, k) => k > from && k < to && mine(p) && weakLine(p));
-  const t = weak(i, lines.length);
-  show(t < 0 ? weak(-1, i + 1) : t);  // round again from the top when none are left ahead
+  if (!drilling) show(i + 1);
+  else {
+    const weak = (from, to) => lines.findIndex((p, k) => k > from && k < to && mine(p) && weakLine(p));
+    const t = weak(i, lines.length);
+    show(t < 0 ? weak(-1, i + 1) : t);  // round again from the top when none are left ahead
+  }
+  if (quizzing() && !shown) { shown = true; paint(); render(); }
 }
 
 function render() {
