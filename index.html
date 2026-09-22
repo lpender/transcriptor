@@ -381,6 +381,7 @@ function start(kind) {
   const f = window.CUES[cueAt][kind], a = new Audio('sound/' + f);
   a.loop = kind === 'bed';
   tracks[kind] = a;
+  a.onplaying = a.onended = () => render();
   a.play().catch(e => {
     // The page cannot start sound until it has been pressed; the chip is a press.
     if (e.name !== 'NotAllowedError') return trouble(`Cannot play ${f}: ${e.name}`);
@@ -388,6 +389,8 @@ function start(kind) {
   });
 }
 function stop(kind) { fade(tracks[kind]); delete tracks[kind]; }
+// What is actually coming out right now, for the header: " · music · room".
+const sounding = () => Object.entries(tracks).filter(([, a]) => !a.paused && !a.ended).map(([k]) => ' · ' + (k === 'bed' ? 'room' : k)).join('');
 function cue(n) {
   if (n === cueAt) return;  // the same scene again is left sounding
   stop('music'); stop('bed');
@@ -579,7 +582,7 @@ function render() {
     : playing && muted.has(speaker(cur())) ? `${speaker(cur())} is silenced`
     : loop ? `Looping ${loop[1] - loop[0] + 1} lines — Esc to stop`
     : playing ? 'Reading aloud'
-    : !learn ? (!hushed && window.CUES?.[cueAt] ? `♫ ${window.CUES[cueAt].name}` : '')
+    : !learn ? (!hushed && window.CUES?.[cueAt] ? `♫ ${window.CUES[cueAt].name}${sounding()}` : '')
     : drilling && !weak ? 'Weak lines cleared' : 'Keep going';
 
   for (const chip of roles.querySelectorAll('.chip')) {
