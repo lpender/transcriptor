@@ -733,7 +733,7 @@ function act(k) {
   else if (k === 'p') { since = 0; part = 0; (playing = !playing) ? play() : stopPlay(); }
   else if (k === 'l') learn ? stopLearn() : startLearn();
   else if (k === 's') hush(!hushed);
-  else if (k === 'm' || k === 'b') flip(cueAt, k === 'm' ? 'music' : 'bed');
+  else if (k === 'm' || k === 'r') flip(cueAt, k === 'm' ? 'music' : 'bed');
   else if (k === 'k') { keywords = !keywords; save('keywords', keywords); lines.forEach(p => p !== cur() && plain(p)); learn ? paint() : plain(cur()); }
   else if (k === 'w') learn && drilling ? startLearn() : startLearn(true);
   else return false;
