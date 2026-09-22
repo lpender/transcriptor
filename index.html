@@ -415,7 +415,8 @@ function buildCues() {
     who.className = 'who';
     who.textContent = c.name;
     who.title = 'Go to ' + c.name;
-    who.onclick = () => { stopPlay(); loop = null; markLoop(null); jump(lines.findIndex(p => +p.dataset.scene === n)); sheet.close(); };
+    // The sheet stays open: running a show, you go scene to scene from here.
+    who.onclick = () => { stopPlay(); loop = null; markLoop(null); jump(lines.findIndex(p => +p.dataset.scene === n)); render(); };
     row.append(who, ...['music', 'bed'].filter(kind => c[kind]).map(kind => {
       const chip = document.createElement('button');
       chip.className = 'chip';
