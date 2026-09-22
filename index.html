@@ -85,7 +85,10 @@
     background: var(--surface); color: var(--paper);
     border-radius: 16px 16px 0 0; border-top: 1px solid var(--edge);
     animation: rise .18s ease-out;
+    /* Taller than the screen, it scrolls inside; the script behind never moves. */
+    max-height: calc(100dvh - env(safe-area-inset-top) - 24px); overflow-y: auto; overscroll-behavior: contain;
   }
+  body:has(#sheet[open]) { overflow: hidden; }
   #sheet::backdrop { background: #000A; }
   @keyframes rise { from { transform: translateY(14px); opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { #sheet { animation: none; } }
