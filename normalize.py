@@ -27,7 +27,7 @@ for target, name in ((t, n) for t, names in GROUPS.items() for n in names):
     path = f"sound/{name}.mp3"
     mean, peak = levels(path)
     gain = target - mean
-    if abs(gain) < 0.5:
+    if abs(gain) < 1:  # a re-encode drifts half a dB; do not chase it
         print(f"{name:24} {mean:6.1f} dB  ok"); continue
     if peak + gain > -1:
         sys.exit(f"{name}: +{gain:.1f} dB would clip (peak {peak:.1f} dB); lower its target")
