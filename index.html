@@ -387,9 +387,10 @@ function fade(a) {
     if (t >= 1) { clearInterval(tick); a.pause(); }
   }, 10);
 }
-function start(kind) {
-  if (hushed || !enabled(cueAt, kind)) return;
-  const f = window.CUES[cueAt][kind], a = new Audio('sound/' + f);
+function start(kind, now) {
+  const f = window.CUES?.[cueAt]?.[kind];
+  if (!f || hushed || !(now || enabled(cueAt, kind))) return;
+  const a = new Audio('sound/' + f);
   a.loop = kind === 'bed';
   a.volume = vol(kind);
   tracks[kind] = a;
@@ -410,6 +411,9 @@ function cue(n) {
   start('music'); start('bed');
   render();  // the header names the scene that is sounding
 }
+// The keys work the sound in the moment: they start or stop a track here and now
+// and leave the switches in the sheet alone, so the next scene sounds as set.
+function live(kind) { tracks[kind] && !tracks[kind].paused ? stop(kind) : start(kind, true); }
 // A track switched for its scene; if that is the scene sounding, it starts or stops now.
 function flip(n, kind) {
   const k = n + ':' + kind;
@@ -751,7 +755,7 @@ function act(k) {
   else if (k === 'l') learn ? stopLearn() : startLearn();
   else if (k === 's') hush(!hushed);
   else if (k === 't') { stopPlay(); loop = null; markLoop(null); jump(0); sheet.close(); }
-  else if (k === 'm' || k === 'r') flip(cueAt, k === 'm' ? 'music' : 'bed');
+  else if (k === 'm' || k === 'r') live(k === 'm' ? 'music' : 'bed');
   else if (k === 'k') { keywords = !keywords; save('keywords', keywords); lines.forEach(p => p !== cur() && plain(p)); learn ? paint() : plain(cur()); }
   else if (k === 'w') learn && drilling ? startLearn() : startLearn(true);
   else return false;

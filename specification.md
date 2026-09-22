@@ -99,8 +99,9 @@ reader pasted their own.
 - **The show's sound.** `cues.js` lists James's sound design scene by scene:
   a bed of room tone that loops under the dialogue and, for most scenes, a
   piece of music that plays once over it. Every track has a switch for its
-  scene in the More sheet (M and R flip the current scene's), and S silences
-  the lot; the app starts silent. Two sliders set how loud all the music and
+  scene in the More sheet, and S silences the lot; the app starts silent. M
+  and R start or stop the current scene's music or room tone in the moment
+  without touching those switches, so the next scene sounds as set. Two sliders set how loud all the music and
   all the room tone play, kept across visits. The beds are levelled to one
   loudness by `normalize.py` (a flat gain each, no compression) so one slider
   fits them all, and the music to another, 5 dB louder. Tapping a scene's name there goes to its
