@@ -394,18 +394,41 @@ function fade(a) {
 function start(kind, now) {
   const f = window.CUES?.[cueAt]?.[kind];
   if (!f || hushed || !(now || enabled(cueAt, kind))) return;
-  const a = new Audio('sound/' + f);
-  a.loop = looping(cueAt, kind);
+  const a = spawn(kind, 'sound/' + f, looping(cueAt, kind));
   a.volume = vol(kind);
   tracks[kind] = a;
-  a.onplaying = a.onended = () => render();
   a.play().catch(e => {
     // The page cannot start sound until it has been pressed; the chip is a press.
     if (e.name !== 'NotAllowedError') return trouble(`Cannot play ${f}: ${e.name}`);
     hushed = true; stop(kind); render(); trouble('Sound needs a press first: press S');
   });
 }
-function stop(kind) { fade(tracks[kind]); delete tracks[kind]; }
+// A track that goes round again does not use the element's own loop, whose seam is
+// a hard cut: the next pass starts CROSS seconds before the end and the two trade
+// places, so the join is inaudible.
+const CROSS = 5;
+function spawn(kind, src, again) {
+  const a = new Audio(src);
+  a.again = again;
+  a.onplaying = a.onended = () => render();
+  a.ontimeupdate = () => { if (a.again && !a.next && a.duration && a.duration - a.currentTime <= CROSS) cross(kind, a); };
+  return a;
+}
+function cross(kind, a) {
+  const b = a.next = spawn(kind, a.src, a.again);
+  b.volume = 0;
+  b.prev = a;
+  tracks[kind] = b;
+  b.play().catch(() => {});
+  const t0 = performance.now();
+  const tick = setInterval(() => {
+    const k = Math.min(1, (performance.now() - t0) / (CROSS * 1000));
+    b.volume = vol(kind) * k;
+    a.volume = vol(kind) * (1 - k);
+    if (k >= 1) { clearInterval(tick); a.pause(); delete b.prev; }
+  }, 50);
+}
+function stop(kind) { fade(tracks[kind]); fade(tracks[kind]?.prev); delete tracks[kind]; }
 // What is actually coming out right now, for the header: " · music · room".
 const sounding = () => Object.entries(tracks).filter(([, a]) => !a.paused && !a.ended).map(([k]) => ' · ' + (k === 'bed' ? 'room' : k)).join('');
 function cue(n) {
@@ -429,7 +452,7 @@ function flip(n, kind) {
 function flipLoop(n, kind) {
   loops[n + ':' + kind] = !looping(n, kind);
   save('cuesLoop', JSON.stringify(loops));
-  if (n === cueAt && tracks[kind]) tracks[kind].loop = looping(n, kind);
+  if (n === cueAt && tracks[kind]) tracks[kind].again = looping(n, kind);
 }
 function hush(yes) {
   hushed = yes;

@@ -100,7 +100,8 @@ reader pasted their own.
   a bed of room tone that loops under the dialogue and, for most scenes, a
   piece of music that plays once over it. Every track has a switch for its
   scene in the More sheet, and a loop switch beside it (room tone loops
-  unless told not to, music plays once unless told to loop), and S silences
+  unless told not to, music plays once unless told to loop; a loop's join is
+  a five-second crossfade, not a cut), and S silences
   the lot; the app starts silent. M
   and R start or stop the current scene's music or room tone in the moment
   without touching those switches, so the next scene sounds as set. Two sliders set how loud all the music and
