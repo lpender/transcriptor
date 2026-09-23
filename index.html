@@ -398,11 +398,18 @@ function start(kind, now) {
   a.volume = vol(kind);
   tracks[kind] = a;
   a.play().catch(e => {
-    // The page cannot start sound until it has been pressed; the chip is a press.
     if (e.name !== 'NotAllowedError') return trouble(`Cannot play ${f}: ${e.name}`);
-    hushed = true; stop(kind); render(); trouble('Sound needs a press first: press S');
+    // A fresh page cannot make a sound until it has been touched. The setting
+    // stands; the first press or key starts what should be sounding.
+    delete tracks[kind];
+    if (blocked) return;
+    blocked = true; render();
+    const unblock = () => { blocked = false; start('music'); start('bed'); render(); };
+    document.addEventListener('pointerdown', unblock, { once: true });
+    document.addEventListener('keydown', unblock, { once: true });
   });
 }
+let blocked = false;  // sound is on, but the page has not been touched yet
 // A track that goes round again does not use the element's own loop, whose seam is
 // a hard cut: the next pass starts CROSS seconds before the end and the two trade
 // places, so the join is inaudible.
@@ -641,7 +648,7 @@ function render() {
     : playing && muted.has(speaker(cur())) ? `${speaker(cur())} is silenced`
     : loop ? `Looping ${loop[1] - loop[0] + 1} lines — Esc to stop`
     : playing ? 'Reading aloud'
-    : !learn ? (!hushed && window.CUES?.[cueAt] ? `♫ ${window.CUES[cueAt].name}${sounding()}` : '')
+    : !learn ? (blocked ? '♫ Touch the page to start the sound' : !hushed && window.CUES?.[cueAt] ? `♫ ${window.CUES[cueAt].name}${sounding()}` : '')
     : drilling && !weak ? 'Weak lines cleared' : 'Keep going';
 
   for (const chip of roles.querySelectorAll('.chip')) {

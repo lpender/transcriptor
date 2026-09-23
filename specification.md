@@ -102,7 +102,8 @@ reader pasted their own.
   scene in the More sheet, and a loop switch beside it (room tone loops
   unless told not to, music plays once unless told to loop; a loop's join is
   a five-second crossfade, not a cut), and S silences
-  the lot; the app starts silent. M
+  the lot. All of it is kept across visits; a page that opens with sound on
+  waits for the first touch, which the browser requires, then starts it. M
   and R start or stop the current scene's music or room tone in the moment
   without touching those switches, so the next scene sounds as set. Two sliders set how loud all the music and
   all the room tone play, kept across visits. The beds are levelled to one
