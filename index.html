@@ -54,9 +54,9 @@
     font: 500 18px/1 ui-monospace, Menlo, monospace; opacity: .5;
   }
   @media (hover: hover) { #read .add { opacity: 0; } #read p:hover .add, #read .add:focus-visible { opacity: 1; } }
-  #read p:has(.note:not(:empty)) .add { display: none; }
+  #read p:has(span.note:not(:empty)) .add { display: none; }
   #read .note { display: block; margin-top: .3em; color: var(--cue); font: italic 400 .72em/1.5 ui-monospace, Menlo, monospace; white-space: pre-wrap; cursor: text; }
-  #read .note:empty { display: none; }
+  #read span.note:empty { display: none; }  /* a textarea has no children either; it must show */
   #read textarea.note {
     width: 100%; box-sizing: border-box; padding: 6px 8px; border-radius: 8px; resize: vertical;
     border: 1px solid var(--edge); background: #100F0B; color: var(--paper); font-style: normal;
