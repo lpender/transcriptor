@@ -46,6 +46,21 @@
   #read .hide { color: #3A362C; letter-spacing: .12em; }
   #read .now { color: #FFF3DC; }
   #read .weak { text-decoration: underline wavy var(--ribbon); text-underline-offset: 7px; text-decoration-thickness: 1px; }
+  /* ---- notes: a plus at the line's right, then the note beneath the line ---- */
+  #read p { position: relative; padding-right: 40px; }
+  #read .add {
+    position: absolute; right: 0; top: 0; width: 32px; height: 32px; border-radius: 8px;
+    border: 1px solid var(--edge); background: var(--surface); color: var(--faded);
+    font: 500 18px/1 ui-monospace, Menlo, monospace; opacity: .5;
+  }
+  @media (hover: hover) { #read .add { opacity: 0; } #read p:hover .add, #read .add:focus-visible { opacity: 1; } }
+  #read p:has(.note:not(:empty)) .add { display: none; }
+  #read .note { display: block; margin-top: .3em; color: var(--cue); font: italic 400 .72em/1.5 ui-monospace, Menlo, monospace; white-space: pre-wrap; cursor: text; }
+  #read .note:empty { display: none; }
+  #read textarea.note {
+    width: 100%; box-sizing: border-box; padding: 6px 8px; border-radius: 8px; resize: vertical;
+    border: 1px solid var(--edge); background: #100F0B; color: var(--paper); font-style: normal;
+  }
   #read hr { border: 0; border-top: 1px solid var(--edge); margin: 2em 30%; }
   #read p.cue { font-style: italic; text-align: center; padding-left: 0; border-left: 0; font-size: .85em; letter-spacing: .04em; }
   body.learn #read p.cur ~ p, body.learn #read p.cur ~ hr { visibility: hidden; }
@@ -237,11 +252,12 @@ let myRoles = new Set(JSON.parse(load('roles', '[]')));
 let muted = new Set(JSON.parse(load('muted', '[]')));
 // Parts blocked out on the page, so you recite them instead of reading them.
 let covered = new Set(JSON.parse(load('covered', '[]')));
-const speaker = p => p.textContent.split(':')[0];
+const speaker = p => p.dataset.text.split(':')[0];
+const said = p => p.querySelector('.said');  // where a line's words are drawn; the note sits beside
 const isCue = p => 'cue' in p.dataset;  // a stop of the show's own, not a speech
 // A line you are learning: one of your parts, or every part when none is chosen.
 const learnable = p => !isCue(p) && (!myRoles.size || myRoles.has(speaker(p)));
-const words = p => p.textContent.slice(speaker(p).length + 1);
+const words = p => p.dataset.text.slice(speaker(p).length + 1);
 const cur = () => lines[i];
 const has = (p, c) => p.classList.contains(c);
 const mine = p => has(p, 'mine');
@@ -281,12 +297,53 @@ const mark = text => {
   return text.replace(/[\p{L}\p{N}'-]+/gu, w => keys.has(norm(w)) ? `<b>${esc(w)}</b>` : esc(w));
 };
 const plain = p => {
-  if (isCue(p)) return p.textContent = p.dataset.text;
+  if (isCue(p)) return said(p).textContent = p.dataset.text;
   // A covered part shows only its speaker until you tap the line to look.
-  if (covered.has(speaker(p)) && !p.dataset.open) return p.innerHTML = `${esc(speaker(p))}: <span class="hide">▒▒▒▒▒</span>`;
-  const who = speaker(p), said = p.dataset.text.slice(who.length + 1);
-  p.innerHTML = `${esc(who)}: ${keywords ? sentences(said).map(mark).join(' ') : esc(said.trim())}`;
+  if (covered.has(speaker(p)) && !p.dataset.open) return said(p).innerHTML = `${esc(speaker(p))}: <span class="hide">▒▒▒▒▒</span>`;
+  const who = speaker(p), text = p.dataset.text.slice(who.length + 1);
+  said(p).innerHTML = `${esc(who)}: ${keywords ? sentences(text).map(mark).join(' ') : esc(text.trim())}`;
 };
+
+// Notes: your own words on a line, kept by the line's text so they survive a
+// re-split. The plus adds one; tapping a note edits it; an emptied note is gone.
+const notes = JSON.parse(load('notes', '{}'));
+function noteOf(p) {
+  const n = p.querySelector('.note');
+  if (n.tagName === 'TEXTAREA') return;  // already being written
+  const box = document.createElement('textarea');
+  box.className = 'note';
+  box.rows = 2;
+  box.placeholder = 'A note on this line (empty to remove)';
+  box.value = notes[p.dataset.text] || '';
+  box.onclick = e => e.stopPropagation();
+  let done = false;
+  const finish = keep => {
+    if (done) return;
+    done = true;
+    if (keep) {
+      const text = box.value.trim();
+      text ? notes[p.dataset.text] = text : delete notes[p.dataset.text];
+      save('notes', JSON.stringify(notes));
+    }
+    box.replaceWith(drawNote(p));
+  };
+  box.onblur = () => finish(true);
+  box.onkeydown = e => {
+    e.stopPropagation();
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); finish(true); }
+    if (e.key === 'Escape') finish(false);
+  };
+  n.replaceWith(box);
+  box.focus();
+}
+function drawNote(p) {
+  const n = document.createElement('span');
+  n.className = 'note';
+  n.textContent = notes[p.dataset.text] || '';
+  n.title = 'Edit this note';
+  n.onclick = e => { e.stopPropagation(); noteOf(p); };
+  return n;
+}
 
 function show(n) {
   i = (n % lines.length + lines.length) % lines.length;  // past the end is back to the top
@@ -570,17 +627,17 @@ function paint() {
     // The weak mark is a warning on what is still coming, never on one you just cleared.
     const cls = done ? (it === now && shown ? 'now' : '') : 'hide' + (missCount(it.text) ? ' weak' : '');
     html += `<span class="${cls}">${done ? mark(it.text) : '▒▒▒▒▒'}</span>`;
-    if (!done) { p.innerHTML = html; return center(); }
+    if (!done) { said(p).innerHTML = html; return center(); }
     rest = rest.slice(at + it.text.length);
   }
-  p.innerHTML = html + esc(rest);
+  said(p).innerHTML = html + esc(rest);
   center();
 }
 
 // Keep the sentence under test in the middle of the screen. Revealing text changes
 // the line's height, so this runs on every repaint, not just when the line changes.
 function center() {
-  (cur()?.querySelector('.now, .hide') || cur())?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  (cur()?.querySelector('.said .now, .said .hide') || cur())?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 const esc = t => t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
 
@@ -742,7 +799,16 @@ $('start').onclick = () => {
     const p = document.createElement('p');
     p.dataset.text = text;
     p.dataset.scene = scene;
-    p.textContent = text;
+    const words = document.createElement('span');
+    words.className = 'said';
+    words.textContent = text;
+    const add = document.createElement('button');
+    add.className = 'add';
+    add.textContent = '+';
+    add.title = 'Add a note';
+    add.setAttribute('aria-label', 'Add a note');
+    add.onclick = e => { e.stopPropagation(); noteOf(p); };
+    p.append(words, add, drawNote(p));
     p.onclick = () => {
       if (covered.has(speaker(p)) && !p.dataset.open) { p.dataset.open = '1'; return plain(p); }
       jump(lines.indexOf(p));
@@ -816,6 +882,7 @@ function act(k) {
 document.addEventListener('keydown', e => {
   // A number box keeps the keys while you type in it, but only the digits.
   if (sheet.open && e.key !== 'Escape') return;  // the sheet has its own buttons
+  if (e.target.tagName === 'TEXTAREA') return;  // a note being written
   if (e.target.tagName === 'INPUT' && /^[0-9]$/.test(e.key)) return;
   if (e.target.tagName === 'INPUT') e.target.blur();
   if (read.hidden) return;
