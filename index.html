@@ -61,6 +61,13 @@
     width: 100%; box-sizing: border-box; padding: 6px 8px; border-radius: 8px; resize: vertical;
     border: 1px solid var(--edge); background: #100F0B; color: var(--paper); font-style: normal;
   }
+  /* Room beside the script: notes stand in their own column to the right of each line. */
+  @media (min-width: 66em) {
+    #read { --col: 20rem; max-width: calc(34em + var(--col) + 48px); padding-right: calc(var(--col) + 48px); }
+    #read span.note { position: absolute; left: calc(100% + 28px); top: .35em; width: var(--col); margin: 0; }
+    #read .add { right: -42px; }
+    #read p { padding-right: 0; }
+  }
   #read hr { border: 0; border-top: 1px solid var(--edge); margin: 2em 30%; }
   #read p.cue { font-style: italic; text-align: center; padding-left: 0; border-left: 0; font-size: .85em; letter-spacing: .04em; }
   body.learn #read p.cur ~ p, body.learn #read p.cur ~ hr { visibility: hidden; }

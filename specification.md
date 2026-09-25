@@ -136,7 +136,8 @@ reader pasted their own.
 - **Notes.** A plus at the right of every line (shown on hover where there is
   a mouse) opens a box for a note on it; Enter or leaving the box keeps it,
   Escape drops the edit, and an emptied note is removed. A kept note shows
-  beneath the line, and tapping it edits. Notes are kept in this browser by
+  in a column to the right of the line, or beneath it on a narrow screen,
+  and tapping it edits. Notes are kept in this browser by
   the line's text, so they survive a re-split.
 - **Controls.** Every control is a button in the bar or the More sheet (Back, Play, Learn, Keys, Start from the top,
   Drill weak, Edit, Next) with its keyboard shortcut printed under it. Nothing
