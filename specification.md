@@ -138,7 +138,8 @@ reader pasted their own.
   Escape drops the edit, and an emptied note is removed. A kept note shows
   in a column to the right of the line, or beneath it on a narrow screen,
   and tapping it edits. Notes are kept in this browser by
-  the line's text, so they survive a re-split.
+  the line's text, so they survive a re-split. The edit box opens where the note
+  sits.
 - **Controls.** Every control is a button in the bar or the More sheet (Back, Play, Learn, Keys, Start from the top,
   Drill weak, Edit, Next) with its keyboard shortcut printed under it. Nothing
   is reachable by key alone.

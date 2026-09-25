@@ -64,7 +64,7 @@
   /* Room beside the script: notes stand in their own column to the right of each line. */
   @media (min-width: 66em) {
     #read { --col: 20rem; max-width: calc(34em + var(--col) + 48px); padding-right: calc(var(--col) + 48px); }
-    #read span.note { position: absolute; left: calc(100% + 28px); top: .35em; width: var(--col); margin: 0; }
+    #read .note, #read textarea.note { position: absolute; left: calc(100% + 28px); top: .35em; width: var(--col); margin: 0; z-index: 1; }
     #read .add { right: -42px; }
     #read p { padding-right: 0; }
   }
@@ -440,11 +440,13 @@ for (const kind of ['music', 'bed']) {
   slider.value = vol(kind);
   slider.oninput = () => { save('vol:' + kind, slider.value); if (tracks[kind]) tracks[kind].volume = +slider.value; };
 }
-const off = new Set(JSON.parse(load('cuesOff', '[]')));  // "scene:kind" switched off
-const enabled = (n, kind) => !!window.CUES?.[n]?.[kind] && !off.has(n + ':' + kind);
+// Settings are kept by scene name, so a scene added or removed in cues.js leaves the rest alone.
+const cueKey = (n, kind) => window.CUES?.[n]?.name + ':' + kind;
+const off = new Set(JSON.parse(load('cuesOff', '[]')));  // "name:kind" switched off
+const enabled = (n, kind) => !!window.CUES?.[n]?.[kind] && !off.has(cueKey(n, kind));
 // Whether a track goes round again: room tone does unless told not to, music does not unless told to.
-const loops = JSON.parse(load('cuesLoop', '{}'));  // "scene:kind": true or false
-const looping = (n, kind) => loops[n + ':' + kind] ?? kind === 'bed';
+const loops = JSON.parse(load('cuesLoop', '{}'));  // "name:kind": true or false
+const looping = (n, kind) => loops[cueKey(n, kind)] ?? kind === 'bed';
 function fade(a) {
   if (!a) return;
   const from = a.volume;
@@ -514,14 +516,14 @@ function cue(n) {
 function live(kind) { tracks[kind] && !tracks[kind].paused ? stop(kind) : start(kind, true); }
 // A track switched for its scene; if that is the scene sounding, it starts or stops now.
 function flip(n, kind) {
-  const k = n + ':' + kind;
+  const k = cueKey(n, kind);
   off.has(k) ? off.delete(k) : off.add(k);
   save('cuesOff', JSON.stringify([...off]));
   if (n === cueAt) off.has(k) ? stop(kind) : start(kind);
 }
 // A track's loop switched for its scene; if it is sounding now, it takes effect now.
 function flipLoop(n, kind) {
-  loops[n + ':' + kind] = !looping(n, kind);
+  loops[cueKey(n, kind)] = !looping(n, kind);
   save('cuesLoop', JSON.stringify(loops));
   if (n === cueAt && tracks[kind]) tracks[kind].again = looping(n, kind);
 }
@@ -724,7 +726,7 @@ function render() {
   $('hushChip').firstChild.textContent = hushed ? 'Sound off' : 'Sound on';
   for (const chip of $('cues').querySelectorAll('.chip')) {
     const { cue, kind } = chip.dataset;
-    on(chip, 'loop' in chip.dataset ? looping(+cue, kind) : !off.has(cue + ':' + kind));
+    on(chip, 'loop' in chip.dataset ? looping(+cue, kind) : !off.has(cueKey(+cue, kind)));
   }
   for (const row of $('cues').children) row.classList.toggle('cur', [...row.querySelectorAll('.chip')].some(c => +c.dataset.cue === cueAt));
   $('learnChip').firstChild.textContent = learn ? 'Stop learning' : 'Learn my lines';

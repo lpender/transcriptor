@@ -7,11 +7,12 @@
 // line. One with no music and no bed is a silence. The others attach to the
 // script's scenes ("***" breaks) in order.
 //
+// Names must be unique: the switches in the sheet are kept by scene name, so a
+// scene added or removed above does not shift the others' settings.
 // Alternatives James offered are noted; swap the file names to try them.
 window.CUES = [
   { name: 'Before the show', music: 'WaitingIntro.mp3', bed: 'QuietRoom.mp3', hold: true },
   { name: 'Reception', music: 'OfficeFansCelli.mp3', bed: 'OfficeFans.mp3' },
-  { name: 'Pause', music: 'OfficeFansCelli.mp3', hold: true },  // Reception's music again, alone, before the meeting
   { name: 'First meeting', music: 'HorridToneLowSynth.mp3', bed: 'HorridTone.mp3' },
   { name: 'Pause', music: 'BustedFanTortureTrills.mp3', hold: true },  // after "Eight thousand and twenty-two years.": the next scene's music, ahead of it
   { name: 'Nelson chews out the receptionist', bed: 'BustedFanTorture.mp3' },  // James: "not sure about this one"; its trills play in the pause before
