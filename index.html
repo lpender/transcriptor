@@ -148,7 +148,7 @@
   /* ---- pasting a script ---- */
   #edit { max-width: 40em; margin: 0 auto; padding: 24px 20px 40px; font: 400 15px/1.55 ui-monospace, Menlo, monospace; color: var(--faded); }
   #edit p { color: var(--cue); }
-  textarea {
+  #src {
     width: 100%; height: 58vh; padding: 12px; border-radius: 10px;
     background: #100F0B; color: var(--paper); border: 1px solid var(--edge);
     font: 400 14px/1.5 ui-monospace, Menlo, monospace;
@@ -326,7 +326,7 @@ function noteOf(p) {
   if (n.tagName === 'TEXTAREA') return;  // already being written
   const box = document.createElement('textarea');
   box.className = 'note';
-  box.rows = 2;
+  box.rows = 3;
   box.placeholder = 'A note on this line (empty to remove)';
   box.value = notes[p.dataset.text] || '';
   box.onclick = e => e.stopPropagation();
