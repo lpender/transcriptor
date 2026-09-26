@@ -133,6 +133,14 @@ reader pasted their own.
 - **Key words.** Bolds the words a line hangs on — skip the filler, then prefer
   long and rare in this script over short and common, about half the remaining
   words, at most four.
+- **Together.** One device leads and others follow. Each enters the same room
+  word in the More sheet and picks Lead or Follow; every move the leader
+  makes (a press, a tap, a scene jump) goes out over a public MQTT broker
+  (broker.emqx.io, WebSocket, no account) and the followers go to the same
+  line, matched by its text. The last move is retained on the broker, so a
+  follower joining late lands in the right place. The header says which
+  role this device has and whether it is connected. Only the room word keeps
+  strangers out, so use one nobody would guess.
 - **Notes.** A plus at the right of every line (shown on hover where there is
   a mouse) opens a box for a note on it; Enter or leaving the box keeps it,
   Escape drops the edit, and an emptied note is removed. A kept note shows
