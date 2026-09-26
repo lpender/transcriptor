@@ -136,11 +136,17 @@ reader pasted their own.
 - **Together.** One device leads and others follow. Each enters the same room
   word in the More sheet and picks Lead or Follow; every move the leader
   makes (a press, a tap, a scene jump) goes out over a public MQTT broker
-  (broker.emqx.io, WebSocket, no account) and the followers go to the same
-  line, matched by its text. The last move is retained on the broker, so a
-  follower joining late lands in the right place. The header says which
-  role this device has and whether it is connected. Only the room word keeps
-  strangers out, so use one nobody would guess.
+  (WebSocket, no account; three brokers, tried in turn) and the followers go
+  to the same line. A move carries the index, the line's text and a
+  fingerprint of the script: the same script means the index is exact, a
+  different cut means the nearest line with that text. Messages are signed
+  with a key drawn from the room word and the topic is a hash of it, so
+  nothing else on the broker can move a follower and the word never travels;
+  they carry the leader's clock, so a late or repeated one is dropped. The
+  leader repeats its place every 15 s and the broker retains the last move,
+  so a follower joining late, or back from a dropped link, lands right; one
+  that hears nothing for 45 s says so in the header, which also names the
+  role. A dead socket is noticed by its missed ping and reconnected.
 - **Notes.** A plus at the right of every line (shown on hover where there is
   a mouse) opens a box for a note on it; Enter or leaving the box keeps it,
   Escape drops the edit, and an emptied note is removed. A kept note shows

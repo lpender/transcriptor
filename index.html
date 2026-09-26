@@ -723,7 +723,7 @@ function render() {
     : loop ? `Looping ${loop[1] - loop[0] + 1} lines — Esc to stop`
     : playing ? 'Reading aloud'
     : !learn ? [
-        room.role && `${room.role === 'lead' ? 'Leading' : 'Following'} ${room.code}${room.up ? '' : ' · connecting…'}`,
+        room.role && `${room.role === 'lead' ? 'Leading' : 'Following'} ${room.code}${room.up ? '' : room.role === 'lead' ? ' · connecting…' : ' · nothing heard'}`,
         blocked ? '♫ Touch the page to start the sound' : !hushed && window.CUES?.[cueAt] ? `♫ ${window.CUES[cueAt].name}${sounding()}` : '',
       ].filter(Boolean).join(' · ')
     : drilling && !weak ? 'Weak lines cleared' : 'Keep going';
@@ -809,13 +809,26 @@ function buildRoles(names) {
 }
 
 // Two devices, one place. A leader sends every move to a public MQTT broker over a
-// WebSocket; followers on the same room word go with it, matching the line by its
-// text so a re-split does not throw them off. The last move is retained, so a
-// follower that joins late lands on the right line. No account, no server of our
-// own: only the room word keeps strangers out, so make it one nobody would guess.
-// ponytail: public broker (broker.emqx.io), fine for rehearsal; a show-night relay of our own if it ever drops.
-const room = { code: load('room', ''), role: load('role', ''), up: false };
-const BROKER = 'wss://broker.emqx.io:8084/mqtt';
+// WebSocket; followers on the same room word go with it.
+//
+// Built to be trusted on a show night:
+//  - the move names the line by index AND by text, with a fingerprint of the
+//    whole script; the same script means the index is exact, a different one
+//    means the nearest line with that text, never the first "No." in the play;
+//  - every message is signed with a key drawn from the room word, so nothing the
+//    broker or anyone else sends can move a follower, and the topic is a hash of
+//    the word, so the word itself is never on the wire;
+//  - messages carry the leader's clock and a serial; an old or repeated one is
+//    dropped, whatever order the network delivers them in;
+//  - the leader repeats its place every 15 s as a heartbeat and the last move is
+//    retained by the broker, so a follower joining late, or back from a dropped
+//    link, lands on the right line; a follower that hears nothing for 45 s says so;
+//  - the link pings, notices a dead socket, and reconnects through the next of
+//    three public brokers.
+// No account and no server of our own; only the room word keeps strangers out.
+const room = { code: load('room', ''), role: load('role', ''), up: false, heard: 0, seq: 0, last: 0, me: Math.random().toString(36).slice(2, 10) };
+const BROKERS = ['wss://broker.emqx.io:8084/mqtt', 'wss://broker.hivemq.com:8884/mqtt', 'wss://test.mosquitto.org:8081/mqtt'];
+const HEARTBEAT = 15000, SILENCE = 45000;
 const enc = new TextEncoder(), dec = new TextDecoder();
 const mstr = s => { const b = enc.encode(s); return [b.length >> 8, b.length & 255, ...b]; };
 const frame = (type, body) => {  // an MQTT packet: type, remaining length as a varint, body
@@ -824,52 +837,97 @@ const frame = (type, body) => {  // an MQTT packet: type, remaining length as a 
   do { let d = n % 128; n = Math.floor(n / 128); if (n) d |= 128; len.push(d); } while (n);
   return new Uint8Array([type, ...len, ...body]);
 };
-const topic = () => 'transcriptor/' + room.code;
-let link = null;
+const hex = buf => [...new Uint8Array(buf)].map(x => x.toString(16).padStart(2, '0')).join('');
+const sha = async s => hex(await crypto.subtle.digest('SHA-256', enc.encode(s)));
+// The room word signs every message; the topic is its hash, so the word never travels.
+let roomKey = null, roomTopic = '', scriptId = '';
+async function keys() {
+  roomTopic = 'transcriptor/' + (await sha('room:' + room.code)).slice(0, 32);
+  roomKey = await crypto.subtle.importKey('raw', enc.encode('key:' + room.code), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify']);
+}
+const sign = async body => hex(await crypto.subtle.sign('HMAC', roomKey, enc.encode(body)));
+let link = null, broker = 0, heartbeat = 0, watch = 0;
 function joinRoom() {
   link?.close();
   link = null;
+  clearInterval(heartbeat); clearInterval(watch);
   room.up = false;
   render();
   if (!room.role || !room.code) return;
-  const ws = link = new WebSocket(BROKER, 'mqtt');
-  ws.binaryType = 'arraybuffer';
-  const ping = setInterval(() => ws.readyState === 1 && ws.send(new Uint8Array([0xC0, 0])), 30000);
-  ws.onopen = () => ws.send(frame(0x10, [...mstr('MQTT'), 4, 2, 0, 60, ...mstr('t-' + Math.random().toString(36).slice(2, 10))]));
-  ws.onmessage = e => {
-    const b = new Uint8Array(e.data), type = b[0] >> 4;
-    if (type === 2) {  // connected: a follower subscribes, a leader says where it is
-      room.up = true; render();
-      room.role === 'follow' ? ws.send(frame(0x82, [0, 1, ...mstr(topic()), 0])) : tell();
-    }
-    if (type === 3 && room.role === 'follow') {  // a move from the leader
-      let k = 1;
-      while (b[k] & 128) k++;
-      const tl = (b[++k] << 8) | b[k + 1];
-      const { i: n, text } = JSON.parse(dec.decode(b.slice(k + 2 + tl)));
-      const at = lines.findIndex(p => p.dataset.text === text);
-      const to = at >= 0 ? at : Math.min(n, lines.length - 1);
-      if (to !== i) show(to);
-    }
-  };
-  ws.onclose = () => {
-    clearInterval(ping);
-    if (link !== ws) return;  // closed on purpose, for a new room or role
-    room.up = false; render();
-    setTimeout(() => link === ws && joinRoom(), 2000);
-  };
+  if (!crypto.subtle) return trouble('Together needs a secure page (https or localhost)');
+  keys().then(() => {
+    if (link) return;  // a newer join won the race
+    const ws = link = new WebSocket(BROKERS[broker % BROKERS.length], 'mqtt');
+    ws.binaryType = 'arraybuffer';
+    let alive = true;
+    const ping = setInterval(() => {
+      if (ws.readyState !== 1) return;
+      if (!alive) return ws.close();  // the last ping went unanswered: the socket is dead
+      alive = false;
+      ws.send(new Uint8Array([0xC0, 0]));
+    }, 20000);
+    ws.onopen = () => ws.send(frame(0x10, [...mstr('MQTT'), 4, 2, 0, 60, ...mstr('t-' + room.me)]));
+    ws.onmessage = async e => {
+      const b = new Uint8Array(e.data), type = b[0] >> 4;
+      alive = true;
+      if (type === 2) {  // connected: a follower subscribes, a leader says where it is
+        room.up = true; broker = 0; render();
+        if (room.role === 'follow') {
+          ws.send(frame(0x82, [0, 1, ...mstr(roomTopic), 0]));
+          room.heard = Date.now();
+          watch = setInterval(() => { const quiet = Date.now() - room.heard > SILENCE; if (quiet === room.up) { room.up = !quiet; render(); } }, 5000);
+        } else {
+          tell();
+          heartbeat = setInterval(tell, HEARTBEAT);
+        }
+      }
+      if (type === 3 && room.role === 'follow') await follow(b);
+    };
+    ws.onclose = () => {
+      clearInterval(ping);
+      if (link !== ws) return;  // closed on purpose, for a new room or role
+      link = null; broker++;
+      room.up = false; render();
+      setTimeout(() => !link && joinRoom(), 2000);
+    };
+    ws.onerror = () => ws.close();
+  });
 }
-function tell() {
-  if (room.role !== 'lead' || link?.readyState !== 1) return;
-  link.send(frame(0x31, [...mstr(topic()), ...enc.encode(JSON.stringify({ i, text: cur().dataset.text }))]));  // 0x31: retained
+// A move from the leader: checked, ordered, then placed.
+async function follow(b) {
+  let k = 1;
+  while (b[k] & 128) k++;
+  const tl = (b[++k] << 8) | b[k + 1];
+  const [body, sig] = dec.decode(b.slice(k + 2 + tl)).split('\n');
+  if (!sig || sig !== await sign(body)) return;  // not from anyone holding the room word
+  const m = JSON.parse(body);
+  if (m.t <= room.last) return;  // older than what we already have
+  room.last = m.t;
+  room.heard = Date.now();
+  if (!room.up) { room.up = true; render(); }
+  let to;
+  if (m.script === scriptId) to = m.i;  // the same script: the index is the truth
+  else {  // a different cut: the nearest line with these words, else the same index
+    const near = lines.map((p, k) => p.dataset.text === m.text ? k : -1).filter(k => k >= 0)
+      .sort((a, c) => Math.abs(a - m.i) - Math.abs(c - m.i))[0];
+    to = near ?? m.i;
+  }
+  to = Math.max(0, Math.min(to, lines.length - 1));
+  if (to !== i) show(to);
+}
+async function tell() {
+  if (room.role !== 'lead' || link?.readyState !== 1 || !roomKey) return;
+  const body = JSON.stringify({ i, text: cur().dataset.text, script: scriptId, t: Date.now(), n: ++room.seq, from: room.me });
+  link.send(frame(0x31, [...mstr(roomTopic), ...enc.encode(body + '\n' + await sign(body))]));  // 0x31: retained
 }
 function setRole(r) {
   room.role = room.role === r ? '' : r;
   save('role', room.role);
+  room.last = 0;
   joinRoom();
 }
 $('room').value = room.code;
-$('room').onchange = () => { room.code = $('room').value.trim().toLowerCase(); save('room', room.code); $('room').value = room.code; joinRoom(); };
+$('room').onchange = () => { room.code = $('room').value.trim().toLowerCase(); save('room', room.code); $('room').value = room.code; room.last = 0; joinRoom(); };
 $('leadChip').onclick = () => { setRole('lead'); $('leadChip').blur(); };
 $('followChip').onclick = () => { setRole('follow'); $('followChip').blur(); };
 $('start').onclick = () => {
@@ -917,6 +975,8 @@ $('start').onclick = () => {
   if (!lines.length) return;
   freq = {};
   for (const w of src.value.match(/[\p{L}\p{N}'-]+/gu) || []) freq[norm(w)] = (freq[norm(w)] || 0) + 1;
+  // A fingerprint of this cut of the script, so another device can tell whether an index means the same line.
+  scriptId = ''; if (crypto.subtle) sha(src.value).then(h => { scriptId = h.slice(0, 16); tell(); });
   lines.forEach(plain);
   buildRoles([...new Set(lines.filter(p => !isCue(p)).map(speaker))]);
   buildCues();
