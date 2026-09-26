@@ -206,6 +206,13 @@
     <label class="loop" title="How loud the room tone plays">room <input id="vol:bed" type="range" min="0" max="1" step="0.02"></label>
     <div id="cues"></div>
 
+    <h2>Together</h2>
+    <label class="loop" title="Any word; the same on every device that should move together">room <input id="room" type="text" autocapitalize="off" autocomplete="off" spellcheck="false"></label>
+    <div class="row">
+      <button class="chip wide" id="leadChip" title="Every move here is sent to the room">Lead</button>
+      <button class="chip wide" id="followChip" title="Go where the leader goes">Follow</button>
+    </div>
+
     <h2>Practice</h2>
     <div class="row">
       <button class="chip wide" data-key="l" id="learnChip">Learn my lines<span class="key">L</span></button>
@@ -356,6 +363,7 @@ function show(n) {
   i = (n % lines.length + lines.length) % lines.length;  // past the end is back to the top
   lines.forEach((p, k) => p.classList.toggle('cur', k === i));
   save('line', i);
+  tell();
   cue(+cur().dataset.scene);
   if (playing && !moving) { part = 0; play(); }
   if (learn) enter(); else center();
@@ -706,7 +714,7 @@ function render() {
   mainBtn.textContent = quizzing() ? (shown ? 'Got it' : 'Reveal') : 'Next';
   missBtn.hidden = !(quizzing() && shown);
   backBtn.innerHTML = '&uarr;';
-  hud.hidden = !(learn || loop || playing || !hushed);
+  hud.hidden = !(learn || loop || playing || !hushed || room.role);
 
   score.textContent = learn ? `${cleared.size} of ${items.length} clear · best ${load(bestKey(), 0)}` : '';
   // What to do now, most pressing first: your line beats everything else.
@@ -714,7 +722,10 @@ function render() {
     : playing && muted.has(speaker(cur())) ? `${speaker(cur())} is silenced`
     : loop ? `Looping ${loop[1] - loop[0] + 1} lines — Esc to stop`
     : playing ? 'Reading aloud'
-    : !learn ? (blocked ? '♫ Touch the page to start the sound' : !hushed && window.CUES?.[cueAt] ? `♫ ${window.CUES[cueAt].name}${sounding()}` : '')
+    : !learn ? [
+        room.role && `${room.role === 'lead' ? 'Leading' : 'Following'} ${room.code}${room.up ? '' : ' · connecting…'}`,
+        blocked ? '♫ Touch the page to start the sound' : !hushed && window.CUES?.[cueAt] ? `♫ ${window.CUES[cueAt].name}${sounding()}` : '',
+      ].filter(Boolean).join(' · ')
     : drilling && !weak ? 'Weak lines cleared' : 'Keep going';
 
   for (const chip of roles.querySelectorAll('.chip')) {
@@ -724,6 +735,7 @@ function render() {
   }
   $('playChip').firstChild.textContent = playing ? 'Stop reading aloud' : 'Read aloud';
   $('hushChip').firstChild.textContent = hushed ? 'Sound off' : 'Sound on';
+  on($('leadChip'), room.role === 'lead'); on($('followChip'), room.role === 'follow');
   for (const chip of $('cues').querySelectorAll('.chip')) {
     const { cue, kind } = chip.dataset;
     on(chip, 'loop' in chip.dataset ? looping(+cue, kind) : !off.has(cueKey(+cue, kind)));
@@ -796,6 +808,70 @@ function buildRoles(names) {
   }));
 }
 
+// Two devices, one place. A leader sends every move to a public MQTT broker over a
+// WebSocket; followers on the same room word go with it, matching the line by its
+// text so a re-split does not throw them off. The last move is retained, so a
+// follower that joins late lands on the right line. No account, no server of our
+// own: only the room word keeps strangers out, so make it one nobody would guess.
+// ponytail: public broker (broker.emqx.io), fine for rehearsal; a show-night relay of our own if it ever drops.
+const room = { code: load('room', ''), role: load('role', ''), up: false };
+const BROKER = 'wss://broker.emqx.io:8084/mqtt';
+const enc = new TextEncoder(), dec = new TextDecoder();
+const mstr = s => { const b = enc.encode(s); return [b.length >> 8, b.length & 255, ...b]; };
+const frame = (type, body) => {  // an MQTT packet: type, remaining length as a varint, body
+  const len = [];
+  let n = body.length;
+  do { let d = n % 128; n = Math.floor(n / 128); if (n) d |= 128; len.push(d); } while (n);
+  return new Uint8Array([type, ...len, ...body]);
+};
+const topic = () => 'transcriptor/' + room.code;
+let link = null;
+function joinRoom() {
+  link?.close();
+  link = null;
+  room.up = false;
+  render();
+  if (!room.role || !room.code) return;
+  const ws = link = new WebSocket(BROKER, 'mqtt');
+  ws.binaryType = 'arraybuffer';
+  const ping = setInterval(() => ws.readyState === 1 && ws.send(new Uint8Array([0xC0, 0])), 30000);
+  ws.onopen = () => ws.send(frame(0x10, [...mstr('MQTT'), 4, 2, 0, 60, ...mstr('t-' + Math.random().toString(36).slice(2, 10))]));
+  ws.onmessage = e => {
+    const b = new Uint8Array(e.data), type = b[0] >> 4;
+    if (type === 2) {  // connected: a follower subscribes, a leader says where it is
+      room.up = true; render();
+      room.role === 'follow' ? ws.send(frame(0x82, [0, 1, ...mstr(topic()), 0])) : tell();
+    }
+    if (type === 3 && room.role === 'follow') {  // a move from the leader
+      let k = 1;
+      while (b[k] & 128) k++;
+      const tl = (b[++k] << 8) | b[k + 1];
+      const { i: n, text } = JSON.parse(dec.decode(b.slice(k + 2 + tl)));
+      const at = lines.findIndex(p => p.dataset.text === text);
+      const to = at >= 0 ? at : Math.min(n, lines.length - 1);
+      if (to !== i) show(to);
+    }
+  };
+  ws.onclose = () => {
+    clearInterval(ping);
+    if (link !== ws) return;  // closed on purpose, for a new room or role
+    room.up = false; render();
+    setTimeout(() => link === ws && joinRoom(), 2000);
+  };
+}
+function tell() {
+  if (room.role !== 'lead' || link?.readyState !== 1) return;
+  link.send(frame(0x31, [...mstr(topic()), ...enc.encode(JSON.stringify({ i, text: cur().dataset.text }))]));  // 0x31: retained
+}
+function setRole(r) {
+  room.role = room.role === r ? '' : r;
+  save('role', room.role);
+  joinRoom();
+}
+$('room').value = room.code;
+$('room').onchange = () => { room.code = $('room').value.trim().toLowerCase(); save('room', room.code); $('room').value = room.code; joinRoom(); };
+$('leadChip').onclick = () => { setRole('lead'); $('leadChip').blur(); };
+$('followChip').onclick = () => { setRole('follow'); $('followChip').blur(); };
 $('start').onclick = () => {
   if (!src.value.trim()) return;  // nothing to read, and nothing worth saving
   const sameScript = load('script') === src.value;  // a new script starts from the top
@@ -860,6 +936,8 @@ else {
   edit.querySelector('p').textContent = 'The script did not load. Press "Fetch the script", or paste one below.';
   diagnose();
 }
+
+joinRoom();
 
 // One handler for keyboard shortcuts and the phone button bar. Returns false for unused keys.
 function act(k) {
