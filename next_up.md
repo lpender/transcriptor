@@ -2,18 +2,14 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
+- [ ] sync-progress (owner: loop, started 2026-09-30) — `PUT /productions/:id/me/progress` {best, misses} and
+  `GET /productions/:id/progress` [progress cap] → per member {email, parts,
+  best, weak}; the app posts after each learn run when signed in. Tests.
 ## Queue
 - [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
 - [ ] relay-durable-object (EPIC) — Replace public MQTT with the production's
   DO; keep the message shape and clock ordering. UNTIL: auth-magic-link.
-- [ ] verify-cf-mcp-oauth — Spike: hello-world remote MCP on Workers with
-  `@cloudflare/workers-oauth-provider`, connect from claude.ai as a custom
-  connector, call `whoami`. Verify: a tool call round-trips. Local only
-  until Lee has a domain; `workers.dev` subdomain is free. UNTIL: cf-scaffold.
-- [ ] sync-progress — `PUT /productions/:id/me/progress` {best, misses} and
-  `GET /productions/:id/progress` [progress cap] → per member {email, parts,
-  best, weak}; the app posts after each learn run when signed in. Tests.
 - [ ] mcp-scaffold — `/mcp` route, `whoami`, `list_productions`, bearer
   personal tokens (hashed, revocable). Tests.
 - [ ] web-progress-view — owner/director table: per member cleared/total,
@@ -44,6 +40,10 @@
   voices and cost, MCP setup, cues. Written from the specs above.
 
 ## Gated
+- [ ] verify-cf-mcp-oauth — Spike: hello-world remote MCP on Workers with
+  `@cloudflare/workers-oauth-provider`, connect from claude.ai as a custom
+  connector, call `whoami`. Verify: a tool call round-trips. Local only
+  until Lee has a domain; `workers.dev` subdomain is free. UNTIL: cf-account (claude.ai must reach a public URL).
 - [ ] resend-account — ACTION: a Resend account (free tier) with the domain
   verified in DNS, then `cd api && npx wrangler secret put RESEND_API_KEY`
   and `MAIL_FROM`. Until then sign-in links are only logged. UNTIL: buy-domain.
