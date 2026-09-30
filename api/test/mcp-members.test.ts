@@ -5,6 +5,8 @@ import '../src/routes/invites';
 import '../src/routes/mcp';
 import '../src/routes/mcp-members';
 import '../src/routes/productions';
+import '../src/routes/progress';
+import '../src/routes/scripts';
 import { env } from './env';
 import { signIn } from './helpers';
 
@@ -35,5 +37,27 @@ describe('members over MCP', () => {
     const token = new URL(inv.url).searchParams.get('invite')!;
     expect((await handle(new Request(`http://x/invites/${token}`), env)).status).toBe(200);
     expect((await a('list_members', { production: 'nope' })).isError).toBe(true);
+  });
+  it('checks parts against the script and reports who is off book', async () => {
+    const ann = await signIn('ann28@example.com'), bob = await signIn('bob28@example.com');
+    const { production } = await (await ann.call('POST', '/productions', { name: 'Book' })).json() as { production: { id: string } };
+    await env.DB.prepare("INSERT INTO members VALUES (?, ?, 'cast', '[]', '2026-09-30T00:00:00Z')").bind(bob.user.id, production.id).run();
+    await ann.call('PUT', `/productions/${production.id}/script`, { title: 'B', text: 'VLADIMIR: Nothing to be done.\nESTRAGON: I am beginning to come round to that opinion.' });
+    const a = mcpFor((await (await ann.call('POST', '/tokens', { label: 'a' })).json() as { token: string }).token);
+    const b = mcpFor((await (await bob.call('POST', '/tokens', { label: 'b' })).json() as { token: string }).token);
+    const bad = await b('set_parts', { production: production.id, parts: ['Pozzo'] });
+    expect(bad.isError).toBe(true);
+    expect(bad.text).toContain('VLADIMIR, ESTRAGON');
+    expect((await b('set_parts', { production: production.id, parts: ['vladimir'] })).json().parts).toEqual(['VLADIMIR']);
+    expect((await b('who_is_off_book', { production: production.id })).isError).toBe(true);
+    let s = (await a('who_is_off_book', { production: production.id })).json().summary as string;
+    expect(s).toContain('bob28@example.com (VLADIMIR): not started.');
+    expect(s).toContain('ann28@example.com: no parts chosen yet.');
+    await bob.call('PUT', `/productions/${production.id}/me/progress`, { best: 3, total: 5, misses: { 'x': 1 } });
+    s = (await a('who_is_off_book', { production: production.id })).json().summary as string;
+    expect(s).toContain('bob28@example.com (VLADIMIR): 3 of 5 sentences clear, 1 weak.');
+    await bob.call('PUT', `/productions/${production.id}/me/progress`, { best: 5, total: 5, misses: {} });
+    s = (await a('who_is_off_book', { production: production.id })).json().summary as string;
+    expect(s).toContain('bob28@example.com (VLADIMIR): off book.');
   });
 });

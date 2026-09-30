@@ -4,6 +4,8 @@ import { can, isRole } from '../access';
 import { mintInvite } from '../invites';
 import { tool, DATA_NOTE } from '../mcp';
 import { members, roleOf, setParts, writable, READONLY_MESSAGE } from '../productions';
+import { currentScript } from '../scripts';
+import { parseScript } from '../shared';
 
 const need = async (db: D1Database, userId: string, productionId: unknown) => {
   if (typeof productionId !== 'string') throw new Error('Pass the production id from whoami.');
@@ -24,11 +26,17 @@ tool<{ production: string }>({
 
 tool<{ production: string; email?: string; parts: string[] }>({
   name: 'set_parts',
-  description: 'Set which characters a member is learning, by the exact speaker names in the script. Omit email to set your own; an owner or director may set anyone\'s.' + DATA_NOTE,
+  description: 'Set which characters a member is learning, by the speaker names as they appear in the script (case does not matter). Omit email to set your own; an owner or director may set anyone\'s. Unknown names are refused with the list of speakers.' + DATA_NOTE,
   inputSchema: { type: 'object', properties: { production: { type: 'string' }, email: { type: 'string' }, parts: { type: 'array', items: { type: 'string' } } }, required: ['production', 'parts'] },
-  run: async ({ production, email, parts }, { user, env }) => {
+  run: async ({ production, email, parts: asked }, { user, env }) => {
     const role = await need(env.DB, user.id, production);
-    if (!Array.isArray(parts) || !parts.every((p) => typeof p === 'string' && p.length <= 60) || parts.length > 40) throw new Error('parts must be a list of speaker names.');
+    if (!Array.isArray(asked) || !asked.every((p) => typeof p === 'string' && p.length <= 60) || asked.length > 40) throw new Error('parts must be a list of speaker names.');
+    // Names must be speakers in the current script, spelled its way.
+    const script = await currentScript(env.DB, production);
+    const speakers = script ? Object.keys(parseScript(script.text).speakers) : [];
+    const parts = asked.map((p) => speakers.find((s) => s.toLowerCase() === p.trim().toLowerCase()) ?? p.trim());
+    const unknown = parts.filter((p) => !speakers.includes(p));
+    if (script && unknown.length) throw new Error(`Not in the script: ${unknown.join(', ')}. The speakers are: ${speakers.join(', ')}.`);
     let target = user.id;
     if (email && email.toLowerCase() !== user.email) {
       if (!can(role, 'share')) throw new Error(`Your role (${role}) may only set your own parts.`);
@@ -52,5 +60,29 @@ tool<{ production: string; role: string }>({
     if (!isRole(role) || role === 'owner') throw new Error('Invite as director, cast or crew.');
     const { token, invite } = await mintInvite(env.DB, production, role, user.id);
     return { url: `${env.APP_ORIGIN}/?invite=${token}`, role, expiresAt: invite.expires_at };
+  },
+});
+
+// Who is off book: the director's question, answered in words per member.
+tool<{ production: string }>({
+  name: 'who_is_off_book',
+  description: 'For an owner or director: every member with parts, how far through their lines they have got (best clean run against the sentences in their parts), how many sentences they still miss, and when they last worked. In words, ready to relay.' + DATA_NOTE,
+  inputSchema: { type: 'object', properties: { production: { type: 'string' } }, required: ['production'] },
+  run: async ({ production }, { user, env }) => {
+    const role = await need(env.DB, user.id, production);
+    if (!can(role, 'progress')) throw new Error(`Your role (${role}) may not see everyone's progress.`);
+    const rows = (await env.DB.prepare(`SELECT u.email, u.name, m.role, m.parts, p.best, p.total, p.misses, p.updated_at
+        FROM members m JOIN users u ON u.id = m.user_id LEFT JOIN progress p ON p.user_id = m.user_id AND p.production_id = m.production_id
+        WHERE m.production_id = ? ORDER BY m.joined_at`).bind(production).all<{ email: string; name: string | null; role: string; parts: string; best: number | null; total: number | null; misses: string | null; updated_at: string | null }>()).results;
+    const lines = rows.filter((r) => r.role !== 'crew').map((r) => {
+      const who = r.name || r.email, parts = JSON.parse(r.parts) as string[];
+      const weak = r.misses ? Object.keys(JSON.parse(r.misses) as object).length : 0;
+      if (!parts.length) return `${who}: no parts chosen yet.`;
+      if (!r.total) return `${who} (${parts.join(', ')}): not started.`;
+      const when = r.updated_at ? ` Last worked ${r.updated_at.slice(0, 10)}.` : '';
+      if (r.best! >= r.total) return `${who} (${parts.join(', ')}): off book${weak ? `, ${weak} sentence${weak > 1 ? 's' : ''} still shaky` : ''}.${when}`;
+      return `${who} (${parts.join(', ')}): ${r.best} of ${r.total} sentences clear${weak ? `, ${weak} weak` : ''}.${when}`;
+    });
+    return { summary: lines.join('\n'), members: rows.length };
   },
 });
