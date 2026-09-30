@@ -2,14 +2,14 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
+- [ ] web-tokens (owner: loop, started 2026-09-30) — Account section: "Connect your AI" makes a personal token
+  (shown once with the MCP URL and a copy button), lists tokens by label,
+  revokes. Verify in Chrome against `task dev`.
 ## Queue
 - [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
 - [ ] relay-durable-object (EPIC) — Replace public MQTT with the production's
   DO; keep the message shape and clock ordering. UNTIL: auth-magic-link.
-- [ ] web-tokens — Account section: "Connect your AI" makes a personal token
-  (shown once with the MCP URL and a copy button), lists tokens by label,
-  revokes. Verify in Chrome against `task dev`.
 - [ ] web-progress-view — owner/director table: per member cleared/total,
   weak lines. UNTIL: sync-progress.
 - [ ] mcp-add-script — `add_script` + `get_script`; one `parseScript` in

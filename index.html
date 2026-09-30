@@ -149,11 +149,11 @@
   #edit { max-width: 40em; margin: 0 auto; padding: 24px 20px 40px; font: 400 15px/1.55 ui-monospace, Menlo, monospace; color: var(--faded); }
   #edit p { color: var(--cue); }
   #accountNote { color: var(--cue); font-size: .9em; min-height: 1.2em; margin: 6px 0 0; }
-  #company h3 { margin: 6px 0; font-weight: 500; }
-  #company .row { padding: 3px 8px; margin: 0 -8px; border-radius: 8px; justify-content: space-between; }
-  #company .row:nth-child(odd) { background: rgba(255, 255, 255, .035); }
-  #company .seats, #joinNote { color: var(--cue); font-size: .9em; margin: 6px 0; }
-  #inviteOut input { width: 100%; font: inherit; font-size: .85em; padding: 4px 6px; border-radius: 6px; border: 1px solid var(--edge); background: #100F0B; color: var(--paper); }
+  #company h3, #ai h3 { margin: 10px 0 4px; font-weight: 500; }
+  #ai .row, #company .row { padding: 3px 8px; margin: 0 -8px; border-radius: 8px; justify-content: space-between; }
+  #ai .row:nth-of-type(odd), #company .row:nth-child(odd) { background: rgba(255, 255, 255, .035); }
+  #ai .seats, #company .seats, #joinNote { color: var(--cue); font-size: .9em; margin: 6px 0; }
+  #ai input, #inviteOut input { width: 100%; font: inherit; font-size: .85em; padding: 4px 6px; border-radius: 6px; border: 1px solid var(--edge); background: #100F0B; color: var(--paper); }
   #accountNote a { color: var(--paper); }
   #src {
     width: 100%; height: 58vh; padding: 12px; border-radius: 10px;
@@ -251,6 +251,7 @@
     </div>
     <div id="signedIn" hidden>
       <div id="company"></div>
+      <div id="ai"></div>
       <div class="row">
         <button class="chip wide" id="signoutChip">Sign out</button>
       </div>
@@ -1131,6 +1132,7 @@ function drawAccount() {
   $('signedIn').hidden = !me;
   if (me) accountNote.textContent = `Signed in as ${me.email}`;
   loadCompany();
+  drawTokens();
 }
 async function whoami() {
   const r = await api('/me');
@@ -1228,6 +1230,33 @@ function queueProgress() {
     const misses = Object.fromEntries(Object.entries(stats).filter(([, s]) => s.missed > 0).map(([k, s]) => [k, s.missed]));
     api(`/productions/${current.id}/me/progress`, { best: +load(bestKey(), 0), total: items.length, misses }, 'PUT');
   }, 2000);
+}
+// Your own AI (PLATFORM §4): a personal token, shown once, that lets Claude or
+// another MCP client act as you. Listed by label; revoked with one press.
+const ai = $('ai');
+async function drawTokens(fresh) {
+  if (!me) return ai.replaceChildren();
+  const { tokens = [] } = await api('/tokens');
+  ai.replaceChildren(el('h3', { textContent: 'Your AI' }));
+  if (fresh) {
+    const snippet = `claude mcp add --transport http tablework ${fresh.mcpUrl} --header "Authorization: Bearer ${fresh.token}"`;
+    ai.append(
+      el('p', { className: 'seats', textContent: 'Copy this now; it is not shown again. In a terminal:' }),
+      el('input', { value: snippet, readOnly: true, onclick: e => e.target.select() }),
+      el('p', { className: 'seats', textContent: `Or in claude.ai, add a custom connector at ${fresh.mcpUrl} with this token as the bearer.` }),
+    );
+    try { await navigator.clipboard.writeText(snippet); ai.append(el('p', { className: 'seats', textContent: 'Copied.' })); } catch {}
+  }
+  for (const t of tokens) {
+    const when = new Date(t.last_seen).toLocaleDateString();
+    ai.append(el('div', { className: 'row' }, el('span', { className: 'who', textContent: t.label }), el('span', {}, `used ${when} `, el('button', { className: 'chip', textContent: 'Revoke', onclick: async () => { await api(`/tokens/${t.id}`, undefined, 'DELETE'); drawTokens(); } }))));
+  }
+  ai.append(el('div', { className: 'row' }, el('button', { className: 'chip wide', textContent: tokens.length ? 'Connect another AI' : 'Connect your AI', onclick: async () => {
+    const label = prompt('A name for this AI (which app, which device)?', 'Claude on my laptop');
+    if (!label) return;
+    const r = await api('/tokens', { label });
+    if (r.status === 201) drawTokens(r); else accountNote.textContent = 'Could not make a token.';
+  } })));
 }
 // Landing on an invite link: say what it joins, then join (signed in) or ask for an address.
 async function landInvite(token) {
