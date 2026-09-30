@@ -200,7 +200,8 @@ reader pasted their own.
   paste a script or ask your AI). The word "production" appears only once
   there is more than one member. It lists members by name (or address) with role and parts (and, for an owner or director,
   each member's standing: sentences clear of their parts, weak ones, or
-  "off book"), the seat
+  "off book", and "quiet N days" when nobody has heard from them for a
+  week), the seat
   count and monthly price, and for an owner or director makes invite links
   per role (14 days, copied to the clipboard). Opening an invite link opens
   the sheet on the Company section alone, saying what it joins; signed in

@@ -1515,7 +1515,8 @@ async function drawCompany() {
   const standing = m => {
     const p = progress[m.email];
     if (!p || !p.total) return m.parts.length ? ' · not started' : '';
-    return ` · ${p.best === p.total ? 'off book' : `${p.best} of ${p.total} clear`}${p.weak ? `, ${p.weak} weak` : ''}`;
+    const days = p.updatedAt ? Math.floor((Date.now() - new Date(p.updatedAt)) / 864e5) : 0;
+    return ` · ${p.best === p.total ? 'off book' : `${p.best} of ${p.total} clear`}${p.weak ? `, ${p.weak} weak` : ''}${days > 6 ? `, quiet ${days} days` : ''}`;
   };
   if (productions.length > 1) {
     const pick = el('select', { onchange: () => { save('production', pick.value); current = productions.find(p => p.id === pick.value); drawCompany(); } });
