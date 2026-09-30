@@ -10,6 +10,10 @@ export interface Env {
   MAIL_FROM?: string;
   ELEVEN_LABS_API_KEY?: string;   // secret; unset = rendering with our key is off
   SEALING_KEY?: string;           // secret; seals productions' own keys at rest
+  STRIPE_SECRET_KEY?: string;     // secret; unset = billing is off
+  STRIPE_WEBHOOK_SECRET?: string; // secret
+  STRIPE_PRICE_MONTHLY?: string;  // price ids from the Stripe dashboard
+  STRIPE_PRICE_YEARLY?: string;
   CLIPS: R2Bucket;                // rendered clips, keyed by hash
 }
 

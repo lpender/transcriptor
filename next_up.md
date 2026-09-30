@@ -2,10 +2,6 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-- [ ] billing-core (owner: loop, started 2026-09-30) — schema (trial_ends_at, period_ends_at, stripe ids),
-  `api/src/stripe.ts` (fetch + form bodies, `setStripe()` seam),
-  `verifyWebhook` tested against a hand-signed payload, `canWrite`, 14-day
-  trial set on creation. `docs/design/billing.md`.
 ## Queue
 - [ ] billing-routes — checkout (quantity = members), portal, plans, webhook
   → production.state; tests with a stubbed Stripe. UNTIL: billing-core.
@@ -52,6 +48,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] billing-core — DONE 2026-09-30: migration 0011 (trial_ends_at, period_ends_at), `api/src/stripe.ts` (fetch + form bodies, `setStripe()` seam, webhook signature verify/sign with Web Crypto), `api/src/billing.ts` (`canWrite`, `effectiveState`, `describe` in words), productions start on a 14-day trial. 3 tests incl. a hand-signed payload.
 - [x] welcome-landing — DONE 2026-09-30: on any host but the show's (or `?show=1`), a first visit shows "Tablework — Run lines with your company" with Paste a script / Sign in / Try a sample (a Wilde scene, public domain); the bundled script and cues.js stay for the show's host. Driven in Chrome at 390: welcome, sample loads 10 lines with no cues; `?show=1` still 285 lines and 11 cues (`tmp/qa/2026-09-30-welcome-390.png`).
 - [x] app-title — DONE 2026-09-30: `<title>` is Tablework; signed in, "<production> · Tablework".
 - [x] aloud-loop-words — DONE 2026-09-30: "read [N] sentences, then go back [M] (0: straight through)".

@@ -1,6 +1,7 @@
 // Productions and their members (docs/design/sharing.md). Pure over D1.
 import { can, isRole, type Capability, type Role } from './access';
 import { currentUser, type User } from './auth';
+import { trialEnd } from './billing';
 import { id, now } from './ids';
 import { error } from './router';
 
@@ -8,9 +9,9 @@ export interface Production { id: string; name: string; state: string; created_a
 export interface Member { user_id: string; email: string; name: string | null; role: Role; parts: string[]; joined_at: string }
 
 export async function createProduction(db: D1Database, owner: User, name: string): Promise<Production> {
-  const p = { id: id(), name: name.trim(), state: 'active', created_at: now() };
+  const p = { id: id(), name: name.trim(), state: 'trial', created_at: now() };
   await db.batch([
-    db.prepare('INSERT INTO productions (id, name, state, created_at) VALUES (?, ?, ?, ?)').bind(p.id, p.name, p.state, p.created_at),
+    db.prepare('INSERT INTO productions (id, name, state, created_at, trial_ends_at) VALUES (?, ?, ?, ?, ?)').bind(p.id, p.name, p.state, p.created_at, trialEnd()),
     db.prepare("INSERT INTO members (user_id, production_id, role, parts, joined_at) VALUES (?, ?, 'owner', '[]', ?)").bind(owner.id, p.id, p.created_at),
   ]);
   return p;
