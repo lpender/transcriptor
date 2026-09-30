@@ -2,9 +2,9 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-## Queue
-- [ ] design-voices-render — Spec the render flow: price quote from
+- [ ] design-voices-render (owner: loop, started 2026-09-30) — Spec the render flow: price quote from
   uncached characters, per-line resumable job, R2 cache by hash, BYO key.
+## Queue
 - [ ] design-sound-upload — Spec per-production music + room tone
   upload per scene, normalization in a Worker (port `normalize.py`), replaces
   `cues.js` + `sound/`.
