@@ -2,9 +2,9 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-## Queue
-- [ ] api-productions — create/list/get, members, change role, remove, leave
+- [ ] api-productions (owner: loop, started 2026-09-30) — create/list/get, members, change role, remove, leave
   (last owner rule). Tests against local D1. UNTIL: db-schema-0001.
+## Queue
 - [ ] api-invites — mint (role, 14 days), revoke, accept signed in / signed
   out (via magic link purpose `invite`). UNTIL: auth-magic-link.
 - [ ] web-production-panel — More sheet: members, roles, invite link, seat
