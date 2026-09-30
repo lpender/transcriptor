@@ -1,12 +1,6 @@
 # Next Up — transcriptor
 
 ## Now
-- [ ] platform-conventions (owner: loop, started 2026-09-30) — Write `~/dev/godfiles/conventions/PLATFORM.md`:
-  how every app does magic-link auth, Stripe web billing (Checkout, portal,
-  webhook flag, no IAP), ownership/sharing/invites (owner/editor/viewer +
-  invite token), one MCP server per app (`whoami` + ingest tools), and a
-  "How it works" doc page. Reference bodylang's Stripe controllers. Commit in
-  godfiles; link from this repo's CLAUDE.md (already does).
 
 ## Queue
 - [ ] design-sharing-model (EPIC) — Diverge → skeptic → spec in
@@ -46,6 +40,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] platform-conventions — DONE 2026-09-30: `~/dev/godfiles/conventions/PLATFORM.md` v1, references given.care auth/access and bodylang Stripe; checklist for new apps.
 - [x] recon-competitors — DONE 2026-09-30: `docs/recon/competitors.md`, five products, every claim linked. Finding: cue-listening via speech recognition is the one feature we lack; queued as a spike.
 - [x] productionize-docs — DONE 2026-09-30: kind tool → app; VISION, ADR
   001 positioning, 002 stack, 003 pricing/voices, product LOG, ARCHITECTURE
