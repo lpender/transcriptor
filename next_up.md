@@ -2,12 +2,12 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-## Queue
-- [ ] auth-routes — `POST /auth/link` (email), `GET /auth/verify?token`
+- [ ] auth-routes (owner: loop, started 2026-09-30) — `POST /auth/link` (email), `GET /auth/verify?token`
   (sets cookie, redirects to APP_ORIGIN), `GET /me`, `POST /auth/logout`.
   Mail through `email.ts` with Resend behind an env var; dev logs the link.
   ACTION for Lee later: Resend key + domain (costs nothing on the free tier
   but needs DNS).
+## Queue
 - [ ] api-productions — create/list/get, members, change role, remove, leave
   (last owner rule). Tests against local D1. UNTIL: db-schema-0001.
 - [ ] api-invites — mint (role, 14 days), revoke, accept signed in / signed
