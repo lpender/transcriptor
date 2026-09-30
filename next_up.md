@@ -2,12 +2,12 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
+- [ ] how-it-works-page (owner: loop, started 2026-09-30) — Public docs page: productions, invites,
+  voices and cost, MCP setup, cues. Written from the specs above.
+
 ## Queue
 - [ ] mcp-oauth — OAuth 2.1 provider + consent page listing productions.
   UNTIL: verify-cf-mcp-oauth, mcp-scaffold.
-- [ ] how-it-works-page (EPIC) — Public docs page: productions, invites,
-  voices and cost, MCP setup, cues. Written from the specs above.
-
 ## Gated
 - [ ] stripe-keys — ACTION: a Stripe account in test mode, two prices ($1/mo,
   $10/yr), then `cd api && npx wrangler secret put STRIPE_SECRET_KEY`,
