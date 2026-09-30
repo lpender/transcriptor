@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How Tablework works</title>
+<link rel="icon" href="icon-192.png">
+<style>
+  :root { --ink: #13120E; --surface: #1E1C16; --edge: #322E24; --paper: #EFE7D6; --faded: #8C8371; --ribbon: #C8462F; --cue: #B9AE94; }
+  body { margin: 0; background: var(--ink); color: var(--paper); font: 400 17px/1.55 Georgia, 'Times New Roman', serif; }
+  main { max-width: 38em; margin: 0 auto; padding: 32px 20px 80px; }
+  h1 { font: 500 2.2em/1.1 Georgia, serif; margin: 0 0 6px; }
+  h1 + p { color: var(--cue); margin: 0 0 32px; }
+  h2 { font: 500 1.3em/1.2 Georgia, serif; margin: 36px 0 8px; border-top: 1px solid var(--edge); padding-top: 18px; }
+  p, li { color: var(--paper); }
+  li { margin: 4px 0; }
+  code { font: 400 .85em ui-monospace, Menlo, monospace; background: #100F0B; border: 1px solid var(--edge); border-radius: 5px; padding: 1px 5px; }
+  pre { background: #100F0B; border: 1px solid var(--edge); border-radius: 8px; padding: 10px 12px; overflow-x: auto; font: 400 .8em/1.5 ui-monospace, Menlo, monospace; }
+  a { color: var(--paper); }
+  .back { display: inline-block; margin-bottom: 20px; color: var(--cue); text-decoration: none; font: 500 14px ui-monospace, Menlo, monospace; }
+  .money { color: var(--cue); }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="./">← Tablework</a>
+  <h1>How Tablework works</h1>
+  <p>Run lines with your company: one script, one set of voices, everyone's place in it.</p>
+
+  <h2>Try it without an account</h2>
+  <p>Paste a script and start. Your place, your parts, your notes and your score stay in this browser. Nothing leaves it, and nothing is kept anywhere else. Signing in is for keeping and sharing, not for trying.</p>
+
+  <h2>The script</h2>
+  <p>One speech per line, the character's name in capitals, a colon, then the words. A line with only <code>***</code> is a scene break. Nothing else: no stage directions, no page numbers.</p>
+  <pre>NELSON: Are there any other magazines?
+RECEPTIONIST: No.
+***
+MR. MCMARTIN: Eight thousand years.</pre>
+  <p>If a line is not shaped like that, the app says which line, and saves nothing until it is fixed.</p>
+
+  <h2>Productions</h2>
+  <p>Signed in, your script lives under a <em>production</em>. A production owns the script, the voices, the sound, the members and the bill. On your own it is just "your script"; the word only appears once someone else joins.</p>
+  <p>Members hold one part each:</p>
+  <ul>
+    <li><strong>Owner</strong> — pays, and can do everything. Usually the producer or the director.</li>
+    <li><strong>Director</strong> — everything but the bill: the script, voices, sound, invites, and who is off book.</li>
+    <li><strong>Cast</strong> — reads, learns lines, keeps notes. Cannot change the script or the cues.</li>
+    <li><strong>Crew</strong> — the stage manager's part: runs the sound and the cues, leads the room, does not learn lines.</li>
+  </ul>
+
+  <h2>Inviting the cast</h2>
+  <p>An owner or director makes an invite link for a part (cast, crew or director). One link serves the whole group chat: it works for anyone for 14 days, and it can be withdrawn. Opening it shows what it joins; signed in you join at once, signed out you give an email and the link that arrives both signs you in and joins.</p>
+  <p>Anyone can leave a production. The last owner names another owner first.</p>
+
+  <h2>Learning lines</h2>
+  <p>Pick your parts. In learn mode your lines are hidden as blocks and revealed a sentence at a time as you say them; a miss takes back the two before it. Misses are remembered so weak sentences can be drilled. With a microphone, the last words of a sentence count as the press. Your best run and the sentences still owed go up to the production so a director can see who is off book — never your notes, which are yours unless you share one.</p>
+
+  <h2>Voices</h2>
+  <p>Every line can be read aloud. Out of the box the device's own voices read the other parts, at no cost. A production can also render its script in the company's voices, one voice per character, chosen from our cast.</p>
+  <p class="money">Rendering costs money because the voices do: 30 cents per thousand characters that nobody has rendered before, at least a dollar. A line that anyone has already rendered in that voice is free for everyone, so a popular play soon costs nothing. The price is shown before anything is spent. A production with its own ElevenLabs key renders on that key at no charge.</p>
+
+  <h2>The show's sound</h2>
+  <p>A stage manager can add music and room tone per scene, mark a scene as a hold (before the show, an interval, the end), and every member's device plays the same sound at the same level. Files are levelled on upload, not re-encoded.</p>
+
+  <h2>Together</h2>
+  <p>In the rehearsal room, one device leads and the others follow: every move the leader makes, everyone's script makes too. An owner, director or crew member can lead; cast follow. A device that drops out lands on the right line when it comes back.</p>
+
+  <h2>Your AI</h2>
+  <p>Tablework speaks <a href="https://modelcontextprotocol.io/">MCP</a>, so your own AI can load a script, set parts, make invites and lay out cues. In the app, under Account, press <em>Connect your AI</em>: you get a personal token, shown once, and the line to paste into Claude Code:</p>
+  <pre>claude mcp add --transport http tablework https://api.tablework.com/mcp --header "Authorization: Bearer …"</pre>
+  <p>In claude.ai, add a custom connector at that address with the token as the bearer. Give your AI the play as a PDF or a photo of the sides and ask it to load it: it converts the pages into the one-speech-per-line shape and calls <code>add_script</code>. Revoke a token any time under Account.</p>
+
+  <h2>Paying</h2>
+  <p class="money">Every production starts with 14 days free. After that it is $1 a seat a month, or $10 a seat a year, paid by the owner on the web through Stripe. Seats are members; the count follows people joining and leaving. A production of one is one seat.</p>
+  <p>If a production is not paid for, nothing is lost: everyone can still read, learn and follow. Saving the script, inviting, uploading sound and rendering voices wait until it is.</p>
+
+  <h2>Your data</h2>
+  <p>A script is private to its production. It is never listed, shared beyond its members, or used for anything else. You bring scripts you have the right to use. Notes are private to their author unless shared. Sign out and your session ends; leave a production and its script leaves your device on the next load. To take everything with you, the script is yours to copy from the paste box at any time.</p>
+
+  <p class="back" style="margin-top:40px"><a class="back" href="./">← Back to Tablework</a></p>
+</main>
+</body>
+</html>

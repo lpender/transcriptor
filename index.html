@@ -153,6 +153,7 @@
   #welcome { margin: 10vh 0 28px; }
   #welcome h1 { font: 500 2.2em/1.1 Georgia, 'Times New Roman', serif; color: var(--paper); margin: 0 0 8px; letter-spacing: .01em; }
   #welcome .tag { color: var(--cue); font-size: 1.05em; margin: 0 0 18px; }
+  #welcome .tag a { color: var(--cue); }
   #welcome .row { flex-wrap: wrap; }
   #welcome button { min-height: var(--tap); padding: 0 18px; border-radius: 10px; border: 1px solid #5E5540; background: #262218; color: var(--paper); font: 500 15px ui-monospace, Menlo, monospace; }
   .dim { color: var(--cue); font-size: .85em; }
@@ -191,6 +192,7 @@
       <button id="signinBtn">Sign in</button>
       <button id="sampleBtn">Try a sample</button>
     </div>
+    <p class="tag"><a href="how.html">How it works</a></p>
   </div>
   <p>Paste a script — one speech per line, each starting with the character's name and a colon. Your place, your parts and your score are kept in this browser.</p>
   <textarea id="src" spellcheck="false"></textarea>
@@ -284,6 +286,7 @@
       </div>
     </div>
     <p id="accountNote"></p>
+    <p class="seats"><a href="how.html" style="color:var(--cue)">How Tablework works</a></p>
     <div id="joinBox" hidden>
       <p id="joinNote"></p>
       <label class="loop" id="joinEmailRow" title="A link is sent there; opening it joins on this device">email <input id="joinEmail" type="email" autocapitalize="off" autocomplete="email" spellcheck="false"></label>

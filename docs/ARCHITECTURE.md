@@ -25,6 +25,7 @@ flowchart LR
 | Path | Role |
 |---|---|
 | `index.html` | The whole frontend: markup, styles, script |
+| `how.html` | The public "How Tablework works" page (PLATFORM §5) |
 | `sentences.js` | Sentence/piece splitter, shared by browser and `convert.py` tests |
 | `script.js`, `clips.js`, `clips/` | Generated for this show; move to D1/R2 in target |
 | `cues.js`, `sound/` | This show's sound design; becomes per-production upload |

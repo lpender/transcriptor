@@ -2,9 +2,6 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-- [ ] how-it-works-page (owner: loop, started 2026-09-30) — Public docs page: productions, invites,
-  voices and cost, MCP setup, cues. Written from the specs above.
-
 ## Queue
 - [ ] mcp-oauth — OAuth 2.1 provider + consent page listing productions.
   UNTIL: verify-cf-mcp-oauth, mcp-scaffold.
@@ -37,6 +34,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] how-it-works-page — DONE 2026-09-30: `how.html`, eleven sections in plain words (try it, the script shape, productions and parts, invites, learning, voices and cost, sound, Together, your AI with the `claude mcp add` line, paying, your data), linked from the welcome and the Account section, cached by the service worker. Rendered at 390 with no horizontal scroll (`tmp/qa/2026-09-30-how-390.png`).
 - [x] web-relay — DONE 2026-09-30: signed in with a production, Lead/Follow use the production's Room over WebSocket (server-ordered moves, last move on join, presence in the header "Leading <name> · 2 here", auto-rejoin after a drop); the room word hides; signed out keeps MQTT. Driven in Chrome: leader's jumps arrive on a second socket as seq 7, 8; 101 passthrough bug in cors() found and fixed.
 - [x] relay-do — DONE 2026-09-30: `api/src/room.ts` Room Durable Object (hibernation sockets, lead on/off gated by the role table, moves stamped with a sequence and kept as the last move, presence broadcasts, ping), `GET /productions/:id/room` upgrade route passing who and role, wrangler binding + SQLite migration. 2 tests with real WebSocket pairs.
 - [x] web-billing — DONE 2026-09-30: the company panel shows how the production is paid for in words and one action: Pay $10 a seat a year (or $1 a month) for the owner, Manage billing once subscribed; `?billing=` landings say what happened; routes answer Stripe outages as a plain 502; any throwing route now answers JSON 500 with CORS. Driven in Chrome with a dummy key: trial line, Pay reaches Stripe (`tmp/qa/2026-09-30-billing.png`).
