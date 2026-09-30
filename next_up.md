@@ -3,6 +3,18 @@
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
 ## Queue
+- [ ] production-name — a production made from the app is named after
+  `document.title`, now "Tablework" (signed-in drive 2026-09-30: the test one
+  is "Script Follower"). Ask for a name when creating ("Name this production",
+  default: the script's title line if any, else "My play"), and let an owner
+  rename it from the company panel (`PUT /productions/:id {name}` exists? add
+  it). Verify in Chrome.
+- [ ] sheet-sections-fold — the More sheet is 3,251 px tall at 390 wide when
+  signed in (`tmp/qa/2026-09-30-signedin-390-sheet-top.png`): ten sections,
+  the company at the bottom. Make each section a `<details>` whose open state
+  is remembered; open by default: Parts and Practice, plus Company (renamed
+  from Account) which moves to the top when signed in. Verify at 390: the
+  first screen shows the company and the parts, everything else one tap away.
 ## Gated
 - [ ] stripe-keys — ACTION: a Stripe account in test mode, two prices ($1/mo,
   $10/yr), then `cd api && npx wrangler secret put STRIPE_SECRET_KEY`,
