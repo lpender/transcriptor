@@ -85,6 +85,7 @@
   }
   #score { color: var(--cue); letter-spacing: .04em; white-space: nowrap; }
   #hint { color: var(--faded); font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  @media (max-width: 480px) { #hud { flex-wrap: wrap; gap: 0 14px; } #hint { white-space: normal; } }   /* the hint is the instruction: on a phone it drops a line rather than losing its verb */
 
   /* ---- the bar you keep your thumb on ---- */
   #bar {
