@@ -148,6 +148,8 @@
   /* ---- pasting a script ---- */
   #edit { max-width: 40em; margin: 0 auto; padding: 24px 20px 40px; font: 400 15px/1.55 ui-monospace, Menlo, monospace; color: var(--faded); }
   #edit p { color: var(--cue); }
+  #accountNote { color: var(--cue); font-size: .9em; min-height: 1.2em; margin: 6px 0 0; }
+  #accountNote a { color: var(--paper); }
   #src {
     width: 100%; height: 58vh; padding: 12px; border-radius: 10px;
     background: #100F0B; color: var(--paper); border: 1px solid var(--edge);
@@ -235,6 +237,20 @@
     <div class="row">
       <button class="chip wide" id="reloadBtn">Check for a new version<span class="key">↻</span></button>
     </div>
+    <h2>Account</h2>
+    <div id="signedOut">
+      <label class="loop" title="A link is sent there; opening it signs you in on this device">email <input id="email" type="email" autocapitalize="off" autocomplete="email" spellcheck="false"></label>
+      <div class="row">
+        <button class="chip wide" id="signinChip">Send me a sign-in link</button>
+      </div>
+    </div>
+    <div id="signedIn" hidden>
+      <div class="row">
+        <button class="chip wide" id="signoutChip">Sign out</button>
+      </div>
+    </div>
+    <p id="accountNote"></p>
+
     <button id="closeSheet">Close</button>
   </div>
 </dialog>
@@ -1086,6 +1102,49 @@ else {
 }
 
 joinRoom();
+
+// Accounts (PLATFORM §1): a magic link by mail, a cookie on the API's origin.
+// Signed out, nothing else changes; an account is for keeping and sharing.
+const API = ['localhost', '127.0.0.1'].includes(location.hostname) ? 'http://localhost:8787' : 'https://api.tablework.com';
+const api = (path, body, method = body ? 'POST' : 'GET') =>
+  fetch(API + path, { method, credentials: 'include', headers: { 'content-type': 'application/json' }, body: body && JSON.stringify(body) })
+    .then(async r => ({ status: r.status, ...(await r.json().catch(() => ({}))) }))
+    .catch(() => ({ status: 0 }));
+let me = null;
+const accountNote = $('accountNote');
+function drawAccount() {
+  $('signedOut').hidden = !!me;
+  $('signedIn').hidden = !me;
+  if (me) accountNote.textContent = `Signed in as ${me.email}`;
+}
+async function whoami() {
+  const r = await api('/me');
+  me = r.status === 200 ? r.user : null;
+  drawAccount();
+}
+async function sendLink() {
+  const email = $('email').value.trim();
+  if (!email) return $('email').focus();
+  accountNote.textContent = 'Sending…';
+  const r = await api('/auth/link', { email });
+  accountNote.textContent = r.status === 202 ? `A link is on its way to ${email}. Open it on this device.`
+    : r.status === 400 ? (r.message || 'That does not look like an email address.')
+    : r.status === 0 ? 'Cannot reach the server.' : `Could not send (${r.status}).`;
+  if (r.link) { accountNote.textContent += ' '; accountNote.append(Object.assign(document.createElement('a'), { href: r.link, textContent: 'Open it here (dev).' })); }
+}
+$('signinChip').onclick = sendLink;
+$('email').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); sendLink(); } };
+$('signoutChip').onclick = async () => { await api('/auth/logout', {}); me = null; accountNote.textContent = 'Signed out.'; drawAccount(); };
+{
+  const q = new URLSearchParams(location.search);
+  if (q.has('signin') || q.has('joined')) {
+    accountNote.textContent = q.get('signin') === 'expired' ? 'That link has expired. Ask for another.' : '';
+    history.replaceState(null, '', location.pathname);
+    if (q.get('signin') !== 'expired') whoami().then(() => sheet.showModal());
+    else sheet.showModal();
+  }
+}
+whoami();
 
 // One handler for keyboard shortcuts and the phone button bar. Returns false for unused keys.
 function act(k) {

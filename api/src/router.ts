@@ -40,6 +40,12 @@ export const cors = (req: Request, env: Env) => (res: Response) => {
   const h = new Headers(res.headers);
   h.set('access-control-allow-origin', origin);
   h.set('access-control-allow-credentials', 'true');
+  h.set('access-control-allow-methods', 'GET, POST, PUT, DELETE');
+  h.set('access-control-allow-headers', 'content-type, authorization');
+  h.set('access-control-max-age', '86400');
   h.set('vary', 'origin');
   return new Response(res.body, { status: res.status, headers: h });
 };
+
+// A preflight gets an empty 204 with the headers above; the router never sees it.
+export const preflight = (req: Request) => (req.method === 'OPTIONS' ? new Response(null, { status: 204 }) : null);

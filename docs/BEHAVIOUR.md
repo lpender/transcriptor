@@ -165,6 +165,11 @@ reader pasted their own.
   and tapping it edits. Notes are kept in this browser by
   the line's text, so they survive a re-split. The edit box opens where the note
   sits.
+- **Account.** The More sheet's Account section takes an email address and
+  sends a sign-in link (the API at `localhost:8787` in dev, `api.tablework.com`
+  live); opening the link on this device signs it in and returns to the app
+  with the sheet open. Signed in, the sheet shows the address and Sign out.
+  Signed out, or with no API reachable, nothing else about the app changes.
 - **Controls.** Every control is a button in the bar or the More sheet (Back, Play, Learn, Keys, Start from the top,
   Drill weak, Edit, Next) with its keyboard shortcut printed under it. Nothing
   is reachable by key alone.

@@ -1,9 +1,9 @@
 // The API Worker entry: nothing but the handler, see router.ts.
-import { cors, handle, type Env } from './router';
+import { cors, handle, preflight, type Env } from './router';
 import './routes/auth';
 import './routes/productions';
 import './routes/invites';
 
 export default {
-  fetch: (req: Request, env: Env) => handle(req, env).then(cors(req, env)),
+  fetch: async (req: Request, env: Env) => cors(req, env)(preflight(req) ?? (await handle(req, env))),
 } satisfies ExportedHandler<Env>;

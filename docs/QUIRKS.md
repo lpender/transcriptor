@@ -27,6 +27,14 @@
 
 ## Runtime
 
+- The service worker serves the cached `index.html` even to a `?v=` URL, so a
+  Playwright drive after an edit must unregister it (`getRegistrations` →
+  `unregister`) and reload, or it tests the previous build. A bumped `CACHE`
+  alone only takes effect on the reload after next.
+- When inserting code "after `joinRoom();`", the first match in the file is the
+  reconnect call inside `joinRoom` itself; the top-level call is the one at
+  column 0. A block inserted in the wrong place runs only on a socket drop.
+
 - Autoplay: the first `play()` before a touch throws `NotAllowedError`. That
   is not "sound off"; keep the preference and retry on first touch.
 - Per-scene sound prefs are keyed by scene name, so cue names must be unique.
