@@ -68,7 +68,7 @@ MR. MCMARTIN: Eight thousand years.</pre>
   <h2>Your AI</h2>
   <p>Tablework speaks <a href="https://modelcontextprotocol.io/">MCP</a>, so your own AI can load a script, set parts, make invites and lay out cues. In the app, under Account, press <em>Connect your AI</em>: you get a personal token, shown once, and the line to paste into Claude Code:</p>
   <pre>claude mcp add --transport http tablework https://api.tablework.com/mcp --header "Authorization: Bearer …"</pre>
-  <p>In claude.ai, add a custom connector at that address with the token as the bearer. Give your AI the play as a PDF or a photo of the sides and ask it to load it: it converts the pages into the one-speech-per-line shape and calls <code>add_script</code>. Revoke a token any time under Account.</p>
+  <p>In claude.ai, add a custom connector at that address with the token as the bearer. Give your AI the play as a PDF or a photo of the sides and ask it to load it: it converts the pages into the one-speech-per-line shape and calls <code>add_script</code>. It can also set your name (<code>set_name</code>), choose parts, make invites and ask who is off book. Revoke a token any time under Account.</p>
 
   <h2>Paying</h2>
   <p class="money">Every production starts with 14 days free. After that it is $1 a seat a month, or $10 a seat a year, paid by the owner on the web through Stripe. Seats are members; the count follows people joining and leaving. A production of one is one seat.</p>

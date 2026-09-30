@@ -1,6 +1,6 @@
 {
-  "name": "Script Follower",
-  "short_name": "Script",
+  "name": "Tablework",
+  "short_name": "Tablework",
   "description": "Follow a script, hear it, and learn your lines.",
   "start_url": ".",
   "scope": ".",
