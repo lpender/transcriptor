@@ -1349,7 +1349,7 @@ async function loadCompany() {
 function dropScript() {
   for (const k of ['fromProduction', 'production', 'script', 'pasted']) localStorage.removeItem(k);
   src.value = '';
-  stopPlay(); stopLearn(); hud.hidden = bar.hidden = true; read.hidden = true; edit.hidden = false;
+  stopPlay(); stopLearn(); hud.hidden = bar.hidden = true; read.hidden = true; read.replaceChildren(); lines = []; edit.hidden = false;
   edit.querySelector('p').textContent = 'You are no longer in that production, so its script has left this device. Paste a script, or open an invite.';
 }
 async function pullScript() {
@@ -1527,7 +1527,7 @@ async function drawCompany() {
   // against the size of their parts, and how many sentences they still owe.
   const standing = m => {
     const p = progress[m.email];
-    if (!p || !p.total) return m.parts.length ? ' · not started' : '';
+    if (!p || !p.total) return m.parts.length ? ' · not started' : m.role === 'cast' ? ' · no parts yet' : '';
     const days = p.updatedAt ? Math.floor((Date.now() - new Date(p.updatedAt)) / 864e5) : 0;
     return ` · ${p.best === p.total ? 'off book' : `${p.best} of ${p.total} clear`}${p.weak ? `, ${p.weak} weak` : ''}${days > 6 ? `, quiet ${days} days` : ''}`;
   };
