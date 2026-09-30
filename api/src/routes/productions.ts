@@ -7,6 +7,7 @@
 import { currentUser } from '../auth';
 import { createProduction, gate, members, myProductions, parseRole, removeMember, setParts, setRole } from '../productions';
 import { error, json, route } from '../router';
+import { syncSeats } from '../seats';
 
 const body = <T>(req: Request) => req.json().catch(() => ({})) as Promise<Partial<T>>;
 const outcome = (r: 'ok' | 'last_owner' | 'not_member') =>
@@ -46,7 +47,9 @@ route('DELETE', '/productions/:id/members/:user', async (req, env, { id, user })
   const g = await gate(env.DB, req, id, 'read');
   if (g instanceof Response) return g;
   if (user !== g.user.id && (await gate(env.DB, req, id, 'share')) instanceof Response) return error('not_allowed', 403);
-  return outcome(await removeMember(env.DB, id, user));
+  const r = await removeMember(env.DB, id, user);
+  if (r === 'ok') await syncSeats(env, id);
+  return outcome(r);
 });
 
 route('PUT', '/productions/:id/members/:user/parts', async (req, env, { id, user }) => {

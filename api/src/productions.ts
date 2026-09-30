@@ -1,7 +1,7 @@
 // Productions and their members (docs/design/sharing.md). Pure over D1.
 import { can, isRole, type Capability, type Role } from './access';
 import { currentUser, type User } from './auth';
-import { trialEnd } from './billing';
+import { billingOf, canWrite, trialEnd } from './billing';
 import { id, now } from './ids';
 import { error } from './router';
 
@@ -68,13 +68,21 @@ export async function setParts(db: D1Database, productionId: string, userId: str
 // 401 unsigned; 403 `forbidden` when not a member at all (the production is
 // invisible); 403 `not_allowed` when the role may not do this.
 export type Gate = { user: User; role: Role } | Response;
+// WRITE capabilities also need a production that may still save (billing).
+const WRITES: ReadonlySet<Capability> = new Set(['script', 'cues', 'render', 'share']);
+export const READONLY_MESSAGE = 'This production is not paid for. Everyone can still read, learn and follow; saving is off until it is.';
 export async function gate(db: D1Database, req: Request, productionId: string, capability: Capability): Promise<Gate> {
   const user = await currentUser(db, req);
   if (!user) return error('unauthorized', 401);
   const role = await roleOf(db, user.id, productionId);
   if (!role) return error('forbidden', 403);
   if (!can(role, capability)) return error('not_allowed', 403);
+  if (WRITES.has(capability) && !(await writable(db, productionId))) return error('readonly', 402, READONLY_MESSAGE);
   return { user, role };
+}
+export async function writable(db: D1Database, productionId: string): Promise<boolean> {
+  const b = await billingOf(db, productionId);
+  return !!b && canWrite(b);
 }
 
 export const parseRole = (x: unknown): Role | null => (isRole(x) ? x : null);

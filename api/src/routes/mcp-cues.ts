@@ -2,7 +2,7 @@
 // plays what. Files themselves are uploaded in the web (design: sound-upload).
 import { can } from '../access';
 import { tool, DATA_NOTE } from '../mcp';
-import { roleOf } from '../productions';
+import { roleOf, writable, READONLY_MESSAGE } from '../productions';
 import { getCues, listSound, setCues } from './sound';
 
 const need = async (db: D1Database, userId: string, productionId: unknown, cap: 'read' | 'cues') => {
@@ -10,6 +10,7 @@ const need = async (db: D1Database, userId: string, productionId: unknown, cap: 
   const role = await roleOf(db, userId, productionId);
   if (!role) throw new Error('Not a member of that production.');
   if (!can(role, cap)) throw new Error(`Your role (${role}) may not do this.`);
+  if (cap !== 'read' && !(await writable(db, productionId))) throw new Error(READONLY_MESSAGE);
 };
 
 tool<{ production: string }>({

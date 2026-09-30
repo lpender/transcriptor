@@ -67,7 +67,7 @@ before any render is bought.
 | ElevenLabs down mid-render | The job is per line and idempotent by hash; failures are listed on the render, done lines stay done, Retry forgets the failures | `api/src/render.ts` |
 | Leader loses connection | DO keeps last move; follower reconnects and lands right; header says "no leader for 45 s" | DO + frontend |
 | Member removed from production | Session still valid, membership check on every production route returns 403; local cache of that script cleared on next load | API middleware |
-| Owner stops paying | Production goes read-only after grace; nothing deleted; export stays | Stripe webhook → production.state |
+| Owner stops paying | Webhook sets past_due then readonly; writes answer 402, reading/learning/Together keep working; nothing deleted | `api/src/billing.ts`, `gate()` |
 | Copyrighted script uploaded | Private to the production, never listed or shared beyond members; takedown path in TOS | policy, not code |
 
 ## External services

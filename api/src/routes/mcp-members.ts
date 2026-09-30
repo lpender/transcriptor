@@ -3,7 +3,7 @@
 import { can, isRole } from '../access';
 import { mintInvite } from '../invites';
 import { tool, DATA_NOTE } from '../mcp';
-import { members, roleOf, setParts } from '../productions';
+import { members, roleOf, setParts, writable, READONLY_MESSAGE } from '../productions';
 
 const need = async (db: D1Database, userId: string, productionId: unknown) => {
   if (typeof productionId !== 'string') throw new Error('Pass the production id from whoami.');
@@ -48,6 +48,7 @@ tool<{ production: string; role: string }>({
   run: async ({ production, role }, { user, env }) => {
     const mine = await need(env.DB, user.id, production);
     if (!can(mine, 'share')) throw new Error(`Your role (${mine}) may not invite.`);
+    if (!(await writable(env.DB, production))) throw new Error(READONLY_MESSAGE);
     if (!isRole(role) || role === 'owner') throw new Error('Invite as director, cast or crew.');
     const { token, invite } = await mintInvite(env.DB, production, role, user.id);
     return { url: `${env.APP_ORIGIN}/?invite=${token}`, role, expiresAt: invite.expires_at };

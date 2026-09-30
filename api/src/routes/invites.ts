@@ -6,7 +6,8 @@
 import { currentUser, issueMagicLink, validEmail } from '../auth';
 import { send } from '../email';
 import { acceptInvite, findInvite, listInvites, mintInvite, revokeInvite } from '../invites';
-import { gate, parseRole } from '../productions';
+import { gate, parseRole, READONLY_MESSAGE } from '../productions';
+import { syncSeats } from '../seats';
 import { error, json, route } from '../router';
 
 route('POST', '/productions/:id/invites', async (req, env, { id }) => {
@@ -40,7 +41,12 @@ route('POST', '/invites/:token/accept', async (req, env, { token }) => {
   const invite = await findInvite(env.DB, { token });
   if (!invite) return error('invite_gone', 404, 'That invite has expired or was withdrawn.');
   const user = await currentUser(env.DB, req);
-  if (user) return json({ ok: true, joined: await acceptInvite(env.DB, invite, user.id), production: { id: invite.production_id, name: invite.production_name } });
+  if (user) {
+    const joined = await acceptInvite(env.DB, invite, user.id);
+    if (joined === 'readonly') return error('readonly', 402, READONLY_MESSAGE);
+    if (joined === 'joined') await syncSeats(env, invite.production_id);
+    return json({ ok: true, joined, production: { id: invite.production_id, name: invite.production_name } });
+  }
   const { email } = (await req.json().catch(() => ({}))) as { email?: unknown };
   if (!validEmail(email)) return error('unauthorized', 401, 'Sign in, or give an email address to be sent a link.');
   const link = `${env.API_ORIGIN}/auth/verify?token=${encodeURIComponent((await issueMagicLink(env.DB, email, 'invite', invite.id)).token)}`;

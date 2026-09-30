@@ -3,7 +3,7 @@
 // member already is left as they are.
 import { INVITABLE, type Role } from './access';
 import { id, now, plus, sha256, token } from './ids';
-import { roleOf } from './productions';
+import { roleOf, writable } from './productions';
 
 export const INVITE_TTL_MS = 14 * 24 * 60 * 60 * 1000;
 
@@ -41,8 +41,9 @@ export async function findInvite(db: D1Database, by: { token?: unknown; id?: str
 }
 
 // Join by a live invite. Already a member: nothing changes, not even the role.
-export async function acceptInvite(db: D1Database, invite: Invite, userId: string): Promise<'joined' | 'already'> {
+export async function acceptInvite(db: D1Database, invite: Invite, userId: string): Promise<'joined' | 'already' | 'readonly'> {
   if (await roleOf(db, userId, invite.production_id)) return 'already';
+  if (!(await writable(db, invite.production_id))) return 'readonly';
   await db.prepare('INSERT INTO members (user_id, production_id, role, parts, joined_at) VALUES (?, ?, ?, ?, ?)').bind(userId, invite.production_id, invite.role, '[]', now()).run();
   return 'joined';
 }

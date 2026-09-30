@@ -6,6 +6,7 @@
 import { createSession, currentUser, issueMagicLink, revokeSession, validEmail, verifyMagicLink, SESSION_COOKIE, SESSION_TTL_MS } from '../auth';
 import { send } from '../email';
 import { acceptInvite, findInvite } from '../invites';
+import { syncSeats } from '../seats';
 import { error, json, route } from '../router';
 
 const cookie = (token: string, maxAge: number) =>
@@ -31,7 +32,9 @@ route('GET', '/auth/verify', async (req, env) => {
   let landing = `${env.APP_ORIGIN}/?signin=ok`;
   if (hit.inviteId) {
     const invite = await findInvite(env.DB, { id: hit.inviteId });
-    landing = invite ? (await acceptInvite(env.DB, invite, hit.user.id), `${env.APP_ORIGIN}/?joined=${invite.production_id}`) : `${env.APP_ORIGIN}/?signin=ok&invite=gone`;
+    const joined = invite ? await acceptInvite(env.DB, invite, hit.user.id) : 'gone';
+    if (joined === 'joined') await syncSeats(env, invite!.production_id);
+    landing = joined === 'gone' ? `${env.APP_ORIGIN}/?signin=ok&invite=gone` : joined === 'readonly' ? `${env.APP_ORIGIN}/?signin=ok&invite=readonly` : `${env.APP_ORIGIN}/?joined=${invite!.production_id}`;
   }
   const session = await createSession(env.DB, hit.user.id);
   return new Response(null, { status: 302, headers: { location: landing, 'set-cookie': cookie(session.token, SESSION_TTL_MS / 1000) } });

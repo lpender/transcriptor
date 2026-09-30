@@ -3,7 +3,7 @@
 // The same two doors over MCP: add_script, get_script.
 import { parseScript } from '../shared';
 import { tool, DATA_NOTE } from '../mcp';
-import { gate, roleOf } from '../productions';
+import { gate, roleOf, writable, READONLY_MESSAGE } from '../productions';
 import { can } from '../access';
 import { error, json, route } from '../router';
 import { currentScript, setScript, validate } from '../scripts';
@@ -31,6 +31,7 @@ const need = async (env: { DB: D1Database }, userId: string, productionId: unkno
   const role = await roleOf(env.DB, userId, productionId);
   if (!role) throw new Error('Not a member of that production.');
   if (!can(role, cap)) throw new Error(`Your role (${role}) may not do this.`);
+  if (cap !== 'read' && !(await writable(env.DB, productionId))) throw new Error(READONLY_MESSAGE);
 };
 
 tool<{ production: string; title: string; text: string }>({
