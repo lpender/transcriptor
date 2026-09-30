@@ -6,6 +6,7 @@ import { gate } from '../productions';
 import { error, json, route } from '../router';
 import { currentScript } from '../scripts';
 import { CAST, quote, voicesOf } from '../voices';
+import { keyFor } from './render';
 
 route('GET', '/voices', () => json({ voices: CAST }));
 
@@ -34,5 +35,7 @@ route('POST', '/productions/:id/render/quote', async (req, env, { id }) => {
   if (g instanceof Response) return g;
   const script = await currentScript(env.DB, id);
   if (!script) return error('no_script', 404, 'Load a script first.');
-  return json({ quote: await quote(env.DB, script.text, await voicesOf(env.DB, id)) });
+  const q = await quote(env.DB, script.text, await voicesOf(env.DB, id));
+  const own = (await keyFor(env, id))?.own ?? false;
+  return json({ quote: { ...q, priceCents: own ? 0 : q.priceCents, ownKey: own } });
 });

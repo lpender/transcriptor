@@ -10,16 +10,24 @@ import { error, json, route } from '../router';
 import { currentScript } from '../scripts';
 import { plan, voicesOf } from '../voices';
 import { parseScript } from '../shared';
+import { unseal } from '../seal';
 
 const scriptAndVoices = async (env: { DB: D1Database }, id: string) => {
   const script = await currentScript(env.DB, id);
   return script ? { script, voiceOf: await voicesOf(env.DB, id) } : null;
 };
 
+// The key a render runs on: the production's own if it has one, else ours.
+export async function keyFor(env: { DB: D1Database; ELEVEN_LABS_API_KEY?: string; SEALING_KEY?: string }, id: string): Promise<{ key: string; own: boolean } | null> {
+  const row = await env.DB.prepare('SELECT eleven_key_enc AS enc FROM productions WHERE id = ?').bind(id).first<{ enc: string | null }>();
+  if (row?.enc && env.SEALING_KEY) return { key: await unseal(env.SEALING_KEY, row.enc), own: true };
+  return env.ELEVEN_LABS_API_KEY ? { key: env.ELEVEN_LABS_API_KEY, own: false } : null;
+}
+
 route('POST', '/productions/:id/render', async (req, env, { id }) => {
   const g = await gate(env.DB, req, id, 'render');
   if (g instanceof Response) return g;
-  if (!env.ELEVEN_LABS_API_KEY) return error('no_engine', 503, 'Voice rendering is not switched on here yet.');
+  if (!(await keyFor(env, id))) return error('no_engine', 503, 'Voice rendering is not switched on here yet.');
   const sv = await scriptAndVoices(env, id);
   if (!sv) return error('no_script', 404, 'Load a script first.');
   return json({ render: await startRender(env.DB, id, sv.script.id, sv.script.text, sv.voiceOf, g.user.id) }, 201);
@@ -31,10 +39,11 @@ route('POST', '/productions/:id/render/:rid/next', async (req, env, { id, rid })
   const r = await getRender(env.DB, id, rid);
   if (!r) return error('not_found', 404);
   if (r.state === 'done') return json({ render: r });
-  if (!env.ELEVEN_LABS_API_KEY) return error('no_engine', 503);
+  const k = await keyFor(env, id);
+  if (!k) return error('no_engine', 503);
   const sv = await scriptAndVoices(env, id);
   if (!sv) return error('no_script', 404);
-  return json({ render: await renderNext(env.DB, env.CLIPS, env.ELEVEN_LABS_API_KEY, r, sv.script.text, sv.voiceOf) });
+  return json({ render: await renderNext(env.DB, env.CLIPS, k.key, r, sv.script.text, sv.voiceOf) });
 });
 
 route('POST', '/productions/:id/render/:rid/retry', async (req, env, { id, rid }) => {

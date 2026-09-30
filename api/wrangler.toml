@@ -16,4 +16,5 @@ bucket_name = "tablework-clips"   # ACTION for Lee: `wrangler r2 bucket create t
 [vars]
 APP_ORIGIN = "http://localhost:8799"
 API_ORIGIN = "http://localhost:8787"
+SEALING_KEY = "local-dev-only-not-a-secret"   # prod: `wrangler secret put SEALING_KEY` (Lee)
 # RESEND_API_KEY and MAIL_FROM are secrets: `wrangler secret put` (Lee). Unset = links are logged.
