@@ -25,9 +25,7 @@
   `docs/ARCHITECTURE.md` (login, create D1/KV/R2, paste ids, secrets,
   `task deploy`). Free tier; needs your browser. Until then everything runs
   locally only.
-- [ ] buy-domain — ACTION: buy tablework.com (free 2026-09-30) and point
-  it at Pages (or Cloudflare once cf-scaffold lands). Costs money. Name is
-  decided: Tablework (LOG 2026-09-30).
+- [ ] buy-domain — ACTION: tablework.com is NOT free (registered 2004, GoDaddy, expires 2027-04-29; the 2026-09-30 note saying otherwise was wrong). Free on 2026-09-30: tablework.co (recommended), tablework.io, tablework.live, tablework.studio, tablework.dev, gettablework.com, tableworkapp.com. Buy one, then tell the loop: it swaps the domain strings in `api/wrangler.toml` `[env.production]`, `docs/ARCHITECTURE.md` and `how.html`, and runs `task deploy:check`.
 - [ ] render-three-silent-lines — ACTION: Run `ELEVEN_LABS_API_KEY=... python3 tts.py` for the 3 lines the
   2026-09-19 "Mr." re-split left silent ("Or if he wasn't, he said he could be
   reached!", "Mr. Sebatacheck, please …", "Mr. McMartin, in admissions …"),
