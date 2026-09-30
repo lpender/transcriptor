@@ -181,6 +181,11 @@ reader pasted their own.
   best run, the size of your parts and the sentences still owed up to the
   production a beat later, so a director can see who is off book. Signed out
   nothing is sent; the browser keeps its own copy either way.
+- **Your AI.** Signed in, "Connect your AI" makes a personal token for
+  Claude or any MCP client, shown once as a ready `claude mcp add` line
+  (copied to the clipboard) with the MCP URL for a claude.ai connector.
+  Tokens are listed by the name you gave them with their last use, and
+  revoked with one press.
 - **Controls.** Every control is a button in the bar or the More sheet (Back, Play, Learn, Keys, Start from the top,
   Drill weak, Edit, Next) with its keyboard shortcut printed under it. Nothing
   is reachable by key alone.
