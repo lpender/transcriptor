@@ -1,7 +1,6 @@
 # Next Up — transcriptor
 
 ## Now
-<!-- autodev until 2026-09-30 17:42 -->
 
 ## Queue
 ## Gated
