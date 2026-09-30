@@ -146,6 +146,7 @@
   .loopRow { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
   .chip.wide { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
   .chip.wide .key { float: none; }
+  .loop input[type=email], .loop input[type=text] { flex: 1; width: auto; text-align: left; padding: 0 10px; }
   .loop input[type=range] { flex: 1; width: auto; border: 0; background: none; accent-color: var(--ribbon); padding: 0; }
   #cues [data-loop] { padding: 0 9px; margin-left: -4px; }
   #cues .who { background: none; border: 0; padding: 8px 0; text-align: left; min-height: var(--tap); min-width: 0; }  /* wraps on a phone rather than pushing four chips off the edge */
@@ -302,7 +303,7 @@
       </div>
     </div>
     <div id="signedIn" hidden>
-      <label class="loop" title="How the company sees you">your name <input id="myName" type="text" autocomplete="name" style="flex:1" placeholder="as on the call sheet"></label>
+      <label class="loop" title="How the company sees you">your name <input id="myName" type="text" autocomplete="name" placeholder="as on the call sheet"></label>
       <div id="company"></div>
       <div id="voices"></div>
       <div id="ai"></div>
@@ -1606,9 +1607,15 @@ async function landInvite(token) {
   const peek = await api(`/invites/${token}`);
   const box = $('joinBox'), note = $('joinNote');
   box.hidden = false;
+  $('signedOut').hidden = true;  // one email field, the invite's; the plain sign-in row would be a second
   if (peek.status !== 200) { note.textContent = peek.message || 'That invite is not valid.'; $('joinEmailRow').hidden = $('joinChip').hidden = true; return; }
-  note.textContent = `Join ${peek.production.name} as ${peek.role}.`;
+  note.textContent = `Join ${peek.production.name} as ${peek.role}.` + (me ? '' : ' Give your email and a link is sent that signs you in on this device.');
   $('joinEmailRow').hidden = !!me;
+  // The invite is the only thing this visit is about: its section first, alone, at the top.
+  const acc = document.querySelector('details[data-sec="account"]');
+  document.querySelectorAll('details.sec').forEach(d => { d.open = d === acc; });
+  document.querySelector('details.sec').before(acc);
+  sheet.scrollTop = 0;
   $('joinChip').onclick = async () => {
     const email = $('joinEmail').value.trim();
     const r = await api(`/invites/${token}/accept`, me ? {} : { email });
@@ -1619,7 +1626,7 @@ async function landInvite(token) {
 }
 {
   const q = new URLSearchParams(location.search);
-  if (q.has('invite')) { history.replaceState(null, '', location.pathname); whoami().then(() => { landInvite(q.get('invite')); sheet.showModal(); }); }
+  if (q.has('invite')) { history.replaceState(null, '', location.pathname); whoami().then(async () => { sheet.showModal(); await landInvite(q.get('invite')); }); }
 }
 
 // One handler for keyboard shortcuts and the phone button bar. Returns false for unused keys.
