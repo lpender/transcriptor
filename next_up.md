@@ -1,12 +1,12 @@
 # Next Up — transcriptor
 
 ## Now
-
-## Queue
-- [ ] recon-competitors — Try Go Offbook (web, no signup) and read Offbook,
+- [ ] recon-competitors (owner: loop, started 2026-09-30) — Try Go Offbook (web, no signup) and read Offbook,
   coldRead, ActOnCue marketing + pricing; write `docs/recon/competitors.md`:
   one table (import, voices, grading, multi-user, cues, price). Verify: file
   exists, every claim has a URL.
+
+## Queue
 - [ ] platform-conventions — Write `~/dev/godfiles/conventions/PLATFORM.md`:
   how every app does magic-link auth, Stripe web billing (Checkout, portal,
   webhook flag, no IAP), ownership/sharing/invites (owner/editor/viewer +
