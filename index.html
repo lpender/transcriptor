@@ -57,14 +57,16 @@
   #read p:has(span.note:not(:empty)) .add { display: none; }
   #read .note { display: block; margin-top: .3em; color: var(--cue); font: italic 400 .72em/1.5 ui-monospace, Menlo, monospace; white-space: pre-wrap; cursor: text; }
   #read span.note:empty { display: none; }  /* a textarea has no children either; it must show */
-  #read textarea.note {
-    width: 100%; box-sizing: border-box; padding: 6px 8px; border-radius: 8px; resize: vertical;
-    border: 1px solid var(--edge); background: #100F0B; color: var(--paper); font-style: normal;
+  #read .note.edit textarea, #read .note.edit input {
+    width: 100%; box-sizing: border-box; padding: 6px 8px; border-radius: 8px; resize: vertical; font: inherit; font-style: normal;
+    border: 1px solid var(--edge); background: #100F0B; color: var(--paper);
   }
+  #read .note.edit input { margin-top: 4px; }
+  #read .note .say { display: block; color: var(--cue); font-style: normal; }
   /* Room beside the script: notes stand in their own column to the right of each line. */
   @media (min-width: 66em) {
     #read { --col: 20rem; max-width: calc(34em + var(--col) + 48px); padding-right: calc(var(--col) + 48px); }
-    #read .note, #read textarea.note { position: absolute; left: calc(100% + 28px); top: .35em; width: var(--col); margin: 0; z-index: 1; }
+    #read .note { position: absolute; left: calc(100% + 28px); top: .35em; width: var(--col); margin: 0; z-index: 1; }
     #read .add { right: -42px; }
     #read p { padding-right: 0; }
   }
@@ -356,15 +358,29 @@ const plain = p => {
 // Notes: your own words on a line, kept by the line's text so they survive a
 // re-split. The plus adds one; tapping a note edits it; an emptied note is gone.
 const notes = JSON.parse(load('notes', '{}'));
+// How the voice should say a line, when that differs from how it reads (the
+// production's say-as, ADR 003): an owner or director edits it under the note.
+let sayAs = {};
+const canSay = () => !!(me && current && shares(current.role));
 function noteOf(p) {
   const n = p.querySelector('.note');
-  if (n.tagName === 'TEXTAREA') return;  // already being written
+  if (n.classList.contains('edit')) return;  // already being written
+  const wrap = document.createElement('span');
+  wrap.className = 'note edit';
   const box = document.createElement('textarea');
-  box.className = 'note';
   box.rows = 3;
   box.placeholder = 'A note on this line (empty to remove)';
   box.value = notes[p.dataset.text] || '';
-  box.onclick = e => e.stopPropagation();
+  wrap.append(box);
+  let sayBox = null;
+  if (canSay()) {
+    sayBox = document.createElement('input');
+    sayBox.className = 'say-in';
+    sayBox.placeholder = 'Say it as… (for the voice; empty = as written)';
+    sayBox.value = sayAs[p.dataset.text] || '';
+    wrap.append(sayBox);
+  }
+  wrap.onclick = e => e.stopPropagation();
   let done = false;
   const finish = keep => {
     if (done) return;
@@ -373,22 +389,28 @@ function noteOf(p) {
       const text = box.value.trim();
       text ? notes[p.dataset.text] = text : delete notes[p.dataset.text];
       save('notes', JSON.stringify(notes));
+      if (sayBox && (sayBox.value.trim() || '') !== (sayAs[p.dataset.text] || '')) {
+        const say = sayBox.value.trim();
+        say ? sayAs[p.dataset.text] = say : delete sayAs[p.dataset.text];
+        api(`/productions/${current.id}/sayas`, { [p.dataset.text]: say }, 'PUT').then(drawVoices);
+      }
     }
-    box.replaceWith(drawNote(p));
+    wrap.replaceWith(drawNote(p));
   };
-  box.onblur = () => finish(true);
-  box.onkeydown = e => {
+  wrap.addEventListener('focusout', e => { if (!wrap.contains(e.relatedTarget)) finish(true); });
+  wrap.onkeydown = e => {
     e.stopPropagation();
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); finish(true); }
     if (e.key === 'Escape') finish(false);
   };
-  n.replaceWith(box);
+  n.replaceWith(wrap);
   box.focus();
 }
 function drawNote(p) {
   const n = document.createElement('span');
   n.className = 'note';
   n.textContent = notes[p.dataset.text] || '';
+  if (sayAs[p.dataset.text]) n.append(Object.assign(document.createElement('i'), { className: 'say', textContent: '♪ ' + sayAs[p.dataset.text] }));
   n.title = 'Edit this note';
   n.onclick = e => { e.stopPropagation(); noteOf(p); };
   return n;
@@ -1194,6 +1216,8 @@ async function pullScript() {
   // The company's rendered voices, in clips.js's shape, over whatever this device had.
   const c = await api(`/productions/${current.id}/clips`);
   if (c.status === 200 && c.clips) { window.CLIPS = { ...(window.CLIPS || {}), ...c.clips }; render(); }
+  const sa = await api(`/productions/${current.id}/sayas`);
+  if (sa.status === 200) { sayAs = sa.sayas || {}; lines.forEach(p => { const n = p.querySelector('span.note:not(.edit)'); if (n) n.replaceWith(drawNote(p)); }); }
   drawVoices();
 }
 
