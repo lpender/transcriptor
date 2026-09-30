@@ -2,10 +2,10 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-## Queue
-- [ ] cf-scaffold — `wrangler` project, D1 migration 0001, one health
+- [ ] cf-scaffold (owner: loop, started 2026-09-30) — `wrangler` project, D1 migration 0001, one health
   route, `Taskfile.yml` with `task dev`, `task test`, `task deploy` (deploy
   is ACTION for Lee). Verify: `task test` green, `curl localhost:8787/health` ok.
+## Queue
 - [ ] db-schema-0001 — D1 migration: users, productions, members, invites,
   scripts, notes per `docs/design/sharing.md`; `can(role, cap)` table in
   `api/src/access.ts` with a unit test. UNTIL: cf-scaffold.
