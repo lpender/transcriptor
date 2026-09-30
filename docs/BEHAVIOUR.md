@@ -177,6 +177,10 @@ reader pasted their own.
   per role (14 days, copied to the clipboard). Opening an invite link shows
   what it joins; signed in you join at once, signed out you give an address
   and the link that arrives both signs you in and joins.
+- **Progress up.** Signed in and in a production, a graded sentence sends the
+  best run, the size of your parts and the sentences still owed up to the
+  production a beat later, so a director can see who is off book. Signed out
+  nothing is sent; the browser keeps its own copy either way.
 - **Controls.** Every control is a button in the bar or the More sheet (Back, Play, Learn, Keys, Start from the top,
   Drill weak, Edit, Next) with its keyboard shortcut printed under it. Nothing
   is reachable by key alone.

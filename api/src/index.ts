@@ -3,6 +3,7 @@ import { cors, handle, preflight, type Env } from './router';
 import './routes/auth';
 import './routes/productions';
 import './routes/invites';
+import './routes/progress';
 
 export default {
   fetch: async (req: Request, env: Env) => cors(req, env)(preflight(req) ?? (await handle(req, env))),

@@ -316,6 +316,7 @@ const record = (t, ok) => {
   s.seen++;
   s.missed = ok ? Math.max(0, s.missed - 1) : s.missed + 1;  // two clean runs clear one miss
   save('stats', JSON.stringify(stats));
+  queueProgress();
 };
 
 const weakLine = p => sentences(words(p)).some(missCount);
@@ -1216,6 +1217,17 @@ async function invite(role) {
   if (r.status !== 201) return out.textContent = 'Could not make a link.';
   out.replaceChildren(el('span', { textContent: `Send this to the ${role} (works for 14 days): ` }), el('input', { value: r.url, readOnly: true, onclick: e => e.target.select() }));
   try { await navigator.clipboard.writeText(r.url); out.append(' Copied.'); } catch {}
+}
+// Progress goes up to the production a beat after each graded sentence, so a
+// director can see who is off book. Signed out, or not in a production, nothing is sent.
+let progressTimer = 0;
+function queueProgress() {
+  if (!me || !current) return;
+  clearTimeout(progressTimer);
+  progressTimer = setTimeout(() => {
+    const misses = Object.fromEntries(Object.entries(stats).filter(([, s]) => s.missed > 0).map(([k, s]) => [k, s.missed]));
+    api(`/productions/${current.id}/me/progress`, { best: +load(bestKey(), 0), total: items.length, misses }, 'PUT');
+  }, 2000);
 }
 // Landing on an invite link: say what it joins, then join (signed in) or ask for an address.
 async function landInvite(token) {
