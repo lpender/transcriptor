@@ -2,9 +2,9 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-## Queue
-- [ ] billing-routes — checkout (quantity = members), portal, plans, webhook
+- [ ] billing-routes (owner: loop, started 2026-09-30) — checkout (quantity = members), portal, plans, webhook
   → production.state; tests with a stubbed Stripe. UNTIL: billing-core.
+## Queue
 - [ ] billing-gate — `canWrite` on script PUT, sound POST, render start,
   invite accept, member add; readonly answers 402 with a plain message.
   UNTIL: billing-core.
