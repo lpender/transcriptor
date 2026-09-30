@@ -11,3 +11,5 @@ Dated fast calls. Bigger ones get an ADR.
 - 2026-09-30 — Billing periods: monthly and yearly both, yearly default.
 - 2026-09-30 — Sound files are never re-encoded: loudness measured in the browser (Web Audio RMS), a gain per file applied at playback through a GainNode. `docs/design/sound-upload.md`.
 - 2026-09-30 — Browser `speechSynthesis` is the free voice tier and ships in the static app now; one rendered engine (ElevenLabs) to start, a cheap middle tier (OpenAI tts) noted for later. `docs/design/voices.md`.
+- 2026-09-30 — MCP is hand-rolled (stateless JSON-RPC over POST /mcp, ~60 lines) rather than the Node SDK or Cloudflare's `agents` McpAgent: the SDK's transports need Node streams, McpAgent needs a Durable Object per session. Upgrade path: McpAgent if a client needs SSE or resources.
+- 2026-09-30 — Personal tokens are sessions with a label and a ten-year expiry, not a new table: one resolver, one revoke.

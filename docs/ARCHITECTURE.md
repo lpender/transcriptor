@@ -31,6 +31,7 @@ flowchart LR
 | `convert.py`, `tts.py`, `normalize.py`, `stress.json` | Pipeline for this show; `tts.py` becomes a Worker job |
 | `sw.js` | Service worker; `CACHE` bumped every deploy |
 | `api/` | The Workers backend: `src/index.ts` entry (handler only), `src/router.ts`, `src/routes/*.ts` (one file per area), `src/auth.ts`, `src/access.ts`, `src/email.ts`, `migrations/` D1, `test/` vitest on a real D1 |
+| `api/src/mcp.ts`, `api/src/routes/mcp.ts` | The MCP server (`POST /mcp`, bearer personal tokens) and its tools |
 | `Taskfile.yml` | `task serve` (app), `task dev` (API on :8787), `task test` (gate), `task deploy` (Lee) |
 | `docs/BEHAVIOUR.md` | Exact behaviour of the app as it stands |
 

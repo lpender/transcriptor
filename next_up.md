@@ -2,13 +2,14 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-- [ ] mcp-scaffold (owner: loop, started 2026-09-30) — `/mcp` route, `whoami`, `list_productions`, bearer
-  personal tokens (hashed, revocable). Tests.
 ## Queue
 - [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
 - [ ] relay-durable-object (EPIC) — Replace public MQTT with the production's
   DO; keep the message shape and clock ordering. UNTIL: auth-magic-link.
+- [ ] web-tokens — Account section: "Connect your AI" makes a personal token
+  (shown once with the MCP URL and a copy button), lists tokens by label,
+  revokes. Verify in Chrome against `task dev`.
 - [ ] web-progress-view — owner/director table: per member cleared/total,
   weak lines. UNTIL: sync-progress.
 - [ ] mcp-add-script — `add_script` + `get_script`; one `parseScript` in
@@ -56,6 +57,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] mcp-scaffold — DONE 2026-09-30: `api/src/mcp.ts` (stateless Streamable-HTTP JSON-RPC: initialize, tools/list, tools/call, ping), `routes/mcp.ts` (`POST /mcp` with a bearer, personal tokens as labelled 10-year sessions: mint once, list, revoke), tools `whoami` + `list_productions`. 2 tests; live curl: initialize → whoami returns the user and production.
 - [x] sync-progress — DONE 2026-09-30: migration 0003 `progress`, `PUT /productions/:id/me/progress` [learn] and `GET …/progress` [progress]; the app posts 2 s after a graded sentence when signed in and in a production. 2 tests; driven in Chrome: one right answer → best 1 of 317 on the server.
 - [x] web-production-panel — DONE 2026-09-30: signed in, the Account section shows the company: create ("Keep this script under your account"), members with roles and parts, seat count and price, Invite cast/crew/director links (copied), a picker when in several productions; `?invite=` landing peeks, joins signed in or by email link. Driven in Chrome against `task dev` with a second user via curl (`tmp/qa/2026-09-30-company.png`).
 - [x] web-signin — DONE 2026-09-30: Account section in More (email → link; signed in shows the address and Sign out), `api()` helper with credentials, `/me` on load, `?signin=` and `?joined=` landings. Preflight CORS added to the Worker. Walked in Chrome against `task dev`: link → verify → signed in → sign out (`tmp/qa/2026-09-30-signin.png`).

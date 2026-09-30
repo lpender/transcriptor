@@ -19,7 +19,7 @@ export const route = (method: string, path: string, handler: Handler) =>
 
 export const json = (body: unknown, status = 200, headers: HeadersInit = {}) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', ...headers } });
-export const error = (code: string, status: number, message?: string) => json({ error: code, message }, status);
+export const error = (code: string, status: number, message?: string, headers: HeadersInit = {}) => json({ error: code, message }, status, headers);
 
 route('GET', '/health', () => json({ ok: true, version: VERSION }));
 
