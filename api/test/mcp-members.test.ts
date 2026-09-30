@@ -49,7 +49,9 @@ describe('members over MCP', () => {
     expect(bad.isError).toBe(true);
     expect(bad.text).toContain('VLADIMIR, ESTRAGON');
     expect((await b('set_parts', { production: production.id, parts: ['vladimir'] })).json().parts).toEqual(['VLADIMIR']);
-    expect((await b('who_is_off_book', { production: production.id })).isError).toBe(true);
+    const own = (await b('who_is_off_book', { production: production.id })).json().summary as string;  // cast: only themselves
+    expect(own).toContain('bob28@example.com (VLADIMIR): not started.');
+    expect(own).not.toContain('ann28');
     let s = (await a('who_is_off_book', { production: production.id })).json().summary as string;
     expect(s).toContain('bob28@example.com (VLADIMIR): not started.');
     expect(s).toContain('ann28@example.com: no parts chosen yet (set_parts).');

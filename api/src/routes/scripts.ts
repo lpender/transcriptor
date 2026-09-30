@@ -30,7 +30,7 @@ const need = async (env: { DB: D1Database }, userId: string, productionId: unkno
   if (typeof productionId !== 'string') throw new Error('Pass the production id from whoami.');
   const role = await roleOf(env.DB, userId, productionId);
   if (!role) throw new Error('Not a member of that production.');
-  if (!can(role, cap)) throw new Error(`Your role (${role}) may not do this.`);
+  if (!can(role, cap)) throw new Error(`Your role (${role}) may not ${cap === 'read' ? 'read the script' : 'change the script'}.`);
   if (cap !== 'read' && !(await writable(env.DB, productionId))) throw new Error(READONLY_MESSAGE);
 };
 

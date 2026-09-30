@@ -77,14 +77,14 @@ tool<{ name: string }>({
 // Who is off book: the director's question, answered in words per member.
 tool<{ production: string }>({
   name: 'who_is_off_book',
-  description: 'For an owner or director: every member with parts, how far through their lines they have got (best clean run against the sentences in their parts), how many sentences they still miss, and when they last worked. In words, ready to relay.' + DATA_NOTE,
+  description: 'How far each member is through their lines: best clean run against the sentences in their parts, how many sentences they still miss, when they last worked. In words, ready to relay. An owner or director sees everyone; cast see only themselves.' + DATA_NOTE,
   inputSchema: { type: 'object', properties: { production: { type: 'string' } }, required: ['production'] },
   run: async ({ production }, { user, env }) => {
     const role = await need(env.DB, user.id, production);
-    if (!can(role, 'progress')) throw new Error(`Your role (${role}) may not see everyone's progress.`);
+    const everyone = can(role, 'progress');  // cast see their own standing only
     const rows = (await env.DB.prepare(`SELECT u.email, u.name, m.role, m.parts, p.best, p.total, p.misses, p.updated_at
         FROM members m JOIN users u ON u.id = m.user_id LEFT JOIN progress p ON p.user_id = m.user_id AND p.production_id = m.production_id
-        WHERE m.production_id = ? ORDER BY m.joined_at`).bind(production).all<{ email: string; name: string | null; role: string; parts: string; best: number | null; total: number | null; misses: string | null; updated_at: string | null }>()).results;
+        WHERE m.production_id = ? AND (? OR m.user_id = ?) ORDER BY m.joined_at`).bind(production, everyone ? 1 : 0, user.id).all<{ email: string; name: string | null; role: string; parts: string; best: number | null; total: number | null; misses: string | null; updated_at: string | null }>()).results;
     const lines = rows.filter((r) => r.role !== 'crew').map((r) => {
       const who = r.name || r.email, parts = JSON.parse(r.parts) as string[];
       const weak = r.misses ? Object.keys(JSON.parse(r.misses) as object).length : 0;

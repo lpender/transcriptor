@@ -9,7 +9,7 @@ const need = async (db: D1Database, userId: string, productionId: unknown, cap: 
   if (typeof productionId !== 'string') throw new Error('Pass the production id from whoami.');
   const role = await roleOf(db, userId, productionId);
   if (!role) throw new Error('Not a member of that production.');
-  if (!can(role, cap)) throw new Error(`Your role (${role}) may not do this.`);
+  if (!can(role, cap)) throw new Error(`Your role (${role}) may not ${cap === 'read' ? 'read the sound list' : 'set cues'}.`);
   if (cap !== 'read' && !(await writable(db, productionId))) throw new Error(READONLY_MESSAGE);
 };
 

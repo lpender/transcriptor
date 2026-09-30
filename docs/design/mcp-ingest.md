@@ -66,6 +66,7 @@ Tools (all scoped to the caller; production named by id or exact name):
 | `get_script` | production | title, text (the format above), speakers |
 | `set_parts` | production, member email, parts[] | ok |
 | `set_name` | name (empty clears) | ok |
+| `who_is_off_book` | production | summary (cast: own line only) |
 | `set_cues` | production, cues [{name, music?, bed?, hold?}] | ok; names must be unique; music/bed name files already uploaded |
 | `list_sound` | production | uploaded files [{name, kind, seconds}] |
 | `invite` | production, role | invite URL (14 days) |
