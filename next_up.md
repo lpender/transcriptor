@@ -2,11 +2,11 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-## Queue
-- [ ] web-signin — the static app learns the API: `API` origin constant,
+- [ ] web-signin (owner: loop, started 2026-09-30) — the static app learns the API: `API` origin constant,
   `api()` fetch helper with credentials, More sheet "Sign in" (email → link
   sent → `?signin=ok` lands signed in), `/me` on load, "Signed in as … · Sign
   out". Nothing else changes signed out. Verify against `task dev` in Chrome.
+## Queue
 - [ ] web-production-panel — More sheet: members, roles, invite link, seat
   count and monthly price; the word "production" only with 2+ members.
   UNTIL: api-invites.
