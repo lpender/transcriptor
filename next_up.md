@@ -2,6 +2,9 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
+- [ ] web-say-as (owner: loop, started 2026-09-30) — a "say as" field beside a line's note (owner/director,
+  signed in): how the voice should say it; saved to `/sayas`; the quote shows
+  the line as unrendered after. Verify in Chrome.
 ## Queue
 - [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
@@ -10,9 +13,6 @@
 - [ ] mcp-cues — `set_cues`, `list_sound` over MCP. UNTIL: sound-api.
 - [ ] mcp-oauth — OAuth 2.1 provider + consent page listing productions.
   UNTIL: verify-cf-mcp-oauth, mcp-scaffold.
-- [ ] web-say-as — a "say as" field beside a line's note (owner/director,
-  signed in): how the voice should say it; saved to `/sayas`; the quote shows
-  the line as unrendered after. Verify in Chrome.
 - [ ] sound-api — D1 `sound` + `cues`, presigned R2 upload URL, rows, cues
   PUT, delete refused when in use. UNTIL: db-schema-0001.
 - [ ] web-sound-panel — Add music / Add room tone, per-scene assignment,
