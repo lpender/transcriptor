@@ -1385,9 +1385,9 @@ async function drawSoundPanel() {
   if (!editsSound()) return;
   soundFiles = (await api(`/productions/${current.id}/sound`)).sound || [];
   const pick = (kind, chosen) => {
-    const sel = el('select');
-    sel.append(el('option', { value: '', textContent: `no ${kind === 'bed' ? 'room tone' : 'music'}` }));
-    for (const f of soundFiles.filter(f => f.kind === kind)) sel.append(el('option', { value: f.id, textContent: f.name, selected: f.id === chosen }));
+    const word = kind === 'bed' ? 'room tone' : 'music', sel = el('select', { title: word });
+    sel.append(el('option', { value: '', textContent: `no ${word}` }));
+    for (const f of soundFiles.filter(f => f.kind === kind)) sel.append(el('option', { value: f.id, textContent: `${word}: ${f.name}`, selected: f.id === chosen }));
     return sel;
   };
   const list = el('div');

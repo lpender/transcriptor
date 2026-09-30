@@ -4,7 +4,6 @@
 <!-- autodev until 2026-09-30 17:42 -->
 
 ## Queue
-- [ ] scenes-editor-labels — the Scenes editor rows at 390 are two unlabelled selects plus "hold" and ×; nothing says which is music and which is room tone (tmp/naive-390-sheet-4.png). Prefix each select's options ("music: OfficeFansCelli", "room: OfficeFans") or put a small label above each. Verify: 390 shot.
 ## Gated
 - [ ] stripe-keys — ACTION: a Stripe account in test mode, two prices ($1/mo,
   $10/yr), then `cd api && npx wrangler secret put STRIPE_SECRET_KEY`,
@@ -35,6 +34,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] scenes-editor-labels (2026-09-30) — scene selects say "music: X" / "room tone: Y" so a filled row still names its kind. Verified: 390 shot tmp/scenes-labels-390.png.
 - [x] sound-plain-words (2026-09-30) — sound rows read "1:23 · levelled" (dB in the title); long names shrink instead of pushing Delete off the row; wide chips are flex so key badges stay right when text wraps. Verified: 390 shot tmp/sound-plain-390.png.
 - [x] loop-row-phone (2026-09-30) — loop row restacked ("loop [n] sentences, back [n]" + faded "0 = straight through"); wide chips no longer wrap. Verified: 390 shot tmp/loop-row-390.png.
 - [x] user-name (2026-09-30) — `PUT /me {name}`, MCP `set_name`, name field in Account; names before emails in company rows and who_is_off_book. Verified: vitest (60), Chrome (name saved, survives reload, row reads "Lee P (you)").
