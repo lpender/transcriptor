@@ -2,13 +2,10 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-- [ ] engine-gain-node (owner: loop, started 2026-09-30) — play music and beds through an AudioContext
-  GainNode with a per-file gain (0 today). Verify: play, fade, crossfade
-  unchanged with the stubbed engine and in Chrome. `docs/design/sound-upload.md`.
-## Queue
-- [ ] measure-loudness — `loudness(file)` in the browser via Web Audio RMS;
+- [ ] measure-loudness (owner: loop, started 2026-09-30) — `loudness(file)` in the browser via Web Audio RMS;
   test on a generated tone; matches `normalize.py` on one `sound/` file
   within 1 dB.
+## Queue
 - [ ] cf-scaffold — `wrangler` project, D1 migration 0001, one health
   route, `Taskfile.yml` with `task dev`, `task test`, `task deploy` (deploy
   is ACTION for Lee). Verify: `task test` green, `curl localhost:8787/health` ok.
@@ -71,6 +68,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] engine-gain-node — DONE 2026-09-30: every track routes through a GainNode with `window.GAINS[file]` dB (0 when absent); slider and fades untouched. Verified in Playwright with real audio: +6 dB → 1.995, −3 dB → 0.708, both tracks playing, fade stops one and leaves the other.
 - [x] browser-voices — DONE 2026-09-30: `speak()` via speechSynthesis when a line has no clip, voice per character by name hash, silenced at volume 0, header says whose voices. Verified in Playwright with a stubbed engine (advances line by line, cancel on stop). Safari and real voices: Lee's ear.
 - [x] design-sound-upload — DONE 2026-09-30: `docs/design/sound-upload.md`; never re-encode, measure in the browser, GainNode at playback; split into engine-gain-node, measure-loudness, sound-api, web-sound-panel.
 - [x] design-voices-render — DONE 2026-09-30: `docs/design/voices.md`; ElevenLabs cost checked ($0.18/1k, play $11–18), ADR 003 amended; split into browser-voices, stress-per-line, voices-quote, voices-render-job, voices-byo-key, web-voices-panel.

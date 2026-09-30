@@ -518,8 +518,23 @@ let blocked = false;  // sound is on, but the page has not been touched yet
 // a hard cut: the next pass starts CROSS seconds before the end and the two trade
 // places, so the join is inaudible.
 const CROSS = 5;
+// Each file carries its own gain in dB (0 for files already levelled), applied
+// through a GainNode so it can go above unity; the element's volume stays the
+// slider's and the fades'. Browsers without Web Audio just play at the slider.
+let ctx = null;
+const gainOf = file => window.GAINS?.[file.split('/').pop()] ?? 0;
+function route(a, db) {
+  try {
+    ctx ??= new (window.AudioContext || window.webkitAudioContext)();
+    if (ctx.state === 'suspended') ctx.resume();
+    a.gain = ctx.createGain();
+    a.gain.gain.value = Math.pow(10, db / 20);
+    ctx.createMediaElementSource(a).connect(a.gain).connect(ctx.destination);
+  } catch (e) { console.warn('No gain for', a.src, e); }
+}
 function spawn(kind, src, again) {
   const a = new Audio(src);
+  route(a, gainOf(src));
   a.again = again;
   a.onplaying = a.onended = () => render();
   a.ontimeupdate = () => { if (a.again && !a.next && a.duration && a.duration - a.currentTime <= CROSS) cross(kind, a); };

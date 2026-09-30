@@ -23,3 +23,8 @@ window.CUES = [
   { name: 'Disclosure', music: 'ComputerFanFaintBeepStrings.mp3', bed: 'ComputerFanFaintBeep.mp3' },  // or Furnace.mp3
   { name: 'The end', music: 'WaitingOutro.mp3', hold: true },  // ends abruptly, on purpose; SadDay.mp3 was tried here
 ];
+
+// Gain in dB per file, applied at playback on top of the slider. The files in
+// sound/ are already levelled by normalize.py, so nothing is listed; a file
+// that is not (an upload, a late delivery) gets a line here instead of a re-encode.
+window.GAINS = {};

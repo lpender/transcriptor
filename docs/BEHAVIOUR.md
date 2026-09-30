@@ -108,7 +108,9 @@ reader pasted their own.
   waits for the first touch, which the browser requires, then starts it. M
   and R start or stop the current scene's music or room tone in the moment
   without touching those switches, so the next scene sounds as set. Two sliders set how loud all the music and
-  all the room tone play, kept across visits. The beds are levelled to one
+  all the room tone play, kept across visits. Each file plays through a gain of its own
+  (`window.GAINS` in `cues.js`, dB, 0 when absent) so a file can be levelled
+  without re-encoding. The beds are levelled to one
   loudness by `normalize.py` (a flat gain each, no compression) so one slider
   fits them all, and the music to another, 5 dB louder. Tapping a scene's name there goes to its
   first line and keeps the sheet open. The header names the scene sounding.
