@@ -1,0 +1,23 @@
+version: '3'
+
+tasks:
+  serve:
+    desc: Serve the static app on :8799
+    cmds: [python3 -m http.server 8799]
+
+  dev:
+    desc: Run the API Worker locally on :8787 (local D1, no login needed)
+    dir: api
+    cmds: [npx wrangler dev]
+
+  test:
+    desc: The gate — API unit tests, typecheck, and a syntax pass over index.html
+    cmds:
+      - cd api && npx vitest run
+      - cd api && npx tsc --noEmit
+      - node -e "const h=require('fs').readFileSync('index.html','utf8');for(const b of h.match(/<script>([\s\S]*?)<\/script>/g)){try{new Function(b.replace(/<\/?script>/g,''))}catch(e){if(!/window|document|localStorage|await/.test(e.message)){console.error('index.html:',e.message);process.exit(1)}}}console.log('index.html syntax ok')"
+
+  deploy:
+    desc: Deploy the API Worker (Lee only — needs `wrangler login`)
+    dir: api
+    cmds: [npx wrangler deploy]

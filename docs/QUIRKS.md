@@ -2,6 +2,13 @@
 
 ## Build / tooling
 
+- The Workers runtime refuses a non-handler export from the entry module
+  (`Incorrect type for map entry 'VERSION'`): `api/src/index.ts` exports only
+  the default handler; everything testable lives in `router.ts`.
+- `wrangler dev` dies with `ERR_IPC_CHANNEL_CLOSED` when its stdin closes
+  (a backgrounded tool call); start it with `</dev/null` via nohup, or `task dev`.
+- `@cloudflare/workers-types` must match wrangler's peer (v5 line with wrangler 4.145).
+
 - `sw.js` `CACHE` must be bumped on every deploy or installed copies keep the
   old build. 169eb0a shipped without a bump and nobody saw it until 2026-09-26.
 - Chrome-extension test tabs are hidden: no media loads, timers throttle.

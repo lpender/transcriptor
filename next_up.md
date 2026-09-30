@@ -2,9 +2,6 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-- [ ] cf-scaffold (owner: loop, started 2026-09-30) — `wrangler` project, D1 migration 0001, one health
-  route, `Taskfile.yml` with `task dev`, `task test`, `task deploy` (deploy
-  is ACTION for Lee). Verify: `task test` green, `curl localhost:8787/health` ok.
 ## Queue
 - [ ] db-schema-0001 — D1 migration: users, productions, members, invites,
   scripts, notes per `docs/design/sharing.md`; `can(role, cap)` table in
@@ -56,6 +53,9 @@
   voices and cost, MCP setup, cues. Written from the specs above.
 
 ## Gated
+- [ ] cf-account — ACTION: `cd api && npx wrangler login`, then `npx wrangler d1
+  create tablework` and paste the id into `api/wrangler.toml`. Free tier;
+  needs your browser. Until then everything runs on local D1 only.
 - [ ] buy-domain — ACTION: buy tablework.com (free 2026-09-30) and point
   it at Pages (or Cloudflare once cf-scaffold lands). Costs money. Name is
   decided: Tablework (LOG 2026-09-30).
@@ -65,6 +65,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] cf-scaffold — DONE 2026-09-30: `api/` Worker (router.ts + index.ts entry), vitest + tsc, `Taskfile.yml` with serve/dev/test/deploy; `task test` green; `wrangler dev` answers `/health` with CORS for the app origin.
 - [x] measure-loudness — DONE 2026-09-30: `loudness(blobOrUrl)` in index.html (Web Audio, mean-square dB). Playwright: OfficeFans −28.43 vs ffmpeg −28.4, SadDay −23.48 vs −23.5; a 0.1-amplitude tone −23.01 as expected.
 - [x] engine-gain-node — DONE 2026-09-30: every track routes through a GainNode with `window.GAINS[file]` dB (0 when absent); slider and fades untouched. Verified in Playwright with real audio: +6 dB → 1.995, −3 dB → 0.708, both tracks playing, fade stops one and leaves the other.
 - [x] browser-voices — DONE 2026-09-30: `speak()` via speechSynthesis when a line has no clip, voice per character by name hash, silenced at volume 0, header says whose voices. Verified in Playwright with a stubbed engine (advances line by line, cancel on stop). Safari and real voices: Lee's ear.

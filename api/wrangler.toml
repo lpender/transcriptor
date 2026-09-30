@@ -1,0 +1,13 @@
+name = "tablework-api"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tablework"
+database_id = "local"          # ACTION for Lee: replace after `wrangler d1 create tablework`
+migrations_dir = "migrations"
+
+[vars]
+APP_ORIGIN = "http://localhost:8799"

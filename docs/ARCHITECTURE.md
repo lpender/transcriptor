@@ -30,6 +30,8 @@ flowchart LR
 | `cues.js`, `sound/` | This show's sound design; becomes per-production upload |
 | `convert.py`, `tts.py`, `normalize.py`, `stress.json` | Pipeline for this show; `tts.py` becomes a Worker job |
 | `sw.js` | Service worker; `CACHE` bumped every deploy |
+| `api/` | The Workers backend: `src/index.ts` entry (handler only), `src/router.ts` routes, `migrations/` D1, `test/` vitest |
+| `Taskfile.yml` | `task serve` (app), `task dev` (API on :8787), `task test` (gate), `task deploy` (Lee) |
 | `docs/BEHAVIOUR.md` | Exact behaviour of the app as it stands |
 
 ## Data flow
@@ -52,7 +54,8 @@ before any render is bought.
 - Target: Cloudflare Pages (frontend) + `wrangler deploy` (Workers, D1
   migrations, DO). Deploys are `ACTION:` items for Lee until a CI path is
   recorded here.
-- Environments: local `wrangler dev` with a local D1; prod on the domain.
+- Environments: `task dev` runs the Worker on :8787 with a local D1 and no
+  login; prod needs `wrangler login` and a D1 id in `api/wrangler.toml`.
 
 ## Scenarios
 

@@ -10,7 +10,8 @@ Live today at https://lpender.github.io/transcriptor/ (GitHub Pages, `main`).
 
 Frontend: `index.html`, no build, no dependencies. Backend (target, ADR 002):
 Cloudflare Workers + D1 + R2 + Durable Objects, Stripe, Resend.
-Gates today: serve with `python3 -m http.server 8799` and verify in a browser.
+Gates: `task test` (vitest + tsc in `api/`, syntax pass over index.html); UI
+changes verified in a browser on `task serve` (:8799); API on `task dev` (:8787).
 
 ```bash
 python3 convert.py                     # this show's PDF -> script.js

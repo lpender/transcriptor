@@ -1,0 +1,42 @@
+// The router: routes are plain functions of (request, env) so tests call them
+// without a server. Only index.ts exports to the Workers runtime, which
+// refuses any export that is not a handler.
+
+export interface Env {
+  DB: D1Database;
+  APP_ORIGIN: string;
+}
+
+export const VERSION = '0.1.0';
+
+type Handler = (req: Request, env: Env, params: Record<string, string>) => Promise<Response> | Response;
+const routes: { method: string; pattern: URLPattern; handler: Handler }[] = [];
+const route = (method: string, path: string, handler: Handler) =>
+  routes.push({ method, pattern: new URLPattern({ pathname: path }), handler });
+
+export const json = (body: unknown, status = 200, headers: HeadersInit = {}) =>
+  new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', ...headers } });
+export const error = (code: string, status: number, message?: string) => json({ error: code, message }, status);
+
+route('GET', '/health', () => json({ ok: true, version: VERSION }));
+
+export async function handle(req: Request, env: Env): Promise<Response> {
+  const url = new URL(req.url);
+  for (const r of routes) {
+    const m = r.method === req.method && r.pattern.exec(url);
+    if (m) return r.handler(req, env, Object.fromEntries(Object.entries(m.pathname.groups).map(([k, v]) => [k, v ?? ''])));
+  }
+  return error('not_found', 404);
+}
+
+// The static app on another origin calls this API with credentials; only that
+// origin is allowed, never '*'.
+export const cors = (req: Request, env: Env) => (res: Response) => {
+  const origin = req.headers.get('origin');
+  if (origin !== env.APP_ORIGIN) return res;
+  const h = new Headers(res.headers);
+  h.set('access-control-allow-origin', origin);
+  h.set('access-control-allow-credentials', 'true');
+  h.set('vary', 'origin');
+  return new Response(res.body, { status: res.status, headers: h });
+};
