@@ -64,6 +64,17 @@ route('GET', '/me', async (req, env) => {
   return user ? json({ user }) : error('unauthorized', 401);
 });
 
+// Your name, as members and the director's AI see you.
+route('PUT', '/me', async (req, env) => {
+  const user = await currentUser(env.DB, req);
+  if (!user) return error('unauthorized', 401);
+  const { name } = (await req.json().catch(() => ({}))) as { name?: unknown };
+  if (typeof name !== 'string' || name.trim().length > 80) return error('invalid_name', 400);
+  const clean = name.trim() || null;
+  await env.DB.prepare('UPDATE users SET name = ? WHERE id = ?').bind(clean, user.id).run();
+  return json({ user: { ...user, name: clean } });
+});
+
 route('POST', '/auth/logout', async (req, env) => {
   await revokeSession(env.DB, sessionToken(req));
   return json({ ok: true }, 200, { 'set-cookie': cookie('', 0) });

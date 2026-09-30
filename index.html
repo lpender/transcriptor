@@ -298,6 +298,7 @@
       </div>
     </div>
     <div id="signedIn" hidden>
+      <label class="loop" title="How the company sees you">your name <input id="myName" type="text" autocomplete="name" placeholder="as on the call sheet"></label>
       <div id="company"></div>
       <div id="voices"></div>
       <div id="ai"></div>
@@ -1269,7 +1270,7 @@ const accountNote = $('accountNote');
 function drawAccount() {
   $('signedOut').hidden = !!me;
   $('signedIn').hidden = !me;
-  if (me) accountNote.textContent = `Signed in as ${me.email}`;
+  if (me) { accountNote.textContent = `Signed in as ${me.email}`; $('myName').value = me.name || ''; }
   arrangeSheet();
   loadCompany();
   drawTokens();
@@ -1291,6 +1292,10 @@ async function sendLink() {
 }
 $('signinChip').onclick = sendLink;
 $('email').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); sendLink(); } };
+$('myName').onchange = async () => {
+  const r = await api('/me', { name: $('myName').value }, 'PUT');
+  if (r.status === 200) { me = r.user; loadCompany(); } else accountNote.textContent = r.message || 'Could not save your name.';
+};
 $('signoutChip').onclick = async () => { await api('/auth/logout', {}); me = null; accountNote.textContent = 'Signed out.'; drawAccount(); };
 {
   const q = new URLSearchParams(location.search);

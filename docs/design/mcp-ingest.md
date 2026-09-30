@@ -65,6 +65,7 @@ Tools (all scoped to the caller; production named by id or exact name):
 | `add_script` | production, title, text | speakers [{name, lines}], scenes, warnings; error with the offending line numbers |
 | `get_script` | production | title, text (the format above), speakers |
 | `set_parts` | production, member email, parts[] | ok |
+| `set_name` | name (empty clears) | ok |
 | `set_cues` | production, cues [{name, music?, bed?, hold?}] | ok; names must be unique; music/bed name files already uploaded |
 | `list_sound` | production | uploaded files [{name, kind, seconds}] |
 | `invite` | production, role | invite URL (14 days) |

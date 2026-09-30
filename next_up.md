@@ -2,11 +2,8 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
+
 ## Queue
-- [ ] user-name — members show as emails everywhere (persona round 2026-09-30:
-  `name: null` for all). Add `PUT /me {name}`, a name field in the Account
-  section (asked once after first sign-in), MCP `set_name`, and show the name
-  before the email in member lists and who_is_off_book. Tests + Chrome.
 ## Gated
 - [ ] stripe-keys — ACTION: a Stripe account in test mode, two prices ($1/mo,
   $10/yr), then `cd api && npx wrangler secret put STRIPE_SECRET_KEY`,
@@ -37,6 +34,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] user-name (2026-09-30) — `PUT /me {name}`, MCP `set_name`, name field in Account; names before emails in company rows and who_is_off_book. Verified: vitest (60), Chrome (name saved, survives reload, row reads "Lee P (you)").
 - [x] mcp-progress — DONE 2026-09-30: `who_is_off_book` over MCP for owner/director, one line per member in words (not started / N of M clear, K weak / off book, last worked). 1 test.
 - [x] mcp-parts-by-name — DONE 2026-09-30: `set_parts` matches speaker names against the current script (case-insensitive) and refuses unknown ones with the speaker list. Same test.
 - [x] notes-sync — DONE 2026-09-30: migration 0012 (`notes.line`), `GET/PUT /productions/:id/me/notes` [learn]; every note edit goes up when signed in, and on load the production's copy overlays the device's. Also: `pullCues` rebuilds the script only when the cues changed. 1 test; driven in Chrome: note up, local copy dropped, back after a pull, cleared on the server by an empty note.

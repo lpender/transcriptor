@@ -37,6 +37,16 @@ describe('sign in', () => {
     const b = await post('/auth/link', { email: 'new@example.com' });
     expect([a.status, b.status]).toEqual([202, 202]);
   });
+  it('sets and clears a name', async () => {
+    const asked = await post('/auth/link', { email: 'nm@example.com' });
+    const { link } = await asked.json() as { link: string };
+    const cookie = (await handle(new Request(link), env)).headers.get('set-cookie')!.split(';')[0];
+    const put = (name: unknown) => handle(new Request('http://x/me', { method: 'PUT', headers: { cookie, 'content-type': 'application/json' }, body: JSON.stringify({ name }) }), env);
+    expect((await put(42)).status).toBe(400);
+    expect((await (await put('  Dee Dee ')).json() as { user: { name: string } }).user.name).toBe('Dee Dee');
+    expect((await (await handle(new Request('http://x/me', { headers: { cookie } }), env)).json() as { user: { name: string } }).user.name).toBe('Dee Dee');
+    expect((await (await put('')).json() as { user: { name: null } }).user.name).toBeNull();
+  });
   it('401s without a session', async () => {
     expect((await handle(new Request('http://x/me'), env)).status).toBe(401);
   });

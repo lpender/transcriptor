@@ -63,6 +63,17 @@ tool<{ production: string; role: string }>({
   },
 });
 
+tool<{ name: string }>({
+  name: 'set_name',
+  description: 'Set the signed-in person\'s name, as the company sees it (empty clears it).' + DATA_NOTE,
+  inputSchema: { type: 'object', properties: { name: { type: 'string' } }, required: ['name'] },
+  run: async ({ name }, { user, env }) => {
+    if (typeof name !== 'string' || name.trim().length > 80) throw new Error('A name up to 80 characters.');
+    await env.DB.prepare('UPDATE users SET name = ? WHERE id = ?').bind(name.trim() || null, user.id).run();
+    return { ok: true, name: name.trim() || null };
+  },
+});
+
 // Who is off book: the director's question, answered in words per member.
 tool<{ production: string }>({
   name: 'who_is_off_book',
