@@ -125,7 +125,8 @@ tool<{ production: string }>({
     const rows = (await env.DB.prepare(`SELECT u.email, u.name, m.role, m.parts, p.best, p.total, p.misses, p.updated_at
         FROM members m JOIN users u ON u.id = m.user_id LEFT JOIN progress p ON p.user_id = m.user_id AND p.production_id = m.production_id
         WHERE m.production_id = ? AND (? OR m.user_id = ?) ORDER BY m.joined_at`).bind(production, everyone ? 1 : 0, user.id).all<{ email: string; name: string | null; role: string; parts: string; best: number | null; total: number | null; misses: string | null; updated_at: string | null }>()).results;
-    const lines = rows.filter((r) => r.role !== 'crew').map((r) => {
+    // Crew never learn; an owner or director without parts is directing, not owing lines.
+    const lines = rows.filter((r) => r.role !== 'crew' && (r.role === 'cast' || r.parts !== '[]')).map((r) => {
       const who = r.name || r.email, parts = JSON.parse(r.parts) as string[];
       const weak = r.misses ? Object.keys(JSON.parse(r.misses) as object).length : 0;
       if (!parts.length) return `${who}: no parts chosen yet (set_parts).`;
