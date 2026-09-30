@@ -1277,7 +1277,7 @@ const accountNote = $('accountNote');
 function drawAccount() {
   $('signedOut').hidden = !!me;
   $('signedIn').hidden = !me;
-  if (me) { accountNote.textContent = `Signed in as ${me.email}`; $('myName').value = me.name || ''; }
+  if (me) { accountNote.textContent = `Signed in as ${me.email}`; $('myName').value = me.name || ''; $('welcome').hidden = true; }   // signed in, the welcome's "Sign in" is done
   arrangeSheet();
   loadCompany();
   drawTokens();
@@ -1342,6 +1342,7 @@ async function loadCompany() {
 // box can push a script the other way.
 async function pullScript() {
   $('saveBtn').hidden = !(current && shares(current.role));
+  if (current) edit.querySelector('p').textContent = `Paste a script — one speech per line, each starting with the character's name and a colon. Save it and everyone in ${current.name} reads it.`;
   if (!current) return;
   const r = await api(`/productions/${current.id}/script`);
   if (r.status === 200 && r.script && r.script.text !== src.value) { src.value = r.script.text; $('start').click(); }
@@ -1484,6 +1485,7 @@ async function renderVoices(note) {
 // The device's script goes up to the production; the paste box's line says how it went.
 async function pushScript() {
   const r = await api(`/productions/${current.id}/script`, { title: current.name, text: src.value }, 'PUT');
+  if (r.status === 200) $('start').click();   // saved: read it, like Start reading
   edit.querySelector('p').textContent = r.status === 200 ? `Saved to ${current.name}: ${r.lines} lines, ${Object.keys(r.speakers).join(', ')}.`
     : r.error === 'bad_lines' ? `Not saved. These lines are not "NAME: speech" or ***: ${r.errors.map(e => e.line).join(', ')}.`
     : `Not saved (${r.error || r.status}).`;
