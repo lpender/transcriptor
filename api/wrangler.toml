@@ -11,3 +11,5 @@ migrations_dir = "migrations"
 
 [vars]
 APP_ORIGIN = "http://localhost:8799"
+API_ORIGIN = "http://localhost:8787"
+# RESEND_API_KEY and MAIL_FROM are secrets: `wrangler secret put` (Lee). Unset = links are logged.

@@ -4,14 +4,17 @@
 
 export interface Env {
   DB: D1Database;
-  APP_ORIGIN: string;
+  APP_ORIGIN: string;   // where the static app lives; the only CORS origin
+  API_ORIGIN: string;   // this Worker, for links in mail
+  RESEND_API_KEY?: string;
+  MAIL_FROM?: string;
 }
 
 export const VERSION = '0.1.0';
 
 type Handler = (req: Request, env: Env, params: Record<string, string>) => Promise<Response> | Response;
 const routes: { method: string; pattern: URLPattern; handler: Handler }[] = [];
-const route = (method: string, path: string, handler: Handler) =>
+export const route = (method: string, path: string, handler: Handler) =>
   routes.push({ method, pattern: new URLPattern({ pathname: path }), handler });
 
 export const json = (body: unknown, status = 200, headers: HeadersInit = {}) =>

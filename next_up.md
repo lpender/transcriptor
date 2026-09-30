@@ -2,11 +2,6 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-- [ ] auth-routes (owner: loop, started 2026-09-30) — `POST /auth/link` (email), `GET /auth/verify?token`
-  (sets cookie, redirects to APP_ORIGIN), `GET /me`, `POST /auth/logout`.
-  Mail through `email.ts` with Resend behind an env var; dev logs the link.
-  ACTION for Lee later: Resend key + domain (costs nothing on the free tier
-  but needs DNS).
 ## Queue
 - [ ] api-productions — create/list/get, members, change role, remove, leave
   (last owner rule). Tests against local D1. UNTIL: db-schema-0001.
@@ -53,6 +48,9 @@
   voices and cost, MCP setup, cues. Written from the specs above.
 
 ## Gated
+- [ ] resend-account — ACTION: a Resend account (free tier) with the domain
+  verified in DNS, then `cd api && npx wrangler secret put RESEND_API_KEY`
+  and `MAIL_FROM`. Until then sign-in links are only logged. UNTIL: buy-domain.
 - [ ] cf-account — ACTION: `cd api && npx wrangler login`, then `npx wrangler d1
   create tablework` and paste the id into `api/wrangler.toml`. Free tier;
   needs your browser. Until then everything runs on local D1 only.
@@ -65,6 +63,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] auth-routes — DONE 2026-09-30: `/auth/link`, `/auth/verify`, `/me`, `/auth/logout` in `api/src/routes/auth.ts`, mail through `email.ts` (Resend when keyed, logged otherwise). 3 route tests on D1; walked live on `wrangler dev` with curl: 202 → 302 with cookie → /me 200.
 - [x] auth-core — DONE 2026-09-30: migration 0002 (magic_link_tokens, sessions), `api/src/auth.ts` (issue/verify links, sessions, `currentUser` from cookie or bearer), `ids.ts`; 5 tests on a real D1 via `@cloudflare/vitest-pool-workers` 0.22 + vitest 4.
 - [x] db-schema-0001 — DONE 2026-09-30: `api/migrations/0001_productions.sql` (users, productions, members, invites, scripts, notes), `api/src/access.ts` with the role × capability table and 4 tests; applied to local D1, CHECK on role verified.
 - [x] cf-scaffold — DONE 2026-09-30: `api/` Worker (router.ts + index.ts entry), vitest + tsc, `Taskfile.yml` with serve/dev/test/deploy; `task test` green; `wrangler dev` answers `/health` with CORS for the app origin.
