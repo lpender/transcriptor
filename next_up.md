@@ -2,9 +2,6 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-- [ ] design-mcp-ingest (owner: loop, started 2026-09-30) — Spec the MCP server: `whoami`,
-  `list_productions`, `add_script`, `get_script`, `set_cues`,
-  `upload_sound`. Claude converts PDFs client-side; server takes text.
 ## Queue
 - [ ] design-voices-render — Spec the render flow: price quote from
   uncached characters, per-line resumable job, R2 cache by hash, BYO key.
@@ -32,6 +29,19 @@
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
 - [ ] relay-durable-object (EPIC) — Replace public MQTT with the production's
   DO; keep the message shape and clock ordering. UNTIL: auth-magic-link.
+- [ ] verify-cf-mcp-oauth — Spike: hello-world remote MCP on Workers with
+  `@cloudflare/workers-oauth-provider`, connect from claude.ai as a custom
+  connector, call `whoami`. Verify: a tool call round-trips. Local only
+  until Lee has a domain; `workers.dev` subdomain is free. UNTIL: cf-scaffold.
+- [ ] mcp-scaffold — `/mcp` route, `whoami`, `list_productions`, bearer
+  personal tokens (hashed, revocable). Tests. UNTIL: api-productions.
+- [ ] mcp-add-script — `add_script` + `get_script`; one `parseScript` in
+  `sentences.js` shared with the paste box, with the validator and speaker
+  counts. Tests. UNTIL: mcp-scaffold.
+- [ ] mcp-cues-parts-invite — `set_cues`, `list_sound`, `set_parts`,
+  `invite`. UNTIL: mcp-add-script, api-invites.
+- [ ] mcp-oauth — OAuth 2.1 provider + consent page listing productions.
+  UNTIL: verify-cf-mcp-oauth, mcp-scaffold.
 - [ ] how-it-works-page (EPIC) — Public docs page: productions, invites,
   voices and cost, MCP setup, cues. Written from the specs above.
 
@@ -45,6 +55,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] design-mcp-ingest — DONE 2026-09-30: `docs/design/mcp-ingest.md`, ADR 005 (text in the paste format, no files over MCP, OAuth + bearer); split into verify-cf-mcp-oauth, mcp-scaffold, mcp-add-script, mcp-cues-parts-invite, mcp-oauth.
 - [x] design-sharing-model — DONE 2026-09-30: `docs/design/sharing.md` (diverge, skeptic, spec, role table), ADR 004; split into db-schema-0001, api-productions, api-invites, web-production-panel, web-progress-view.
 - [x] spike-cue-listening — DONE 2026-09-30: H switch "Hear me say it" in More; last two words of the sentence under test count as the press. Verified in Playwright with a stubbed SpeechRecognition (wrong words ignored, reveal, then right + next). UNTIL Lee tries it with a real mic: one-word pieces ("No.") will fire on any "no".
 - [x] productionize-billing-period — DECIDED 2026-09-30 (loop): monthly and yearly, yearly default (ADR 003 as written).
