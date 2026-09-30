@@ -2,8 +2,6 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-- [ ] stress-per-line (owner: loop, started 2026-09-30) — `stress.json` becomes a per-line "say as" on the
-  script, editable in the notes column, part of the clip hash. UNTIL: voices-render-job.
 ## Queue
 - [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
@@ -47,6 +45,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] stress-per-line — DONE 2026-09-30: migration 0008 `sayas` (per production, keyed by full line), `plan()`/quote/render take it and hash on the spoken text, `GET/PUT /productions/:id/sayas` [script]. 2 tests. `stress.json` is that table's shape and can be PUT as-is; the notes-column editor comes with web-voices-panel.
 - [x] voices-byo-key — DONE 2026-09-30: migration 0007, `api/src/seal.ts` (AES-GCM under `SEALING_KEY`), routes get/put/delete `/productions/:id/eleven-key` (owner only, last4 shown), `keyFor()` picks the production's key over ours, quote is $0 with an own key. 2 tests.
 - [x] voices-render-job — DONE 2026-09-30: migration 0006 `renders`; `api/src/eleven.ts` (adapter, tts.py's spans), `render.ts` (client-driven batches of 4, idempotent by hash, failures recorded, retry), routes start/next/retry/progress, `GET /productions/:id/clips` (clips.js shape), `GET /clips/:hash`; R2 binding `CLIPS`. 3 tests with a stub engine. A real render needs the key and credits (Gated).
 - [x] voices-quote — DONE 2026-09-30: migration 0005 `clips` + `voices`, `api/src/voices.ts` (cast, tts.py-compatible clip hash, $0.30/1k min $1, quote over uncached chars, dedup), routes `/voices`, `/productions/:id/voices`, `/render/quote`; `scripts/seed-clips.mjs` seeds the cache from clips.js. 4 tests; live: the real play quotes with its 3 unrendered lines only.

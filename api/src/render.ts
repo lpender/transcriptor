@@ -24,9 +24,9 @@ export const getRender = async (db: D1Database, productionId: string, renderId: 
 };
 
 // The distinct clips a script needs, in order, with what is already cached marked.
-async function needed(db: D1Database, text: string, voiceOf: Record<string, string>): Promise<{ lines: Line[]; have: Set<string> }> {
+async function needed(db: D1Database, text: string, voiceOf: Record<string, string>, sayAs: Record<string, string>): Promise<{ lines: Line[]; have: Set<string> }> {
   const seen = new Set<string>();
-  const lines = (await plan(text, voiceOf)).filter((l) => !seen.has(l.hash) && seen.add(l.hash));
+  const lines = (await plan(text, voiceOf, sayAs)).filter((l) => !seen.has(l.hash) && seen.add(l.hash));
   const have = new Set<string>();
   const hashes = lines.map((l) => l.hash);
   for (let i = 0; i < hashes.length; i += 100) {
@@ -37,10 +37,10 @@ async function needed(db: D1Database, text: string, voiceOf: Record<string, stri
   return { lines, have };
 }
 
-export async function startRender(db: D1Database, productionId: string, scriptId: string, text: string, voiceOf: Record<string, string>, by: string): Promise<Render> {
+export async function startRender(db: D1Database, productionId: string, scriptId: string, text: string, voiceOf: Record<string, string>, sayAs: Record<string, string>, by: string): Promise<Render> {
   const open = await openRender(db, productionId);
   if (open) return open;
-  const { lines, have } = await needed(db, text, voiceOf);
+  const { lines, have } = await needed(db, text, voiceOf, sayAs);
   const at = now();
   const r: Render = { id: id(), production_id: productionId, script_id: scriptId, total: lines.length, done: [...have].length, failed: [], state: lines.every((l) => have.has(l.hash)) ? 'done' : 'running' };
   await db.prepare('INSERT INTO renders (id, production_id, script_id, total, done, failed, state, created_by, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
@@ -49,8 +49,8 @@ export async function startRender(db: D1Database, productionId: string, scriptId
 }
 
 // Render up to BATCH clips that are still missing; record failures and carry on.
-export async function renderNext(db: D1Database, bucket: R2Bucket, key: string, r: Render, text: string, voiceOf: Record<string, string>): Promise<Render> {
-  const { lines, have } = await needed(db, text, voiceOf);
+export async function renderNext(db: D1Database, bucket: R2Bucket, key: string, r: Render, text: string, voiceOf: Record<string, string>, sayAs: Record<string, string>): Promise<Render> {
+  const { lines, have } = await needed(db, text, voiceOf, sayAs);
   const failedHashes = new Set(r.failed.map((f) => f.hash));
   const todo = lines.filter((l) => !have.has(l.hash) && !failedHashes.has(l.hash)).slice(0, BATCH);
   for (const l of todo) {

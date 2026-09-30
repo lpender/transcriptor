@@ -8,13 +8,13 @@ import { gate } from '../productions';
 import { getRender, renderNext, retryRender, startRender } from '../render';
 import { error, json, route } from '../router';
 import { currentScript } from '../scripts';
-import { plan, voicesOf } from '../voices';
+import { plan, sayAsOf, voicesOf } from '../voices';
 import { parseScript } from '../shared';
 import { unseal } from '../seal';
 
 const scriptAndVoices = async (env: { DB: D1Database }, id: string) => {
   const script = await currentScript(env.DB, id);
-  return script ? { script, voiceOf: await voicesOf(env.DB, id) } : null;
+  return script ? { script, voiceOf: await voicesOf(env.DB, id), sayAs: await sayAsOf(env.DB, id) } : null;
 };
 
 // The key a render runs on: the production's own if it has one, else ours.
@@ -30,7 +30,7 @@ route('POST', '/productions/:id/render', async (req, env, { id }) => {
   if (!(await keyFor(env, id))) return error('no_engine', 503, 'Voice rendering is not switched on here yet.');
   const sv = await scriptAndVoices(env, id);
   if (!sv) return error('no_script', 404, 'Load a script first.');
-  return json({ render: await startRender(env.DB, id, sv.script.id, sv.script.text, sv.voiceOf, g.user.id) }, 201);
+  return json({ render: await startRender(env.DB, id, sv.script.id, sv.script.text, sv.voiceOf, sv.sayAs, g.user.id) }, 201);
 });
 
 route('POST', '/productions/:id/render/:rid/next', async (req, env, { id, rid }) => {
@@ -43,7 +43,7 @@ route('POST', '/productions/:id/render/:rid/next', async (req, env, { id, rid })
   if (!k) return error('no_engine', 503);
   const sv = await scriptAndVoices(env, id);
   if (!sv) return error('no_script', 404);
-  return json({ render: await renderNext(env.DB, env.CLIPS, k.key, r, sv.script.text, sv.voiceOf) });
+  return json({ render: await renderNext(env.DB, env.CLIPS, k.key, r, sv.script.text, sv.voiceOf, sv.sayAs) });
 });
 
 route('POST', '/productions/:id/render/:rid/retry', async (req, env, { id, rid }) => {
@@ -66,7 +66,7 @@ route('GET', '/productions/:id/clips', async (req, env, { id }) => {
   if (g instanceof Response) return g;
   const sv = await scriptAndVoices(env, id);
   if (!sv) return json({ clips: {} });
-  const lines = await plan(sv.script.text, sv.voiceOf);
+  const lines = await plan(sv.script.text, sv.voiceOf, sv.sayAs);
   const hashes = [...new Set(lines.map((l) => l.hash))];
   const have = new Set<string>();
   for (let i = 0; i < hashes.length; i += 100) {

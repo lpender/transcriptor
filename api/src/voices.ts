@@ -31,12 +31,13 @@ export const clipHash = async (voice: string, say: string) => (await sha1(MODEL 
 
 export interface Line { speaker: string; say: string; voice: string; hash: string; chars: number }
 
-// Every line of a script with its voice and clip name.
-export async function plan(text: string, voiceOf: Record<string, string>): Promise<Line[]> {
+// Every line of a script with its voice and clip name. `sayAs` maps a full
+// line ("NAME: words") to how it should be spoken instead.
+export async function plan(text: string, voiceOf: Record<string, string>, sayAs: Record<string, string> = {}): Promise<Line[]> {
   const out: Line[] = [];
   for (const scene of parseScript(text).scenes) {
     for (const s of scene) {
-      const say = spoken(s.text);
+      const say = spoken(sayAs[`${s.speaker}: ${s.text}`] ?? s.text);
       const voice = voiceOf[s.speaker] ?? DEFAULT_VOICE;
       out.push({ speaker: s.speaker, say, voice, hash: await clipHash(voice, say), chars: say.length });
     }
@@ -47,8 +48,8 @@ export async function plan(text: string, voiceOf: Record<string, string>): Promi
 export interface Quote { lines: number; characters: number; cached: number; toRender: number; priceCents: number; speakers: Record<string, { lines: number; voice: string }> }
 
 // The quote: only characters not already in the cache cost anything.
-export async function quote(db: D1Database, text: string, voiceOf: Record<string, string>): Promise<Quote> {
-  const lines = await plan(text, voiceOf);
+export async function quote(db: D1Database, text: string, voiceOf: Record<string, string>, sayAs: Record<string, string> = {}): Promise<Quote> {
+  const lines = await plan(text, voiceOf, sayAs);
   const have = new Set<string>();
   const hashes = [...new Set(lines.map((l) => l.hash))];
   for (let i = 0; i < hashes.length; i += 100) {   // D1 binds at most ~100 parameters comfortably
@@ -73,3 +74,6 @@ export async function quote(db: D1Database, text: string, voiceOf: Record<string
 
 export const voicesOf = async (db: D1Database, productionId: string): Promise<Record<string, string>> =>
   Object.fromEntries((await db.prepare('SELECT speaker, voice_id FROM voices WHERE production_id = ?').bind(productionId).all<{ speaker: string; voice_id: string }>()).results.map((r) => [r.speaker, r.voice_id]));
+
+export const sayAsOf = async (db: D1Database, productionId: string): Promise<Record<string, string>> =>
+  Object.fromEntries((await db.prepare('SELECT line, say FROM sayas WHERE production_id = ?').bind(productionId).all<{ line: string; say: string }>()).results.map((r) => [r.line, r.say]));

@@ -72,7 +72,9 @@ phoneme emphasis tags:
    word capitals cannot reach: `I`, or a word already set in capitals.
 3. **Punctuation.** Ellipses add weight and a pause.
 
-`stress.json` maps a full script line to how it should be spoken:
+`stress.json` maps a full script line to how it should be spoken (in the
+product this is the production's `sayas` table, same shape, set over
+`PUT /productions/:id/sayas`):
 
 ```json
 { "NELSON: That's what I said.": "That's what \"I\" said." }

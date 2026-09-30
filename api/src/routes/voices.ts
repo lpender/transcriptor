@@ -5,7 +5,7 @@
 import { gate } from '../productions';
 import { error, json, route } from '../router';
 import { currentScript } from '../scripts';
-import { CAST, quote, voicesOf } from '../voices';
+import { CAST, quote, sayAsOf, voicesOf } from '../voices';
 import { keyFor } from './render';
 
 route('GET', '/voices', () => json({ voices: CAST }));
@@ -35,7 +35,28 @@ route('POST', '/productions/:id/render/quote', async (req, env, { id }) => {
   if (g instanceof Response) return g;
   const script = await currentScript(env.DB, id);
   if (!script) return error('no_script', 404, 'Load a script first.');
-  const q = await quote(env.DB, script.text, await voicesOf(env.DB, id));
+  const q = await quote(env.DB, script.text, await voicesOf(env.DB, id), await sayAsOf(env.DB, id));
   const own = (await keyFor(env, id))?.own ?? false;
   return json({ quote: { ...q, priceCents: own ? 0 : q.priceCents, ownKey: own } });
+});
+
+//   GET /productions/:id/sayas             → {line: say}                                  [read]
+//   PUT /productions/:id/sayas  {line: say} → set several; an empty say removes one       [script]
+route('GET', '/productions/:id/sayas', async (req, env, { id }) => {
+  const g = await gate(env.DB, req, id, 'read');
+  if (g instanceof Response) return g;
+  return json({ sayas: await sayAsOf(env.DB, id) });
+});
+
+route('PUT', '/productions/:id/sayas', async (req, env, { id }) => {
+  const g = await gate(env.DB, req, id, 'script');
+  if (g instanceof Response) return g;
+  const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return error('invalid_sayas', 400);
+  const entries = Object.entries(body);
+  if (entries.length > 500 || !entries.every(([l, s]) => l.length <= 2000 && typeof s === 'string' && s.length <= 2000)) return error('invalid_sayas', 400);
+  await env.DB.batch(entries.map(([line, say]) => (say as string).trim()
+    ? env.DB.prepare('INSERT INTO sayas (production_id, line, say) VALUES (?, ?, ?) ON CONFLICT (production_id, line) DO UPDATE SET say = excluded.say').bind(id, line, (say as string).trim())
+    : env.DB.prepare('DELETE FROM sayas WHERE production_id = ? AND line = ?').bind(id, line)));
+  return json({ sayas: await sayAsOf(env.DB, id) });
 });
