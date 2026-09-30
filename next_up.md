@@ -3,8 +3,19 @@
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
 ## Queue
-- [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
-  production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
+- [ ] billing-core — schema (trial_ends_at, period_ends_at, stripe ids),
+  `api/src/stripe.ts` (fetch + form bodies, `setStripe()` seam),
+  `verifyWebhook` tested against a hand-signed payload, `canWrite`, 14-day
+  trial set on creation. `docs/design/billing.md`.
+- [ ] billing-routes — checkout (quantity = members), portal, plans, webhook
+  → production.state; tests with a stubbed Stripe. UNTIL: billing-core.
+- [ ] billing-gate — `canWrite` on script PUT, sound POST, render start,
+  invite accept, member add; readonly answers 402 with a plain message.
+  UNTIL: billing-core.
+- [ ] billing-seats — subscription quantity follows the member count on
+  join/leave/remove; failures logged. UNTIL: billing-routes.
+- [ ] web-billing — company panel: state in words and one button, Pay or
+  Manage. UNTIL: billing-routes.
 - [ ] relay-durable-object (EPIC) — Replace public MQTT with the production's
   DO; keep the message shape and clock ordering. UNTIL: auth-magic-link.
 - [ ] mcp-oauth — OAuth 2.1 provider + consent page listing productions.
@@ -13,6 +24,10 @@
   voices and cost, MCP setup, cues. Written from the specs above.
 
 ## Gated
+- [ ] stripe-keys — ACTION: a Stripe account in test mode, two prices ($1/mo,
+  $10/yr), then `cd api && npx wrangler secret put STRIPE_SECRET_KEY`,
+  `STRIPE_WEBHOOK_SECRET`, and the price ids in `wrangler.toml` vars. Nothing
+  charges until live keys. UNTIL: cf-account.
 - [ ] eleven-key-and-bucket — ACTION: `cd api && npx wrangler r2 bucket create
   tablework-clips`, `npx wrangler secret put ELEVEN_LABS_API_KEY` and
   `npx wrangler secret put SEALING_KEY` (any long random string), then say
