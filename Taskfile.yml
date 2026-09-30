@@ -10,6 +10,11 @@ tasks:
     dir: api
     cmds: [npx wrangler dev]
 
+  db:migrate:
+    desc: Apply D1 migrations to the local database (task dev needs this once)
+    dir: api
+    cmds: [npx wrangler d1 migrations apply tablework --local]
+
   test:
     desc: The gate — API unit tests, typecheck, and a syntax pass over index.html
     cmds:

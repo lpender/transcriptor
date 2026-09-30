@@ -2,10 +2,17 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-- [ ] db-schema-0001 (owner: loop, started 2026-09-30) — D1 migration: users, productions, members, invites,
-  scripts, notes per `docs/design/sharing.md`; `can(role, cap)` table in
-  `api/src/access.ts` with a unit test. UNTIL: cf-scaffold.
 ## Queue
+- [ ] auth-core — `api/src/auth.ts` per PLATFORM §1: users, magic_link_tokens
+  (hashed, 15 min, single use), sessions (hashed, 30 days) in migration 0002;
+  `issueMagicLink`, `verifyMagicLink`, `currentUser(req)` from cookie or
+  bearer. Unit tests on a local D1 via `wrangler d1 execute` fixtures or an
+  in-memory fake. No mail yet: dev prints the link to the log.
+- [ ] auth-routes — `POST /auth/link` (email), `GET /auth/verify?token`
+  (sets cookie, redirects to APP_ORIGIN), `GET /me`, `POST /auth/logout`.
+  Mail through `email.ts` with Resend behind an env var; dev logs the link.
+  ACTION for Lee later: Resend key + domain (costs nothing on the free tier
+  but needs DNS).
 - [ ] api-productions — create/list/get, members, change role, remove, leave
   (last owner rule). Tests against local D1. UNTIL: db-schema-0001.
 - [ ] api-invites — mint (role, 14 days), revoke, accept signed in / signed
@@ -15,8 +22,6 @@
   UNTIL: api-invites.
 - [ ] web-progress-view — owner/director table: per member cleared/total,
   weak lines. UNTIL: api-productions.
-- [ ] auth-magic-link (EPIC) — Resend + KV sessions; try-it path stays
-  account-free. UNTIL: cf-scaffold.
 - [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
 - [ ] relay-durable-object (EPIC) — Replace public MQTT with the production's
@@ -65,6 +70,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] db-schema-0001 — DONE 2026-09-30: `api/migrations/0001_productions.sql` (users, productions, members, invites, scripts, notes), `api/src/access.ts` with the role × capability table and 4 tests; applied to local D1, CHECK on role verified.
 - [x] cf-scaffold — DONE 2026-09-30: `api/` Worker (router.ts + index.ts entry), vitest + tsc, `Taskfile.yml` with serve/dev/test/deploy; `task test` green; `wrangler dev` answers `/health` with CORS for the app origin.
 - [x] measure-loudness — DONE 2026-09-30: `loudness(blobOrUrl)` in index.html (Web Audio, mean-square dB). Playwright: OfficeFans −28.43 vs ffmpeg −28.4, SadDay −23.48 vs −23.5; a 0.1-amplitude tone −23.01 as expected.
 - [x] engine-gain-node — DONE 2026-09-30: every track routes through a GainNode with `window.GAINS[file]` dB (0 when absent); slider and fades untouched. Verified in Playwright with real audio: +6 dB → 1.995, −3 dB → 0.708, both tracks playing, fade stops one and leaves the other.
