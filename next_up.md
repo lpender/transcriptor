@@ -2,20 +2,6 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-- [ ] aloud-loop-words (owner: loop, started 2026-09-30) — "play 0 then go back 0" (`tmp/qa/2026-09-30-naive-390-sheet.png`)
-  reads as jargon; say "read [N] lines, then go back [M]; 0 means straight
-  through". Verify in the sheet.
-- [ ] app-title (owner: loop, started 2026-09-30) — `<title>` and the sheet say "Script Follower"; make it
-  "Tablework" (signed in: "<production> · Tablework"). Verify tab title.
-- [ ] welcome-landing (owner: loop, started 2026-09-30) — Naive-user test 2026-09-30 (`tmp/qa/2026-09-30-naive-390-landing.png`,
-  `-1280-landing.png`): a first visit drops into another show's script with
-  no name, no words, half a screen empty above "Before the show", and sign-in
-  is at the bottom of a nine-section sheet. Build: on a host other than the
-  show's (lpender.github.io) with no saved script and no account, show a
-  welcome: "Tablework — run lines with your company", three buttons: Paste a
-  script, Sign in, Try a sample (a short public-domain scene, not Waiting).
-  The bundled Waiting script and cues stay for the show's host. Verify at
-  390 and 1280 in Chrome, signed out.
 ## Queue
 - [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
@@ -51,6 +37,9 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] welcome-landing — DONE 2026-09-30: on any host but the show's (or `?show=1`), a first visit shows "Tablework — Run lines with your company" with Paste a script / Sign in / Try a sample (a Wilde scene, public domain); the bundled script and cues.js stay for the show's host. Driven in Chrome at 390: welcome, sample loads 10 lines with no cues; `?show=1` still 285 lines and 11 cues (`tmp/qa/2026-09-30-welcome-390.png`).
+- [x] app-title — DONE 2026-09-30: `<title>` is Tablework; signed in, "<production> · Tablework".
+- [x] aloud-loop-words — DONE 2026-09-30: "read [N] sentences, then go back [M] (0: straight through)".
 - [x] web-sound-panel — DONE 2026-09-30: Show section gains "Sound files" (Add music / Add room tone, levelled on upload by `loudness()` to −23/−28 dB, gain shown, Delete) and "Scenes" (name, music, room tone, hold, Save) for owner/director/crew; a production's cues replace cues.js and the engine plays its URLs through the per-file gain. Driven in Chrome: two uploads (+0.4, +0.5 dB), two scenes saved, both tracks playing from the API with the right gain, the hold stop in the script.
 - [x] mcp-cues — DONE 2026-09-30: `list_sound` and `set_cues` over MCP (files by id or name, unique scene names, holds), sharing `setCues`/`getCues` with the HTTP routes. 1 test.
 - [x] sound-api — DONE 2026-09-30: migration 0010 `sound` + `cues`; upload through the Worker (25 MB, audio types), list, delete refused while a cue uses it, `GET/PUT /productions/:id/cues` in cues.js's shape with `gains`, `GET /sound/:key` from R2. 1 test walking the lot.

@@ -87,6 +87,12 @@ hundred", "**You** are" answering "Who is."
 
 ## The app
 
+The show's own host (lpender.github.io, or `?show=1`) opens on the bundled
+script with its cues, as the cast is used to. Anywhere else, a first visit
+(no saved script, no account) gets a welcome: Paste a script, Sign in, or
+Try a sample (a public-domain scene); `cues.js` is not applied there, a
+production's own cues are.
+
 State lives in `localStorage` (script, current line, key-word mode, role, best
 run, per-sentence misses). The bundled script wins over a saved copy unless the
 reader pasted their own.
