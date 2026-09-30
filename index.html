@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Script Follower</title>
+<title>Tablework</title>
 <style>
   /* A prompter's script: manila paper, typewriter ribbon, read in a dark room. */
   :root {
@@ -150,6 +150,12 @@
   /* ---- pasting a script ---- */
   #edit { max-width: 40em; margin: 0 auto; padding: 24px 20px 40px; font: 400 15px/1.55 ui-monospace, Menlo, monospace; color: var(--faded); }
   #edit p { color: var(--cue); }
+  #welcome { margin: 10vh 0 28px; }
+  #welcome h1 { font: 500 2.2em/1.1 Georgia, 'Times New Roman', serif; color: var(--paper); margin: 0 0 8px; letter-spacing: .01em; }
+  #welcome .tag { color: var(--cue); font-size: 1.05em; margin: 0 0 18px; }
+  #welcome .row { flex-wrap: wrap; }
+  #welcome button { min-height: var(--tap); padding: 0 18px; border-radius: 10px; border: 1px solid #5E5540; background: #262218; color: var(--paper); font: 500 15px ui-monospace, Menlo, monospace; }
+  .dim { color: var(--cue); font-size: .85em; }
   #accountNote { color: var(--cue); font-size: .9em; min-height: 1.2em; margin: 6px 0 0; }
   #company h3, #voices h3, #ai h3 { margin: 10px 0 4px; font-weight: 500; }
   #voices .row, #ai .row, #company .row { padding: 3px 8px; margin: 0 -8px; border-radius: 8px; justify-content: space-between; }
@@ -177,6 +183,15 @@
 </head>
 <body>
 <div id="edit">
+  <div id="welcome" hidden>
+    <h1>Tablework</h1>
+    <p class="tag">Run lines with your company. One script, one set of voices, everyone's place in it.</p>
+    <div class="row">
+      <button id="pasteBtn">Paste a script</button>
+      <button id="signinBtn">Sign in</button>
+      <button id="sampleBtn">Try a sample</button>
+    </div>
+  </div>
   <p>Paste a script — one speech per line, each starting with the character's name and a colon. Your place, your parts and your score are kept in this browser.</p>
   <textarea id="src" spellcheck="false"></textarea>
   <div class="row">
@@ -210,9 +225,9 @@
     <div class="row">
       <button class="chip wide" data-key="p" id="playChip">Read aloud<span class="key">P</span></button>
     </div>
-    <label class="loop" title="While reading aloud: play this many sentences, then jump back this many">
-      play <input id="chunk" type="number" min="0" max="99" inputmode="numeric"> then go back
-      <input id="rewind" type="number" min="0" max="99" inputmode="numeric">
+    <label class="loop" title="While reading aloud: read this many sentences, then go back this many; 0 means straight through">
+      read <input id="chunk" type="number" min="0" max="99" inputmode="numeric"> sentences, then go back
+      <input id="rewind" type="number" min="0" max="99" inputmode="numeric"> <span class="dim">(0: straight through)</span>
     </label>
 
     <h2>Show</h2>
@@ -1140,13 +1155,37 @@ $('start').onclick = () => {
 // A pasted script wins, but only if there is one: an empty saved script once stuck
 // the app on the paste box with no way back to the built-in one.
 const saved = (load('script') || '').trim() ? load('script') : '';
-src.value = (load('pasted') === 'true' && saved ? saved : window.SCRIPT) || saved || '';
+// The show's own host (and ?show=1 in dev) opens on the bundled script with its
+// cues, as the cast is used to. Anywhere else the bundled script and cues.js are
+// one show's private material: a first visit gets a welcome, and the cues wait
+// for a production's own (pullCues) or stay silent.
+const SHOW_HOST = location.hostname === 'lpender.github.io' || new URLSearchParams(location.search).get('show') === '1';
+if (!SHOW_HOST) { window.CUES = []; window.GAINS = {}; }
+src.value = (load('pasted') === 'true' && saved ? saved : SHOW_HOST ? window.SCRIPT : '') || saved || '';
 if (src.value.trim()) $('start').click();
+else if (!SHOW_HOST) {
+  $('welcome').hidden = false;
+  edit.hidden = false;
+}
 // An empty box means script.js never arrived — say so, rather than looking broken.
 else {
   edit.querySelector('p').textContent = 'The script did not load. Press "Fetch the script", or paste one below.';
   diagnose();
 }
+// A short public-domain scene to try the app on (Wilde, The Importance of Being Earnest, 1895).
+const SAMPLE = `ALGERNON: Did you hear what I was playing, Lane?
+LANE: I didn't think it polite to listen, sir.
+ALGERNON: I'm sorry for that, for your sake. I don't play accurately, anyone can play accurately, but I play with wonderful expression.
+LANE: Yes, sir.
+ALGERNON: And, speaking of the science of Life, have you got the cucumber sandwiches cut for Lady Bracknell?
+LANE: Yes, sir.
+ALGERNON: Oh! By the way, Lane, I see from your book that on Thursday night, when Lord Shoreman and Mr. Worthing were dining with me, eight bottles of champagne are entered as having been consumed.
+LANE: Yes, sir; eight bottles and a pint.
+ALGERNON: Why is it that at a bachelor's establishment the servants invariably drink the champagne? I ask merely for information.
+LANE: I attribute it to the superior quality of the wine, sir.`;
+$('pasteBtn').onclick = () => { $('welcome').hidden = true; src.focus(); };
+$('sampleBtn').onclick = () => { $('welcome').hidden = true; src.value = SAMPLE; $('start').click(); };
+$('signinBtn').onclick = () => { sheet.showModal(); $('email').focus(); };
 
 joinRoom();
 
@@ -1209,6 +1248,7 @@ async function loadCompany() {
   const want = load('production', '');
   current = productions.find(p => p.id === want) || productions[0] || null;
   if (current) save('production', current.id);
+  document.title = current ? `${current.name} · Tablework` : 'Tablework';
   drawCompany();
   pullScript();
 }
