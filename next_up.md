@@ -2,12 +2,12 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-## Queue
-- [ ] billing-gate — `canWrite` on script PUT, sound POST, render start,
+- [ ] billing-seats (owner: loop, started 2026-09-30) — subscription quantity follows the member count on
+  join/leave/remove; failures logged. UNTIL: billing-routes.
+- [ ] billing-gate (owner: loop, started 2026-09-30) — `canWrite` on script PUT, sound POST, render start,
   invite accept, member add; readonly answers 402 with a plain message.
   UNTIL: billing-core.
-- [ ] billing-seats — subscription quantity follows the member count on
-  join/leave/remove; failures logged. UNTIL: billing-routes.
+## Queue
 - [ ] web-billing — company panel: state in words and one button, Pay or
   Manage. UNTIL: billing-routes.
 - [ ] relay-durable-object (EPIC) — Replace public MQTT with the production's
