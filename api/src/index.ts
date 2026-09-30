@@ -11,6 +11,7 @@ import './routes/voices';
 import './routes/render';
 import './routes/byo-key';
 import './routes/sound';
+import './routes/mcp-cues';
 
 export default {
   fetch: async (req: Request, env: Env) => cors(req, env)(preflight(req) ?? (await handle(req, env))),

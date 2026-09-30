@@ -2,7 +2,6 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-- [ ] mcp-cues (owner: loop, started 2026-09-30) — `set_cues`, `list_sound` over MCP.
 ## Queue
 - [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
@@ -40,6 +39,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] mcp-cues — DONE 2026-09-30: `list_sound` and `set_cues` over MCP (files by id or name, unique scene names, holds), sharing `setCues`/`getCues` with the HTTP routes. 1 test.
 - [x] sound-api — DONE 2026-09-30: migration 0010 `sound` + `cues`; upload through the Worker (25 MB, audio types), list, delete refused while a cue uses it, `GET/PUT /productions/:id/cues` in cues.js's shape with `gains`, `GET /sound/:key` from R2. 1 test walking the lot.
 - [x] web-say-as — DONE 2026-09-30: the note editor (owner/director, signed in) gains a "Say it as…" field; saved to `/sayas`, shown as ♪ under the note, the quote counts the line as unrendered. Driven in Chrome: 689 → 703 characters to render after a say-as (`tmp/qa` not needed).
 - [x] web-voices-panel — DONE 2026-09-30: "Company voices" in the Account section (owner/director): a voice per speaker from our cast, the quote in plain words, "Render the voices for $X" that drives the batches to done; clips come from the API in clips.js's shape (spans now stored on the clip row, seed updated). Driven in Chrome against local D1: 6 speakers, $1.00 quote, render refused politely without a key (`tmp/qa/2026-09-30-voices.png`).

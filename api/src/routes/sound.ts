@@ -14,8 +14,8 @@ const MAX_BYTES = 25 * 1024 * 1024;
 const TYPES: Record<string, string> = { 'audio/mpeg': 'mp3', 'audio/mp4': 'm4a', 'audio/x-m4a': 'm4a', 'audio/wav': 'wav', 'audio/x-wav': 'wav', 'audio/ogg': 'ogg', 'audio/webm': 'webm' };
 const num = (x: string | null, lo: number, hi: number) => { const n = x === null ? NaN : Number(x); return Number.isFinite(n) && n >= lo && n <= hi ? n : null; };
 
-interface SoundRow { id: string; name: string; kind: 'music' | 'bed'; r2_key: string; seconds: number | null; gain_db: number; bytes: number }
-const listSound = async (db: D1Database, productionId: string) =>
+export interface SoundRow { id: string; name: string; kind: 'music' | 'bed'; r2_key: string; seconds: number | null; gain_db: number; bytes: number }
+export const listSound = async (db: D1Database, productionId: string) =>
   (await db.prepare('SELECT id, name, kind, r2_key, seconds, gain_db, bytes FROM sound WHERE production_id = ? ORDER BY kind, name').bind(productionId).all<SoundRow>()).results;
 
 route('POST', '/productions/:id/sound', async (req, env, { id: pid }) => {
@@ -61,31 +61,41 @@ route('GET', '/productions/:id/cues', async (req, env, { id: pid }) => {
   const g = await gate(env.DB, req, pid, 'read');
   if (g instanceof Response) return g;
   const files = Object.fromEntries((await listSound(env.DB, pid)).map((s) => [s.id, s]));
-  const rows = (await env.DB.prepare('SELECT name, music_id, bed_id, hold FROM cues WHERE production_id = ? ORDER BY position').bind(pid).all<{ name: string; music_id: string | null; bed_id: string | null; hold: number }>()).results;
+  const rows = await getCues(env.DB, pid);
   const url = (sid: string | null) => (sid && files[sid] ? `${env.API_ORIGIN}/${files[sid].r2_key}` : undefined);
   const gains: Record<string, number> = {};
   for (const s of Object.values(files)) gains[s.r2_key.split('/').pop()!] = s.gain_db;
   return json({ cues: rows.map((r) => ({ name: r.name, music: url(r.music_id), bed: url(r.bed_id), hold: !!r.hold, music_id: r.music_id, bed_id: r.bed_id })), gains });
 });
 
+// Replace the whole cue list. Files may be named by id or by their name.
+export async function setCues(db: D1Database, pid: string, body: unknown): Promise<{ ok: true; cues: number } | { ok: false; message: string }> {
+  if (!Array.isArray(body) || body.length > 200) return { ok: false, message: 'Send a list of scenes.' };
+  const files = await listSound(db, pid);
+  const byId = new Map(files.map((s) => [s.id, s])), byName = new Map(files.map((s) => [`${s.kind}:${s.name.toLowerCase()}`, s]));
+  const find = (x: unknown, kind: 'music' | 'bed') => (typeof x !== 'string' || !x ? null : byId.get(x)?.id ?? byName.get(`${kind}:${x.toLowerCase()}`)?.id ?? 'missing');
+  const names = new Set<string>();
+  const cues = (body as { name?: unknown; music?: unknown; bed?: unknown; hold?: unknown }[]).map((c) => ({ name: typeof c.name === 'string' ? c.name.trim().slice(0, 80) : '', music: find(c.music, 'music'), bed: find(c.bed, 'bed'), hold: !!c.hold }));
+  for (const c of cues) {
+    if (!c.name || names.has(c.name)) return { ok: false, message: 'Every scene needs its own name.' };
+    names.add(c.name);
+    if (c.music === 'missing' || c.bed === 'missing') return { ok: false, message: `"${c.name}" names a file this production does not have; see list_sound.` };
+  }
+  await db.batch([
+    db.prepare('DELETE FROM cues WHERE production_id = ?').bind(pid),
+    ...cues.map((c, k) => db.prepare('INSERT INTO cues (production_id, position, name, music_id, bed_id, hold) VALUES (?, ?, ?, ?, ?, ?)').bind(pid, k, c.name, c.music, c.bed, c.hold ? 1 : 0)),
+  ]);
+  return { ok: true, cues: cues.length };
+}
+
+export const getCues = async (db: D1Database, pid: string) =>
+  (await db.prepare('SELECT name, music_id, bed_id, hold FROM cues WHERE production_id = ? ORDER BY position').bind(pid).all<{ name: string; music_id: string | null; bed_id: string | null; hold: number }>()).results;
+
 route('PUT', '/productions/:id/cues', async (req, env, { id: pid }) => {
   const g = await gate(env.DB, req, pid, 'cues');
   if (g instanceof Response) return g;
-  const body = (await req.json().catch(() => null)) as { name?: unknown; music?: unknown; bed?: unknown; hold?: unknown }[] | null;
-  if (!Array.isArray(body) || body.length > 200) return error('invalid_cues', 400);
-  const files = new Set((await listSound(env.DB, pid)).map((s) => s.id));
-  const names = new Set<string>();
-  const cues = body.map((c) => ({ name: typeof c.name === 'string' ? c.name.trim().slice(0, 80) : '', music: typeof c.music === 'string' ? c.music : null, bed: typeof c.bed === 'string' ? c.bed : null, hold: !!c.hold }));
-  for (const c of cues) {
-    if (!c.name || names.has(c.name)) return error('invalid_cues', 400, 'Every scene needs its own name.');
-    names.add(c.name);
-    if ((c.music && !files.has(c.music)) || (c.bed && !files.has(c.bed))) return error('invalid_cues', 400, 'A cue names a file this production does not have.');
-  }
-  await env.DB.batch([
-    env.DB.prepare('DELETE FROM cues WHERE production_id = ?').bind(pid),
-    ...cues.map((c, k) => env.DB.prepare('INSERT INTO cues (production_id, position, name, music_id, bed_id, hold) VALUES (?, ?, ?, ?, ?, ?)').bind(pid, k, c.name, c.music, c.bed, c.hold ? 1 : 0)),
-  ]);
-  return json({ ok: true, cues: cues.length });
+  const r = await setCues(env.DB, pid, await req.json().catch(() => null));
+  return r.ok ? json(r) : error('invalid_cues', 400, r.message);
 });
 
 route('GET', '/sound/:name', async (_req, env, { name }) => {
