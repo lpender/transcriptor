@@ -2,6 +2,9 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
+- [ ] voices-render-job (owner: loop, started 2026-09-30) — Queues consumer, `voices/eleven.ts`, R2 write,
+  resumable per line. UNTIL: voices-quote. Testing spends credits: ACTION
+  for Lee to allow one small test render when it is ready.
 ## Queue
 - [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
@@ -10,9 +13,6 @@
 - [ ] mcp-cues — `set_cues`, `list_sound` over MCP. UNTIL: sound-api.
 - [ ] mcp-oauth — OAuth 2.1 provider + consent page listing productions.
   UNTIL: verify-cf-mcp-oauth, mcp-scaffold.
-- [ ] voices-render-job — Queues consumer, `voices/eleven.ts`, R2 write,
-  resumable per line. UNTIL: voices-quote. Testing spends credits: ACTION
-  for Lee to allow one small test render when it is ready.
 - [ ] voices-byo-key — encrypted per-production ElevenLabs key; quote and
   charge skipped. UNTIL: voices-render-job.
 - [ ] stress-per-line — `stress.json` becomes a per-line "say as" on the
