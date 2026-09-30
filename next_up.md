@@ -2,11 +2,11 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-## Queue
-- [ ] billing-core — schema (trial_ends_at, period_ends_at, stripe ids),
+- [ ] billing-core (owner: loop, started 2026-09-30) — schema (trial_ends_at, period_ends_at, stripe ids),
   `api/src/stripe.ts` (fetch + form bodies, `setStripe()` seam),
   `verifyWebhook` tested against a hand-signed payload, `canWrite`, 14-day
   trial set on creation. `docs/design/billing.md`.
+## Queue
 - [ ] billing-routes — checkout (quantity = members), portal, plans, webhook
   → production.state; tests with a stubbed Stripe. UNTIL: billing-core.
 - [ ] billing-gate — `canWrite` on script PUT, sound POST, render start,
