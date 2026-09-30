@@ -1734,7 +1734,9 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
 
 document.querySelectorAll('[data-key]').forEach(b => {
   b.tabIndex = -1;  // taps must not leave focus on a button, where Space would press it again
-  b.onclick = () => { b.blur(); act(b.dataset.key); };
+  // A chip that starts something (learn, read aloud, drill, edit, top, listen)
+  // closes the sheet so the thing it started is what you see; toggles keep it open.
+  b.onclick = () => { b.blur(); act(b.dataset.key); if ('lpwteh'.includes(b.dataset.key)) sheet.close(); };
 });
 $('menuBtn').onclick = () => { $('menuBtn').blur(); render(); sheet.showModal(); };
 // The sheet's sections fold; which are open is remembered. Signed in, the
