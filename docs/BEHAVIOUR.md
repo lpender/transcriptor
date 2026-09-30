@@ -1,4 +1,4 @@
-# transcriptor — specification
+# Behaviour — transcriptor (the single-file app as it stands, 2026-09-30)
 
 A single-page web app for learning lines. It shows a script, steps through it,
 reads it aloud in a different voice per character, and tests you on it sentence
