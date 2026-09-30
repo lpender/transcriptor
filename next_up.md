@@ -2,6 +2,8 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
+- [ ] stress-per-line (owner: loop, started 2026-09-30) — `stress.json` becomes a per-line "say as" on the
+  script, editable in the notes column, part of the clip hash. UNTIL: voices-render-job.
 ## Queue
 - [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
@@ -10,9 +12,8 @@
 - [ ] mcp-cues — `set_cues`, `list_sound` over MCP. UNTIL: sound-api.
 - [ ] mcp-oauth — OAuth 2.1 provider + consent page listing productions.
   UNTIL: verify-cf-mcp-oauth, mcp-scaffold.
-- [ ] stress-per-line — `stress.json` becomes a per-line "say as" on the
-  script, editable in the notes column, part of the clip hash. UNTIL: voices-render-job.
 - [ ] web-voices-panel — More sheet: voice per character, quote, render,
+  "say as" per line in the notes column,
   progress, BYO key. UNTIL: voices-quote.
 - [ ] sound-api — D1 `sound` + `cues`, presigned R2 upload URL, rows, cues
   PUT, delete refused when in use. UNTIL: db-schema-0001.
