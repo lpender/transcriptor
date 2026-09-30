@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { env } from './env';
 
-// Open a socket into the room as someone; collect what arrives.
+// Open a socket into the room as someone; collect what arrives; wait on facts, not clocks.
 async function join(room: DurableObjectStub, email: string, role: string) {
   const res = await room.fetch('http://room/', { headers: { upgrade: 'websocket', 'x-user': email, 'x-role': role } });
   const ws = res.webSocket!;
@@ -9,8 +9,12 @@ async function join(room: DurableObjectStub, email: string, role: string) {
   const got: Record<string, unknown>[] = [];
   ws.addEventListener('message', (e) => { got.push(JSON.parse(e.data as string)); });
   const send = (m: unknown) => ws.send(JSON.stringify(m));
-  const wait = (ms = 250) => new Promise((r) => setTimeout(r, ms));
-  return { ws, got, send, wait, of: (type: string) => got.filter((m) => m.type === type) };
+  const of = (type: string) => got.filter((m) => m.type === type);
+  const until = async (pred: () => boolean, what: string) => {
+    for (let i = 0; i < 100; i++) { if (pred()) return; await new Promise((r) => setTimeout(r, 30)); }
+    throw new Error(`waited 3 s for ${what}; got ${JSON.stringify(got)}`);
+  };
+  return { ws, got, send, of, until };
 }
 
 describe('the room', () => {
@@ -18,30 +22,28 @@ describe('the room', () => {
     const room = env.ROOMS.get(env.ROOMS.idFromName('prod-1'));
     const dir = await join(room, 'dir@example.com', 'director');
     const cast = await join(room, 'cast@example.com', 'cast');
-    await dir.wait();
-    expect((dir.got[0] as { type: string; last: unknown }).type).toBe('hello');
+    await dir.until(() => dir.of('hello').length === 1, 'hello');
     expect((dir.got[0] as { last: unknown }).last).toBeNull();
-    cast.send({ type: 'lead', on: true }); await cast.wait();
-    expect(cast.of('refused')).toHaveLength(1);
-    cast.send({ type: 'move', i: 3, text: 'x', scriptId: 's' }); await cast.wait();
-    expect(cast.of('refused')).toHaveLength(2);
-    dir.send({ type: 'lead', on: true }); await dir.wait();
-    expect((cast.of('who').at(-1) as { who: { email: string; leading: boolean }[] }).who.find((w) => w.email === 'dir@example.com')?.leading).toBe(true);
+    cast.send({ type: 'lead', on: true });
+    await cast.until(() => cast.of('refused').length === 1, 'lead refused');
+    cast.send({ type: 'move', i: 3, text: 'x', scriptId: 's' });
+    await cast.until(() => cast.of('refused').length === 2, 'move refused');
+    dir.send({ type: 'lead', on: true });
+    await cast.until(() => cast.of('who').some((m) => (m as { who: { email: string; leading: boolean }[] }).who.some((w) => w.email === 'dir@example.com' && w.leading)), 'director leading');
     dir.send({ type: 'move', i: 3, text: 'NELSON: No.', scriptId: 'abc' });
     dir.send({ type: 'move', i: 4, text: 'NELSON: Yes.', scriptId: 'abc' });
-    await cast.wait(400);
+    await cast.until(() => cast.of('move').length === 2, 'two moves');
     const moves = cast.of('move') as { seq: number; i: number; from: string }[];
     expect(moves.map((m) => [m.seq, m.i])).toEqual([[1, 3], [2, 4]]);
     expect(moves[0].from).toBe('dir@example.com');
     expect(dir.of('move')).toHaveLength(0);   // not echoed to the sender
-    const late = await join(room, 'late@example.com', 'cast'); await late.wait();
+    const late = await join(room, 'late@example.com', 'cast');
+    await late.until(() => late.of('hello').length === 1, 'late hello');
     expect((late.got[0] as { last: { seq: number; i: number } }).last).toMatchObject({ seq: 2, i: 4 });
-    dir.send({ type: 'ping' }); await dir.wait();
-    expect(dir.of('pong')).toHaveLength(1);
-    cast.ws.close(); await dir.wait(400);
-    const who = (dir.of('who').at(-1) as { who: { email: string }[] }).who.map((w) => w.email);
-    expect(who).not.toContain('cast@example.com');
-    expect(who).toContain('late@example.com');
+    dir.send({ type: 'ping' });
+    await dir.until(() => dir.of('pong').length === 1, 'pong');
+    cast.ws.close();
+    await dir.until(() => { const w = dir.of('who').at(-1) as { who: { email: string }[] } | undefined; return !!w && !w.who.some((x) => x.email === 'cast@example.com') && w.who.some((x) => x.email === 'late@example.com'); }, 'cast gone, late present');
   });
   it('refuses a plain request', async () => {
     const room = env.ROOMS.get(env.ROOMS.idFromName('prod-2'));
