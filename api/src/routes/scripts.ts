@@ -21,8 +21,7 @@ route('PUT', '/productions/:id/script', async (req, env, { id }) => {
 route('GET', '/productions/:id/script', async (req, env, { id }) => {
   const g = await gate(env.DB, req, id, 'read');
   if (g instanceof Response) return g;
-  const script = await currentScript(env.DB, id);
-  return script ? json({ script }) : error('no_script', 404, 'This production has no script yet.');
+  return json({ script: await currentScript(env.DB, id) });   // null until one is saved: a state, not an error
 });
 
 // MCP: the caller's role gates the same way; a production is named by id.

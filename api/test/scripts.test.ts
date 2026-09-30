@@ -30,7 +30,7 @@ describe('scripts over HTTP and MCP', () => {
     const ann = await signIn('ann11@example.com'), bob = await signIn('bob11@example.com');
     const { production } = await (await ann.call('POST', '/productions', { name: 'Waiting' })).json() as { production: { id: string } };
     await env.DB.prepare("INSERT INTO members VALUES (?, ?, 'cast', '[]', '2026-09-30T00:00:00Z')").bind(bob.user.id, production.id).run();
-    expect((await ann.call('GET', `/productions/${production.id}/script`)).status).toBe(404);
+    expect((await (await ann.call('GET', `/productions/${production.id}/script`)).json() as { script: null }).script).toBeNull();
     const bad = await ann.call('PUT', `/productions/${production.id}/script`, { title: 'Waiting', text: 'NELSON: Hi\n(beat)' });
     expect(bad.status).toBe(400);
     expect(await bad.json()).toEqual({ error: 'bad_lines', errors: [{ line: 2, text: '(beat)' }] });
