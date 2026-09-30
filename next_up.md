@@ -2,10 +2,10 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-## Queue
-- [ ] web-production-panel — More sheet: members, roles, invite link, seat
+- [ ] web-production-panel (owner: loop, started 2026-09-30) — More sheet: members, roles, invite link, seat
   count and monthly price; the word "production" only with 2+ members.
   UNTIL: api-invites.
+## Queue
 - [ ] web-progress-view — owner/director table: per member cleared/total,
   weak lines. UNTIL: api-productions.
 - [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
