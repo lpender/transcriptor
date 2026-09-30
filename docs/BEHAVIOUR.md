@@ -183,6 +183,10 @@ reader pasted their own.
   best run, the size of your parts and the sentences still owed up to the
   production a beat later, so a director can see who is off book. Signed out
   nothing is sent; the browser keeps its own copy either way.
+- **One script for the company.** Signed in and in a production that has a
+  script, that script is the one this device reads; the bundled one and a
+  local paste are for the try-it path. An owner or director's paste box has
+  "Save to the production", which validates and, on a bad line, names it.
 - **The script format.** One speech per line as `NAME: what they say`, a line
   of `***` between scenes, blank lines ignored, nothing else. `parseScript`
   in `sentences.js` reads it for the paste box and for the API alike and

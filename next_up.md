@@ -2,10 +2,6 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-- [ ] web-script-from-production (owner: loop, started 2026-09-30) — signed in and in a production with a
-  script, the app loads it from `GET /productions/:id/script` instead of the
-  bundled `script.js` (bundled stays for the try-it path), and the paste box
-  offers "Save to the production" for owner/director (PUT). Verify in Chrome.
 ## Queue
 - [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
@@ -53,6 +49,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] web-script-from-production — DONE 2026-09-30: signed in, the production's script replaces the device's (place kept when identical); owner/director get "Save to the production" in the paste box with the validator's line numbers on refusal. Driven in Chrome: server line appears, paste-box line lands on the server, bad line refused.
 - [x] mcp-add-script — DONE 2026-09-30: `parseScript`/`printScript` in `sentences.js` (shared), `api/src/scripts.ts`, `PUT/GET /productions/:id/script` and MCP `add_script`/`get_script` with the hard validator and speaker counts; 4 tests. Live over wrangler dev: the real Waiting script loads via MCP.
 - [x] web-progress-view — DONE 2026-09-30: an owner or director sees each member's standing on their row ("12 of 40 clear, 3 weak", "off book", "not started"). Fixed a double draw of the panel when two sign-in paths raced. Driven in Chrome (`tmp/qa/2026-09-30-progress.png`).
 - [x] web-tokens — DONE 2026-09-30: "Your AI" in the Account section: Connect your AI → labelled token shown once as a `claude mcp add` line (copied) plus the claude.ai connector note; tokens listed with last use and Revoke. Driven in Chrome: token lists MCP tools, revoked token gets 401 (`tmp/qa/2026-09-30-tokens.png`).
