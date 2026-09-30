@@ -1,6 +1,7 @@
 # Next Up — transcriptor
 
 ## Now
+<!-- autodev until 2026-09-30 17:42 -->
 
 ## Queue
 - [ ] spike-cue-listening — Web Speech API: advance on the last word of your line, no grading. Verify: one scene in Chrome, hands free. Feeds design-voices-render.
@@ -28,18 +29,17 @@
   voices and cost, MCP setup, cues. Written from the specs above.
 
 ## Gated
-- [ ] productionize-name-domain — DECISION: name. Recommend **Tablework**
-  (first rehearsals around the table); tablework.com free 2026-09-30, .app
-  and .io taken. Runner-up: Run-through, runthrough.com free. Off Book
-  rejected (four products use it). ACTION: buy the domain.
-- [ ] productionize-billing-period — DECISION: monthly only, or monthly and
-  yearly ($10/seat/year)? ADR 003 assumes both.
+- [ ] buy-domain — ACTION: buy tablework.com (free 2026-09-30) and point
+  it at Pages (or Cloudflare once cf-scaffold lands). Costs money. Name is
+  decided: Tablework (LOG 2026-09-30).
 - [ ] render-three-silent-lines — ACTION: Run `ELEVEN_LABS_API_KEY=... python3 tts.py` for the 3 lines the
   2026-09-19 "Mr." re-split left silent ("Or if he wasn't, he said he could be
   reached!", "Mr. Sebatacheck, please …", "Mr. McMartin, in admissions …"),
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] productionize-billing-period — DECIDED 2026-09-30 (loop): monthly and yearly, yearly default (ADR 003 as written).
+- [x] productionize-name — DECIDED 2026-09-30 (loop): Tablework. Runner-up Run-through. Off Book rejected.
 - [x] platform-conventions — DONE 2026-09-30: `~/dev/godfiles/conventions/PLATFORM.md` v1, references given.care auth/access and bodylang Stripe; checklist for new apps.
 - [x] recon-competitors — DONE 2026-09-30: `docs/recon/competitors.md`, five products, every claim linked. Finding: cue-listening via speech recognition is the one feature we lack; queued as a spike.
 - [x] productionize-docs — DONE 2026-09-30: kind tool → app; VISION, ADR
