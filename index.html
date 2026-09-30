@@ -1481,13 +1481,15 @@ async function renderVoices(note) {
   note.textContent = r.failed.length ? `${r.done} of ${r.total} rendered; ${r.failed.length} failed (${r.failed[0].error}).` : `All ${r.total} rendered.`;
   pullScript();
 }
-$('saveBtn').onclick = async () => {
-  const p = edit.querySelector('p');
+// The device's script goes up to the production; the paste box's line says how it went.
+async function pushScript() {
   const r = await api(`/productions/${current.id}/script`, { title: current.name, text: src.value }, 'PUT');
-  p.textContent = r.status === 200 ? `Saved to ${current.name}: ${r.lines} lines, ${Object.keys(r.speakers).join(', ')}.`
+  edit.querySelector('p').textContent = r.status === 200 ? `Saved to ${current.name}: ${r.lines} lines, ${Object.keys(r.speakers).join(', ')}.`
     : r.error === 'bad_lines' ? `Not saved. These lines are not "NAME: speech" or ***: ${r.errors.map(e => e.line).join(', ')}.`
     : `Not saved (${r.error || r.status}).`;
-};
+  return r;
+}
+$('saveBtn').onclick = pushScript;
 const shares = role => ['owner', 'director'].includes(role);
 const learns = role => role !== 'crew';   // crew run the show; they keep no lines and no notes up there
 let drawGen = 0;  // two draws in flight (sign-in landing and whoami both call) must not both paint
@@ -1550,6 +1552,8 @@ async function createProduction() {
   if (!name) return;
   const r = await api('/productions', { name });
   if (r.status !== 201) return accountNote.textContent = 'Could not create it.';
+  current = r.production; save('production', current.id);
+  if (src.value.trim()) await pushScript();   // "keep this script" keeps it: the paste box goes up first
   await loadCompany();
 }
 async function renameProduction() {
