@@ -157,7 +157,10 @@ reader pasted their own.
 - **Key words.** Bolds the words a line hangs on — skip the filler, then prefer
   long and rare in this script over short and common, about half the remaining
   words, at most four.
-- **Together.** One device leads and others follow. Each enters the same room
+- **Together.** One device leads and others follow. Signed in with a
+  production, the production is the room: pick Lead or Follow and the
+  server orders every move, hands a late joiner the last one, and the
+  header says who is here. Signed out, each device enters the same room
   word in the More sheet and picks Lead or Follow; every move the leader
   makes (a press, a tap, a scene jump) goes out over a public MQTT broker
   (WebSocket, no account; three brokers, tried in turn) and the followers go

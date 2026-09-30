@@ -27,6 +27,10 @@
 
 ## Runtime
 
+- A 101 WebSocket response must be returned as-is: `new Response(res.body, …)`
+  drops the `webSocket` and wrangler answers 500 "did not return status 101".
+  `cors()` passes 101s through untouched.
+
 - The service worker serves the cached `index.html` even to a `?v=` URL, so a
   Playwright drive after an edit must unregister it (`getRegistrations` →
   `unregister`) and reload, or it tests the previous build. A bumped `CACHE`

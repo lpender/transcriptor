@@ -994,6 +994,9 @@ function buildRoles(names) {
 //  - the link pings, notices a dead socket, and reconnects through the next of
 //    three public brokers.
 // No account and no server of our own; only the room word keeps strangers out.
+// Who is signed in and which production this device is on: set by the account
+// code below, read by the room code above it, so declared before both.
+let me = null, productions = [], current = null;
 const room = { code: load('room', ''), role: load('role', ''), up: false, heard: 0, seq: 0, last: 0, me: Math.random().toString(36).slice(2, 10) };
 const BROKERS = ['wss://broker.emqx.io:8084/mqtt', 'wss://broker.hivemq.com:8884/mqtt', 'wss://test.mosquitto.org:8081/mqtt'];
 const HEARTBEAT = 15000, SILENCE = 45000;
@@ -1021,7 +1024,7 @@ function joinRoom() {
   clearInterval(heartbeat); clearInterval(watch);
   room.up = false; room.who = [];
   render();
-  if (typeof me !== 'undefined' && me && current) return joinProductionRoom();
+  if (me && current) return joinProductionRoom();
   if (!room.role || !room.code) return;
   if (!crypto.subtle) return trouble('Together needs a secure page (https or localhost)');
   keys().then(() => {
@@ -1236,7 +1239,7 @@ const api = (path, body, method = body ? 'POST' : 'GET') =>
   fetch(API + path, { method, credentials: 'include', headers: { 'content-type': 'application/json' }, body: body && JSON.stringify(body) })
     .then(async r => ({ status: r.status, ...(await r.json().catch(() => ({}))) }))
     .catch(() => ({ status: 0 }));
-let me = null;
+me = null;
 const accountNote = $('accountNote');
 function drawAccount() {
   $('signedOut').hidden = !!me;
@@ -1280,7 +1283,7 @@ whoami();
 // "production" is not shown until there is more than one member: alone, it
 // is just your script.
 const company = $('company');
-let productions = [], current = null;
+productions = []; current = null;
 const seats = n => `${n} ${n === 1 ? 'member' : 'members'} · $${n}/month`;
 const el = (tag, props = {}, ...kids) => { const e = Object.assign(document.createElement(tag), props); e.append(...kids); return e; };
 async function loadCompany() {

@@ -48,7 +48,8 @@ export async function handle(req: Request, env: Env): Promise<Response> {
 // origin is allowed, never '*'.
 export const cors = (req: Request, env: Env) => (res: Response) => {
   const origin = req.headers.get('origin');
-  if (origin !== env.APP_ORIGIN) return res;
+  // A WebSocket upgrade (101) carries its socket on the response object; rebuilding it would drop it.
+  if (origin !== env.APP_ORIGIN || res.status === 101) return res;
   const h = new Headers(res.headers);
   h.set('access-control-allow-origin', origin);
   h.set('access-control-allow-credentials', 'true');
