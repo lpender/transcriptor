@@ -2,11 +2,11 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-## Queue
-- [ ] browser-voices — speechSynthesis fallback when a line has no clip: one
+- [ ] browser-voices (owner: loop, started 2026-09-30) — speechSynthesis fallback when a line has no clip: one
   system voice per character (stable pick by name), `onboundary` seeking, P
   works with no clips. Header: "Reading with this device's voices". Verify
   in Chrome; Safari by Lee. `docs/design/voices.md`.
+## Queue
 - [ ] engine-gain-node — play music and beds through an AudioContext
   GainNode with a per-file gain (0 today). Verify: play, fade, crossfade
   unchanged with the stubbed engine and in Chrome. `docs/design/sound-upload.md`.
