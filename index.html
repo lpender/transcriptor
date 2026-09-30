@@ -163,7 +163,7 @@
   #edit .row { gap: 10px; margin-top: 12px; }
   #diag { margin: 18px 0 0; padding: 10px 12px; border: 1px solid var(--edge); border-radius: 10px;
           color: var(--faded); font: 400 12px/1.6 ui-monospace, Menlo, monospace; white-space: pre-wrap; }
-  #fetchBtn, #start { margin-top: 0; min-height: var(--tap); padding: 0 20px; border-radius: 10px; border: 1px solid #5E5540; background: #262218; color: var(--paper); font: 500 15px ui-monospace, Menlo, monospace; }
+  #saveBtn, #fetchBtn, #start { margin-top: 0; min-height: var(--tap); padding: 0 20px; border-radius: 10px; border: 1px solid #5E5540; background: #262218; color: var(--paper); font: 500 15px ui-monospace, Menlo, monospace; }
 </style>
 </head>
 <body>
@@ -173,6 +173,7 @@
   <div class="row">
     <button id="start">Start reading</button>
     <button id="fetchBtn">Fetch the script</button>
+    <button id="saveBtn" hidden>Save to the production</button>
   </div>
   <pre id="diag"></pre>
 </div>
@@ -1178,7 +1179,26 @@ async function loadCompany() {
   current = productions.find(p => p.id === want) || productions[0] || null;
   if (current) save('production', current.id);
   drawCompany();
+  pullScript();
 }
+// The production's script is the one everyone reads: it replaces what this
+// device had, keeping the place when it is the same text. A director's paste
+// box can push a script the other way.
+async function pullScript() {
+  $('saveBtn').hidden = !(current && shares(current.role));
+  if (!current) return;
+  const r = await api(`/productions/${current.id}/script`);
+  if (r.status !== 200 || !r.script || r.script.text === src.value) return;
+  src.value = r.script.text;
+  $('start').click();
+}
+$('saveBtn').onclick = async () => {
+  const p = edit.querySelector('p');
+  const r = await api(`/productions/${current.id}/script`, { title: current.name, text: src.value }, 'PUT');
+  p.textContent = r.status === 200 ? `Saved to ${current.name}: ${r.lines} lines, ${Object.keys(r.speakers).join(', ')}.`
+    : r.error === 'bad_lines' ? `Not saved. These lines are not "NAME: speech" or ***: ${r.errors.map(e => e.line).join(', ')}.`
+    : `Not saved (${r.error || r.status}).`;
+};
 const shares = role => ['owner', 'director'].includes(role);
 let drawGen = 0;  // two draws in flight (sign-in landing and whoami both call) must not both paint
 async function drawCompany() {
