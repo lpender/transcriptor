@@ -15,6 +15,7 @@ export interface Env {
   STRIPE_PRICE_MONTHLY?: string;  // price ids from the Stripe dashboard
   STRIPE_PRICE_YEARLY?: string;
   CLIPS: R2Bucket;                // rendered clips, keyed by hash
+  ROOMS: DurableObjectNamespace;  // one Room per production (Together)
 }
 
 export const VERSION = '0.1.0';

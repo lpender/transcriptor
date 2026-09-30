@@ -13,6 +13,8 @@ import './routes/byo-key';
 import './routes/sound';
 import './routes/mcp-cues';
 import './routes/billing';
+import './routes/room';
+export { Room } from './room';
 
 export default {
   fetch: async (req: Request, env: Env) => cors(req, env)(preflight(req) ?? (await handle(req, env))),

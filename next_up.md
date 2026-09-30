@@ -2,10 +2,6 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-- [ ] relay-do (owner: loop, started 2026-09-30) — `api/src/room.ts` Durable Object (WebSocket hibernation,
-  seq-ordered moves, last move kept, presence, lead capability enforced),
-  `GET /productions/:id/room` upgrade route, wrangler binding + migration;
-  test with two sockets. `docs/design/relay.md`.
 ## Queue
 - [ ] web-relay — signed in with a production, Together uses the DO (Lead /
   Follow chips, presence in the header); signed out keeps the MQTT room
@@ -44,6 +40,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] relay-do — DONE 2026-09-30: `api/src/room.ts` Room Durable Object (hibernation sockets, lead on/off gated by the role table, moves stamped with a sequence and kept as the last move, presence broadcasts, ping), `GET /productions/:id/room` upgrade route passing who and role, wrangler binding + SQLite migration. 2 tests with real WebSocket pairs.
 - [x] web-billing — DONE 2026-09-30: the company panel shows how the production is paid for in words and one action: Pay $10 a seat a year (or $1 a month) for the owner, Manage billing once subscribed; `?billing=` landings say what happened; routes answer Stripe outages as a plain 502; any throwing route now answers JSON 500 with CORS. Driven in Chrome with a dummy key: trial line, Pay reaches Stripe (`tmp/qa/2026-09-30-billing.png`).
 - [x] billing-gate — DONE 2026-09-30: `gate()` answers 402 with a plain message for write capabilities (script, cues, render, share) when the production may not save; invite accept and MCP writes refuse the same way; reading, learning, progress and Together untouched. 1 test.
 - [x] billing-seats — DONE 2026-09-30: `api/src/seats.ts` sets the subscription quantity after a join or removal, best effort; 1 test.

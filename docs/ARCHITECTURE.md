@@ -31,6 +31,7 @@ flowchart LR
 | `convert.py`, `tts.py`, `normalize.py`, `stress.json` | Pipeline for this show; `tts.py` becomes a Worker job |
 | `sw.js` | Service worker; `CACHE` bumped every deploy |
 | `api/` | The Workers backend: `src/index.ts` entry (handler only), `src/router.ts`, `src/routes/*.ts` (one file per area), `src/auth.ts`, `src/access.ts`, `src/email.ts`, `migrations/` D1, `test/` vitest on a real D1 |
+| `api/src/room.ts` | The Room Durable Object: Together's relay per production |
 | `api/src/mcp.ts`, `api/src/routes/mcp*.ts`, `routes/scripts.ts` | The MCP server (`POST /mcp`, bearer personal tokens) and its tools: whoami, list_productions, list_members, set_parts, invite, add_script, get_script, list_sound, set_cues |
 | `Taskfile.yml` | `task serve` (app), `task dev` (API on :8787), `task test` (gate), `task deploy` (Lee) |
 | `docs/BEHAVIOUR.md` | Exact behaviour of the app as it stands |
@@ -65,7 +66,7 @@ before any render is bought.
 | Try before signup | Paste a script, browser voices, no account; state in localStorage until signup, then uploaded | frontend |
 | Same play rendered by a second production | Every clip already in R2 by hash; price shown is $0 | API render endpoint |
 | ElevenLabs down mid-render | The job is per line and idempotent by hash; failures are listed on the render, done lines stay done, Retry forgets the failures | `api/src/render.ts` |
-| Leader loses connection | DO keeps last move; follower reconnects and lands right; header says "no leader for 45 s" | DO + frontend |
+| Leader loses connection | The Room keeps the last move and its sequence; a follower that reconnects gets it in `hello`; presence tells everyone who is leading | `api/src/room.ts` |
 | Member removed from production | Session still valid, membership check on every production route returns 403; local cache of that script cleared on next load | API middleware |
 | Owner stops paying | Webhook sets past_due then readonly; writes answer 402, reading/learning/Together keep working; nothing deleted | `api/src/billing.ts`, `gate()` |
 | Copyrighted script uploaded | Private to the production, never listed or shared beyond members; takedown path in TOS | policy, not code |
