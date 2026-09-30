@@ -4,6 +4,9 @@
 <!-- autodev until 2026-09-30 17:42 -->
 
 ## Queue
+- [ ] loop-row-phone — the Aloud loop row ("read 0 sentences, then go back 0 (0: straight through)") is cramped and unreadable at 390 (tmp/naive-390-sheet-3.png). Stack it: "Loop: read [0] sentences, then go back [0]" on one line, "0 = straight through" as a faded line below. Also "Hear me say it H" wraps its key badge (tmp/naive-390-sheet-4.png): keep key badges from wrapping in `.big` buttons. Verify: 390 shot.
+- [ ] sound-plain-words — Sound files rows show "+0.4 dB", jargon to a stage manager (tmp/naive-390-sheet-3.png). Show "levelled · 12.3 s" (seconds already stored) instead; keep dB in the title attribute. Verify: 390 shot, vitest untouched.
+- [ ] scenes-editor-labels — the Scenes editor rows at 390 are two unlabelled selects plus "hold" and ×; nothing says which is music and which is room tone (tmp/naive-390-sheet-4.png). Prefix each select's options ("music: OfficeFansCelli", "room: OfficeFans") or put a small label above each. Verify: 390 shot.
 ## Gated
 - [ ] stripe-keys — ACTION: a Stripe account in test mode, two prices ($1/mo,
   $10/yr), then `cd api && npx wrangler secret put STRIPE_SECRET_KEY`,
