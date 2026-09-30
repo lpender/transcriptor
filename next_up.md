@@ -6,23 +6,20 @@
 
 ## Gated
 - [ ] productionize-name-domain — DECISION: pick a product name and buy the
-  domain (2026-09-30). Checked: offbook.com/.app/.io/.co/.studio taken;
-  offbook.net, offbook.club, linesapp.com free. runlines.* taken.
-- [ ] productionize-pricing — DECISION: $1/month asked (2026-09-30). Stripe
-  takes $0.30 + 2.9% per charge, about a third of $1; Apple takes 30% if it is
-  an iOS app. Options: $1/month billed yearly ($12), or $1/month web-only via
-  Stripe. Pick before building billing.
-- [ ] productionize-tts-cost — DECISION: who pays for voices. ElevenLabs is
-  about $30 per full-length play; at $1/month that is 30 months of revenue per
-  script. Options: browser SpeechSynthesis free tier + paid ElevenLabs render
-  as an add-on, or a cheaper engine (OpenAI tts, about $1.50 per play).
-- [ ] productionize-show-sound — DECISION: James's cues and `sound/` are one
-  show's design. Keep as a per-script "cue sheet" upload feature, or drop from
-  the product and keep for this run only.
-- [ ] render-three-silent-lines — ACTION: Run `ELEVEN_LABS_API_KEY=... python3 tts.py` for the 3 lines the
-  2026-09-19 "Mr." re-split left silent ("Or if he wasn't, he said he could be
-  reached!", "Mr. Sebatacheck, please …", "Mr. McMartin, in admissions …"),
-  then delete the 3 orphaned clips. Spends ElevenLabs credits.
+  domain (2026-09-30). Free: offbook.net, offbookapp.com, linesmith.com,
+  sidesapp.com, linesapp.com. Taken: offbook.com/.app/.io/.co, runlines.*,
+  linesmith.app, cuesheet.app.
+- [ ] productionize-pricing — DECIDED 2026-09-30: $1/month, web signup only
+  (no Apple IAP, no 30%). Open: bill monthly ($0.33 fee) or yearly $12 ($0.65
+  fee)? Recommend yearly with monthly offered.
+- [ ] productionize-voices — DECIDED 2026-09-30 (loop's call, Lee may
+  overrule): browser SpeechSynthesis free in the subscription; ElevenLabs
+  render sold per script at cost plus margin, clips cached by hash of
+  voice+text so a script anyone already rendered costs nothing; BYO
+  ElevenLabs key renders free. Never unlimited in the $1.
+- [x] productionize-show-sound — DECIDED 2026-09-30: sound design is a
+  product feature, users upload music and room tone per scene. James's
+  files stay private to this show.
 
 ## Done
 - [x] note-box-three-lines (2026-09-26) — The note edit box (`#read textarea.note`, index.html)
