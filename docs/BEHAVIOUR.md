@@ -202,7 +202,10 @@ reader pasted their own.
   each member's standing: sentences clear of their parts, weak ones, or
   "off book", and "quiet N days" when nobody has heard from them for a
   week), the seat
-  count and monthly price, and for an owner or director makes invite links
+  count and monthly price; for an owner or director each other member's
+  role is a select (owner offered only to an owner) with a × to remove them,
+  and anyone but an owner has "Leave this production" (the server keeps the
+  last owner either way). It makes invite links
   per role (14 days, copied to the clipboard). Opening an invite link opens
   the sheet on the Company section alone, saying what it joins; signed in
   you join at once, signed out you give an address and the link that arrives

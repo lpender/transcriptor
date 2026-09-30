@@ -178,7 +178,7 @@
   #soundPanel .row { padding: 3px 8px; margin: 0 -8px; border-radius: 8px; justify-content: space-between; }
   #soundPanel .cue-edit { gap: 6px; flex-wrap: wrap; }
   #soundPanel .cue-edit input.scene { flex: 1 1 8em; min-width: 6em; }
-  #soundPanel input.scene, #soundPanel select { font: inherit; font-size: .85em; background: #100F0B; color: var(--paper); border: 1px solid var(--edge); border-radius: 6px; padding: 2px 4px; }
+  #soundPanel input.scene, #soundPanel select, #company select { font: inherit; font-size: .85em; background: #100F0B; color: var(--paper); border: 1px solid var(--edge); border-radius: 6px; padding: 2px 4px; }
   #soundPanel .seats { color: var(--cue); font-size: .9em; margin: 6px 0; }
   #voices select { max-width: 60%; font: inherit; font-size: .85em; background: #100F0B; color: var(--paper); border: 1px solid var(--edge); border-radius: 6px; padding: 2px 4px; }
   #ai input, #inviteOut input { width: 100%; font: inherit; font-size: .85em; padding: 4px 6px; border-radius: 6px; border: 1px solid var(--edge); background: #100F0B; color: var(--paper); }
@@ -1526,9 +1526,18 @@ async function drawCompany() {
   } else company.append(el('h3', { textContent: group ? current.name : `${current.name} — your script`, title: shares(role) ? 'Rename' : '', style: shares(role) ? 'cursor:pointer' : '', onclick: shares(role) ? renameProduction : null }));
   for (const m of members) {
     const who = el('span', { className: 'who', textContent: (m.name || m.email) + (m.user_id === me.id ? ' (you)' : '') });
-    const what = el('span', { textContent: m.role + (m.parts.length ? ' · ' + m.parts.join(', ') : '') + standing(m) });
-    company.append(el('div', { className: 'row', title: m.email }, who, what));
+    const tail = (m.parts.length ? ' · ' + m.parts.join(', ') : '') + standing(m);
+    const others = shares(role) && m.user_id !== me.id;   // an owner or director shapes the others' rows
+    const what = el('span', {});
+    if (others) {
+      const pick = el('select', { title: 'Role', onchange: async () => { const r = await api(`/productions/${current.id}/members/${m.user_id}`, { role: pick.value }, 'PUT'); if (r.status !== 200) accountNote.textContent = r.message || 'Could not change the role.'; drawCompany(); } });
+      for (const r of ['owner', 'director', 'cast', 'crew']) if (r !== 'owner' || role === 'owner') pick.append(el('option', { value: r, textContent: r, selected: r === m.role }));
+      what.append(pick, tail);
+    } else what.textContent = m.role + tail;
+    const gone = others ? el('button', { className: 'chip', textContent: '×', title: `Remove ${m.name || m.email}`, onclick: async () => { const r = await api(`/productions/${current.id}/members/${m.user_id}`, undefined, 'DELETE'); if (r.status !== 200) accountNote.textContent = r.message || 'Could not remove.'; drawCompany(); } }) : '';
+    company.append(el('div', { className: 'row', title: m.email }, who, what, gone));
   }
+  if (role !== 'owner') company.append(el('div', { className: 'row' }, el('button', { className: 'chip', textContent: 'Leave this production', onclick: async () => { if (!confirm(`Leave ${current.name}? Your notes and progress there go with you.`)) return; const r = await api(`/productions/${current.id}/members/${me.id}`, undefined, 'DELETE'); if (r.status !== 200) return accountNote.textContent = r.message || 'Could not leave.'; localStorage.removeItem('production'); loadCompany(); } })));
   if (shares(role)) {
     company.append(el('p', { className: 'seats', textContent: `${seats(members.length)}. Each member you invite is $1 a month.` }));
     // How it is paid for, in words, and the one thing to press (docs/design/billing.md).
