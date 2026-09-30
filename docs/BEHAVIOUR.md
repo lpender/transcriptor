@@ -124,6 +124,11 @@ reader pasted their own.
   old sound with a 0.1s fade; the same scene again is left alone. Reading
   aloud waits on a stop's music before moving on. Files live in `sound/` and
   are cached on first play.
+- **The company's sound.** Signed in with a production, the Show section lets
+  an owner, director or crew member add music and room tone (measured in the
+  browser on upload and levelled by a gain, never re-encoded) and lay out the
+  scenes: a name, its music, its room tone, and whether it is a hold. Saved
+  cues replace `cues.js` on every member's device.
 - **Learn mode.** Your lines are hidden as `▒▒▒▒▒` blocks — fixed width, so
   length gives nothing away — and lines ahead are invisible. Say the line, then
   press: Next onto your line reveals its first sentence, and each right answer

@@ -2,8 +2,6 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-- [ ] web-sound-panel (owner: loop, started 2026-09-30) — Add music / Add room tone, per-scene assignment,
-  gain readout, measure on upload. UNTIL: sound-api, measure-loudness.
 ## Queue
 - [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
@@ -39,6 +37,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] web-sound-panel — DONE 2026-09-30: Show section gains "Sound files" (Add music / Add room tone, levelled on upload by `loudness()` to −23/−28 dB, gain shown, Delete) and "Scenes" (name, music, room tone, hold, Save) for owner/director/crew; a production's cues replace cues.js and the engine plays its URLs through the per-file gain. Driven in Chrome: two uploads (+0.4, +0.5 dB), two scenes saved, both tracks playing from the API with the right gain, the hold stop in the script.
 - [x] mcp-cues — DONE 2026-09-30: `list_sound` and `set_cues` over MCP (files by id or name, unique scene names, holds), sharing `setCues`/`getCues` with the HTTP routes. 1 test.
 - [x] sound-api — DONE 2026-09-30: migration 0010 `sound` + `cues`; upload through the Worker (25 MB, audio types), list, delete refused while a cue uses it, `GET/PUT /productions/:id/cues` in cues.js's shape with `gains`, `GET /sound/:key` from R2. 1 test walking the lot.
 - [x] web-say-as — DONE 2026-09-30: the note editor (owner/director, signed in) gains a "Say it as…" field; saved to `/sayas`, shown as ♪ under the note, the quote counts the line as unrendered. Driven in Chrome: 689 → 703 characters to render after a say-as (`tmp/qa` not needed).
