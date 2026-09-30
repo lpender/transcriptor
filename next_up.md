@@ -2,10 +2,10 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-## Queue
-- [ ] design-mcp-ingest — Spec the MCP server: `whoami`,
+- [ ] design-mcp-ingest (owner: loop, started 2026-09-30) — Spec the MCP server: `whoami`,
   `list_productions`, `add_script`, `get_script`, `set_cues`,
   `upload_sound`. Claude converts PDFs client-side; server takes text.
+## Queue
 - [ ] design-voices-render — Spec the render flow: price quote from
   uncached characters, per-line resumable job, R2 cache by hash, BYO key.
 - [ ] design-sound-upload — Spec per-production music + room tone
