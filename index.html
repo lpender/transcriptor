@@ -1169,8 +1169,9 @@ function setRole(r) {
 }
 $('room').value = room.code;
 $('room').onchange = () => { room.code = $('room').value.trim().toLowerCase(); save('room', room.code); $('room').value = room.code; room.last = 0; joinRoom(); };
-$('leadChip').onclick = () => { setRole('lead'); $('leadChip').blur(); };
-$('followChip').onclick = () => { setRole('follow'); $('followChip').blur(); };
+// Taking a role is going to the room, so the sheet closes; giving it up keeps the sheet.
+$('leadChip').onclick = () => { setRole('lead'); $('leadChip').blur(); if (room.role) sheet.close(); };
+$('followChip').onclick = () => { setRole('follow'); $('followChip').blur(); if (room.role) sheet.close(); };
 $('start').onclick = () => {
   if (!src.value.trim()) return;  // nothing to read, and nothing worth saving
   const sameScript = load('script') === src.value;  // a new script starts from the top
