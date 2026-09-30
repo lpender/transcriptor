@@ -3,12 +3,6 @@
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
 ## Queue
-- [ ] sheet-sections-fold — the More sheet is 3,251 px tall at 390 wide when
-  signed in (`tmp/qa/2026-09-30-signedin-390-sheet-top.png`): ten sections,
-  the company at the bottom. Make each section a `<details>` whose open state
-  is remembered; open by default: Parts and Practice, plus Company (renamed
-  from Account) which moves to the top when signed in. Verify at 390: the
-  first screen shows the company and the parts, everything else one tap away.
 ## Gated
 - [ ] stripe-keys — ACTION: a Stripe account in test mode, two prices ($1/mo,
   $10/yr), then `cd api && npx wrangler secret put STRIPE_SECRET_KEY`,
@@ -38,6 +32,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] sheet-sections-fold — DONE 2026-09-30: every More section is a `<details>` with its open state remembered; Parts, Practice and Account open by default; signed in, Account becomes "Company" and moves to the top. At 390 the sheet went from 3,251 to 1,857 px with the company on the first screen (`tmp/qa/2026-09-30-sheet-folded-390.png`).
 - [x] production-name — DONE 2026-09-30: creating asks for a name (guessed from a title line in the paste, else "My play"); `PUT /productions/:id {name}` for owner/director; tap the name in the company panel to rename, tab title follows. 1 test; driven in Chrome ("Script Follower" → "Waiting").
 - [x] mcp-oauth — DONE 2026-09-30: `@cloudflare/workers-oauth-provider` 1.2.1 wraps the Worker (`api/src/oauth.ts`): discovery, dynamic registration, PKCE, tokens in OAUTH_KV; `/oauth/mcp` runs the same rpc for an OAuth user; the consent page (`routes/authorize.ts`) names the client, its host and your productions, with a sign-in form that returns to it. 1 end-to-end test: register → consent → allow → code → token → whoami. The claude.ai connection itself waits on a public URL (Gated).
 - [x] how-it-works-page — DONE 2026-09-30: `how.html`, eleven sections in plain words (try it, the script shape, productions and parts, invites, learning, voices and cost, sound, Together, your AI with the `claude mcp add` line, paying, your data), linked from the welcome and the Account section, cached by the service worker. Rendered at 390 with no horizontal scroll (`tmp/qa/2026-09-30-how-390.png`).

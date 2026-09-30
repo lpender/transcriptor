@@ -225,6 +225,8 @@ reader pasted their own.
   (copied to the clipboard) with the MCP URL for a claude.ai connector.
   Tokens are listed by the name you gave them with their last use, and
   revoked with one press.
+- **The More sheet.** Its sections fold; which are open is remembered on the
+  device. Signed in, the Company section sits first.
 - **Controls.** Every control is a button in the bar or the More sheet (Back, Play, Learn, Keys, Start from the top,
   Drill weak, Edit, Next) with its keyboard shortcut printed under it. Nothing
   is reachable by key alone.

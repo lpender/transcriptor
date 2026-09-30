@@ -157,6 +157,12 @@
   #welcome .row { flex-wrap: wrap; }
   #welcome button { min-height: var(--tap); padding: 0 18px; border-radius: 10px; border: 1px solid #5E5540; background: #262218; color: var(--paper); font: 500 15px ui-monospace, Menlo, monospace; }
   .dim { color: var(--cue); font-size: .85em; }
+  .sec { border-top: 1px solid var(--edge); padding: 2px 0 8px; }
+  .sec > summary { list-style: none; cursor: pointer; font: 500 12px/2.4 ui-monospace, Menlo, monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--cue); display: flex; justify-content: space-between; align-items: center; }
+  .sec > summary::-webkit-details-marker { display: none; }
+  .sec > summary::after { content: '+'; font-size: 16px; color: var(--faded); }
+  .sec[open] > summary::after { content: '–'; }
+  .sec h2 { display: none; }
   #accountNote { color: var(--cue); font-size: .9em; min-height: 1.2em; margin: 6px 0 0; }
   #company h3, #voices h3, #ai h3 { margin: 10px 0 4px; font-weight: 500; }
   #voices .row, #ai .row, #company .row { padding: 3px 8px; margin: 0 -8px; border-radius: 8px; justify-content: space-between; }
@@ -220,10 +226,13 @@
 
 <dialog id="sheet">
   <div class="sheet-in">
-    <h2>Parts</h2>
+    <details class="sec" data-sec="parts" open>
+      <summary>Parts</summary>
     <div id="roles"></div>
+    </details>
 
-    <h2>Aloud</h2>
+    <details class="sec" data-sec="aloud">
+      <summary>Aloud</summary>
     <div class="row">
       <button class="chip wide" data-key="p" id="playChip">Read aloud<span class="key">P</span></button>
     </div>
@@ -231,8 +240,10 @@
       read <input id="chunk" type="number" min="0" max="99" inputmode="numeric"> sentences, then go back
       <input id="rewind" type="number" min="0" max="99" inputmode="numeric"> <span class="dim">(0: straight through)</span>
     </label>
+    </details>
 
-    <h2>Show</h2>
+    <details class="sec" data-sec="show">
+      <summary>Show</summary>
     <div class="row">
       <button class="chip wide" data-key="s" id="hushChip">Sound on<span class="key">S</span></button>
     </div>
@@ -240,15 +251,19 @@
     <label class="loop" title="How loud the room tone plays">room <input id="vol:bed" type="range" min="0" max="1" step="0.02"></label>
     <div id="cues"></div>
     <div id="soundPanel"></div>
+    </details>
 
-    <h2>Together</h2>
+    <details class="sec" data-sec="together">
+      <summary>Together</summary>
     <label class="loop" title="Any word; the same on every device that should move together">room <input id="room" type="text" autocapitalize="off" autocomplete="off" spellcheck="false"></label>
     <div class="row">
       <button class="chip wide" id="leadChip" title="Every move here is sent to the room">Lead</button>
       <button class="chip wide" id="followChip" title="Go where the leader goes">Follow</button>
     </div>
+    </details>
 
-    <h2>Practice</h2>
+    <details class="sec" data-sec="practice" open>
+      <summary>Practice</summary>
     <div class="row">
       <button class="chip wide" data-key="l" id="learnChip">Learn my lines<span class="key">L</span></button>
       <button class="chip wide" data-key="h" id="earsChip">Hear me say it<span class="key">H</span></button>
@@ -259,8 +274,10 @@
     <div class="row">
       <button class="chip wide" data-key="k" id="keysChip">Bold the key words<span class="key">K</span></button>
     </div>
+    </details>
 
-    <h2>Script</h2>
+    <details class="sec" data-sec="script">
+      <summary>Script</summary>
     <div class="row">
       <button class="chip wide" data-key="t">Start from the top<span class="key">T</span></button>
     </div>
@@ -270,7 +287,10 @@
     <div class="row">
       <button class="chip wide" id="reloadBtn">Check for a new version<span class="key">↻</span></button>
     </div>
-    <h2>Account</h2>
+    </details>
+
+    <details class="sec" data-sec="account" open>
+      <summary>Account</summary>
     <div id="signedOut">
       <label class="loop" title="A link is sent there; opening it signs you in on this device">email <input id="email" type="email" autocapitalize="off" autocomplete="email" spellcheck="false"></label>
       <div class="row">
@@ -294,6 +314,7 @@
         <button class="chip wide" id="joinChip">Join</button>
       </div>
     </div>
+    </details>
 
     <button id="closeSheet">Close</button>
   </div>
@@ -1248,6 +1269,7 @@ function drawAccount() {
   $('signedOut').hidden = !!me;
   $('signedIn').hidden = !me;
   if (me) accountNote.textContent = `Signed in as ${me.email}`;
+  arrangeSheet();
   loadCompany();
   drawTokens();
 }
@@ -1297,6 +1319,7 @@ async function loadCompany() {
   if (current) save('production', current.id);
   document.title = current ? `${current.name} · Tablework` : 'Tablework';
   $('room').parentElement.hidden = !!current;   // the production is the room
+  arrangeSheet();
   joinRoom();
   drawCompany();
   pullScript();
@@ -1690,6 +1713,19 @@ document.querySelectorAll('[data-key]').forEach(b => {
   b.onclick = () => { b.blur(); act(b.dataset.key); };
 });
 $('menuBtn').onclick = () => { $('menuBtn').blur(); render(); sheet.showModal(); };
+// The sheet's sections fold; which are open is remembered. Signed in, the
+// company is the first thing a director wants, so its section goes to the top.
+for (const d of document.querySelectorAll('details.sec')) {
+  const k = 'fold:' + d.dataset.sec;
+  if (localStorage.getItem(k) !== null) d.open = localStorage.getItem(k) === 'true';
+  d.addEventListener('toggle', () => save(k, d.open));
+}
+function arrangeSheet() {
+  const acc = document.querySelector('details[data-sec="account"]'), first = document.querySelector('details.sec');
+  acc.querySelector('summary').textContent = me ? 'Company' : 'Account';
+  if (me && current && first !== acc) first.before(acc);
+  else if (!me && first === acc) $('closeSheet').before(acc);   // signed out it goes last again
+}
 $('closeSheet').onclick = () => sheet.close();
 // An installed copy has no address bar to refresh from. This asks the worker for a
 // new version and reloads; it never throws the saved copy away, or a reload on a
