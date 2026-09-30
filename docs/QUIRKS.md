@@ -54,3 +54,4 @@
 - ElevenLabs `eleven_v3` reads a trailing dash as a pause plus a noise; strip
   it before speaking. No SSML, no italics; emphasis by caps, quotes, ellipses.
 - The show's PDF font has no fi/fl ligatures; `convert.py` repairs six words.
+- **`pullCues` re-clicks Start reading.** Anything the Start handler resets (the `fromProduction` marker, for one) is reset again a beat after `pullScript` set it, because `pullCues` clicks Start when the cues differ. The Start handler therefore only clears device-ownership state when the text actually changed (`sameScript`). Found 2026-09-30 when a freshly set marker kept vanishing.
