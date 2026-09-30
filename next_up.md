@@ -2,10 +2,10 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-## Queue
-- [ ] engine-gain-node — play music and beds through an AudioContext
+- [ ] engine-gain-node (owner: loop, started 2026-09-30) — play music and beds through an AudioContext
   GainNode with a per-file gain (0 today). Verify: play, fade, crossfade
   unchanged with the stubbed engine and in Chrome. `docs/design/sound-upload.md`.
+## Queue
 - [ ] measure-loudness — `loudness(file)` in the browser via Web Audio RMS;
   test on a generated tone; matches `normalize.py` on one `sound/` file
   within 1 dB.
