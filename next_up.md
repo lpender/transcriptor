@@ -2,6 +2,8 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
+- [ ] voices-quote (owner: loop, started 2026-09-30) — `clips` cache table + quote endpoint; unit test on the
+  arithmetic ($0.30 per 1k uncached chars, min $1). UNTIL: cf-scaffold.
 ## Queue
 - [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
@@ -10,15 +12,13 @@
 - [ ] mcp-cues — `set_cues`, `list_sound` over MCP. UNTIL: sound-api.
 - [ ] mcp-oauth — OAuth 2.1 provider + consent page listing productions.
   UNTIL: verify-cf-mcp-oauth, mcp-scaffold.
-- [ ] stress-per-line — `stress.json` becomes a per-line "say as" on the
-  script, editable in the notes column, part of the clip hash. UNTIL: db-schema-0001.
-- [ ] voices-quote — `clips` cache table + quote endpoint; unit test on the
-  arithmetic ($0.30 per 1k uncached chars, min $1). UNTIL: cf-scaffold.
 - [ ] voices-render-job — Queues consumer, `voices/eleven.ts`, R2 write,
   resumable per line. UNTIL: voices-quote. Testing spends credits: ACTION
   for Lee to allow one small test render when it is ready.
 - [ ] voices-byo-key — encrypted per-production ElevenLabs key; quote and
   charge skipped. UNTIL: voices-render-job.
+- [ ] stress-per-line — `stress.json` becomes a per-line "say as" on the
+  script, editable in the notes column, part of the clip hash. UNTIL: voices-render-job.
 - [ ] web-voices-panel — More sheet: voice per character, quote, render,
   progress, BYO key. UNTIL: voices-quote.
 - [ ] sound-api — D1 `sound` + `cues`, presigned R2 upload URL, rows, cues
