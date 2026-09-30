@@ -179,7 +179,8 @@ reader pasted their own.
   Escape drops the edit, and an emptied note is removed. A kept note shows
   in a column to the right of the line, or beneath it on a narrow screen,
   and tapping it edits. Notes are kept in this browser by
-  the line's text, so they survive a re-split. Signed in as an owner or
+  the line's text, so they survive a re-split; signed in and in a
+  production they are kept there too and follow you between devices. Signed in as an owner or
   director, the editor also takes "Say it as…": how the voice should say
   the line (kept by the production, shown as ♪ under the note). The edit box opens where the note
   sits.

@@ -3,10 +3,6 @@
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
 ## Queue
-- [ ] notes-sync — signed in and in a production, a member's notes go up
-  (`PUT /productions/:id/me/notes` {line text: note}, `GET` back) and merge
-  with the device's on load, newest wins; the `notes` table exists. A note
-  can be shared to the production later (flag exists). Tests + Chrome.
 - [ ] mcp-progress — `who_is_off_book` over MCP for owner/director: per member
   cleared/total and weak count, in words. Test.
 - [ ] mcp-parts-by-name — `set_parts` should accept the speaker names as they
@@ -41,6 +37,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] notes-sync — DONE 2026-09-30: migration 0012 (`notes.line`), `GET/PUT /productions/:id/me/notes` [learn]; every note edit goes up when signed in, and on load the production's copy overlays the device's. Also: `pullCues` rebuilds the script only when the cues changed. 1 test; driven in Chrome: note up, local copy dropped, back after a pull, cleared on the server by an empty note.
 - [x] deploy-config — DONE 2026-09-30: `[env.production]` in `api/wrangler.toml` (live origins, custom domain, bindings), `task deploy` / `task deploy:check`, Pages `_headers`, and the go-live runbook in `docs/ARCHITECTURE.md`. `wrangler deploy --dry-run --env production` passes.
 - [x] sheet-sections-fold — DONE 2026-09-30: every More section is a `<details>` with its open state remembered; Parts, Practice and Account open by default; signed in, Account becomes "Company" and moves to the top. At 390 the sheet went from 3,251 to 1,857 px with the company on the first screen (`tmp/qa/2026-09-30-sheet-folded-390.png`).
 - [x] production-name — DONE 2026-09-30: creating asks for a name (guessed from a title line in the paste, else "My play"); `PUT /productions/:id {name}` for owner/director; tap the name in the company panel to rename, tab title follows. 1 test; driven in Chrome ("Script Follower" → "Waiting").

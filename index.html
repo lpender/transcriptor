@@ -435,6 +435,7 @@ function noteOf(p) {
       const text = box.value.trim();
       text ? notes[p.dataset.text] = text : delete notes[p.dataset.text];
       save('notes', JSON.stringify(notes));
+      if (me && current) api(`/productions/${current.id}/me/notes`, { [p.dataset.text]: text }, 'PUT');   // yours, kept by the production too
       if (sayBox && (sayBox.value.trim() || '') !== (sayAs[p.dataset.text] || '')) {
         const say = sayBox.value.trim();
         say ? sayAs[p.dataset.text] = say : delete sayAs[p.dataset.text];
@@ -1336,6 +1337,13 @@ async function pullScript() {
   const c = await api(`/productions/${current.id}/clips`);
   if (c.status === 200 && c.clips) { window.CLIPS = { ...(window.CLIPS || {}), ...c.clips }; render(); }
   pullCues();
+  // Your notes from other devices: the production's copy is the newest, since every edit goes up at once.
+  const mineNotes = await api(`/productions/${current.id}/me/notes`);
+  if (mineNotes.status === 200 && mineNotes.notes) {
+    Object.assign(notes, mineNotes.notes);
+    save('notes', JSON.stringify(notes));
+    lines.forEach(p => { const n = p.querySelector('span.note:not(.edit)'); if (n) n.replaceWith(drawNote(p)); });
+  }
   const sa = await api(`/productions/${current.id}/sayas`);
   if (sa.status === 200) { sayAs = sa.sayas || {}; lines.forEach(p => { const n = p.querySelector('span.note:not(.edit)'); if (n) n.replaceWith(drawNote(p)); }); }
   drawVoices();
@@ -1353,9 +1361,11 @@ async function pullCues() {
   const r = await api(`/productions/${current.id}/cues`);
   if (r.status !== 200) return;
   if (r.cues.length) {
-    window.CUES = r.cues.map(c => ({ name: c.name, music: c.music, bed: c.bed, hold: c.hold }));
+    const cues = r.cues.map(c => ({ name: c.name, music: c.music, bed: c.bed, hold: c.hold }));
+    const changed = JSON.stringify(cues) !== JSON.stringify(window.CUES || []);
+    window.CUES = cues;
     window.GAINS = r.gains || {};
-    $('start').click();   // holds are stops in the script; buildCues() runs there
+    if (changed) $('start').click();   // holds are stops in the script; buildCues() runs there
   }
   cueRows = r.cues;
   await drawSoundPanel();

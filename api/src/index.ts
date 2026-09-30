@@ -17,6 +17,7 @@ import './routes/room';
 export { Room } from './room';
 
 import './routes/authorize';
+import './routes/notes';
 import { providerFor, type OAuthEnv } from './oauth';
 
 // The OAuth provider wraps everything: /oauth/* and /authorize are its, the
