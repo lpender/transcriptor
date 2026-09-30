@@ -2,12 +2,12 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-## Queue
-- [ ] auth-core — `api/src/auth.ts` per PLATFORM §1: users, magic_link_tokens
+- [ ] auth-core (owner: loop, started 2026-09-30) — `api/src/auth.ts` per PLATFORM §1: users, magic_link_tokens
   (hashed, 15 min, single use), sessions (hashed, 30 days) in migration 0002;
   `issueMagicLink`, `verifyMagicLink`, `currentUser(req)` from cookie or
   bearer. Unit tests on a local D1 via `wrangler d1 execute` fixtures or an
   in-memory fake. No mail yet: dev prints the link to the log.
+## Queue
 - [ ] auth-routes — `POST /auth/link` (email), `GET /auth/verify?token`
   (sets cookie, redirects to APP_ORIGIN), `GET /me`, `POST /auth/logout`.
   Mail through `email.ts` with Resend behind an env var; dev logs the link.
