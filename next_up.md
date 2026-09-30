@@ -2,8 +2,6 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-- [ ] web-progress-view (owner: loop, started 2026-09-30) — owner/director table: per member cleared/total,
-  weak lines. UNTIL: sync-progress.
 ## Queue
 - [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
@@ -54,6 +52,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] web-progress-view — DONE 2026-09-30: an owner or director sees each member's standing on their row ("12 of 40 clear, 3 weak", "off book", "not started"). Fixed a double draw of the panel when two sign-in paths raced. Driven in Chrome (`tmp/qa/2026-09-30-progress.png`).
 - [x] web-tokens — DONE 2026-09-30: "Your AI" in the Account section: Connect your AI → labelled token shown once as a `claude mcp add` line (copied) plus the claude.ai connector note; tokens listed with last use and Revoke. Driven in Chrome: token lists MCP tools, revoked token gets 401 (`tmp/qa/2026-09-30-tokens.png`).
 - [x] mcp-scaffold — DONE 2026-09-30: `api/src/mcp.ts` (stateless Streamable-HTTP JSON-RPC: initialize, tools/list, tools/call, ping), `routes/mcp.ts` (`POST /mcp` with a bearer, personal tokens as labelled 10-year sessions: mint once, list, revoke), tools `whoami` + `list_productions`. 2 tests; live curl: initialize → whoami returns the user and production.
 - [x] sync-progress — DONE 2026-09-30: migration 0003 `progress`, `PUT /productions/:id/me/progress` [learn] and `GET …/progress` [progress]; the app posts 2 s after a graded sentence when signed in and in a production. 2 tests; driven in Chrome: one right answer → best 1 of 317 on the server.

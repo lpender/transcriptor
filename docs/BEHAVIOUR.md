@@ -172,7 +172,9 @@ reader pasted their own.
   Signed out, or with no API reachable, nothing else about the app changes.
 - **Company.** Signed in, the Account section keeps the script under a
   production (one button; the word "production" appears only once there is
-  more than one member). It lists members with role and parts, the seat
+  more than one member). It lists members with role and parts (and, for an owner or director,
+  each member's standing: sentences clear of their parts, weak ones, or
+  "off book"), the seat
   count and monthly price, and for an owner or director makes invite links
   per role (14 days, copied to the clipboard). Opening an invite link shows
   what it joins; signed in you join at once, signed out you give an address

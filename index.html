@@ -1179,7 +1179,10 @@ async function loadCompany() {
   if (current) save('production', current.id);
   drawCompany();
 }
+const shares = role => ['owner', 'director'].includes(role);
+let drawGen = 0;  // two draws in flight (sign-in landing and whoami both call) must not both paint
 async function drawCompany() {
+  const gen = ++drawGen;
   company.replaceChildren();
   if (!current) {
     company.append(el('div', { className: 'row' }, el('button', { className: 'chip wide', textContent: 'Keep this script under your account', onclick: createProduction })));
@@ -1187,12 +1190,13 @@ async function drawCompany() {
   }
   const detail = await api(`/productions/${current.id}`);
   if (detail.status !== 200) return company.append(el('p', { textContent: 'Could not load it.' }));
+  const progress = shares(detail.role) ? Object.fromEntries((((await api(`/productions/${current.id}/progress`)).progress) || []).map(p => [p.email, p])) : {};
+  if (gen !== drawGen) return;
+  company.replaceChildren();
   const { members, role } = detail;
   const group = members.length > 1;
-  const shares = ['owner', 'director'].includes(role);
   // Who is off book: an owner or director sees each member's best clean run
   // against the size of their parts, and how many sentences they still owe.
-  const progress = shares ? Object.fromEntries((((await api(`/productions/${current.id}/progress`)).progress) || []).map(p => [p.email, p])) : {};
   const standing = m => {
     const p = progress[m.email];
     if (!p || !p.total) return m.parts.length ? ' · not started' : '';
@@ -1208,7 +1212,7 @@ async function drawCompany() {
     const what = el('span', { textContent: m.role + (m.parts.length ? ' · ' + m.parts.join(', ') : '') + standing(m) });
     company.append(el('div', { className: 'row', title: m.email }, who, what));
   }
-  if (shares) {
+  if (shares(role)) {
     company.append(el('p', { className: 'seats', textContent: `${seats(members.length)}. Each member you invite is $1 a month.` }));
     const row = el('div', { className: 'row' });
     for (const r of ['cast', 'crew', 'director']) row.append(el('button', { className: 'chip', textContent: `Invite ${r}`, onclick: () => invite(r) }));
