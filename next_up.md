@@ -2,13 +2,13 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
+- [ ] mcp-scaffold (owner: loop, started 2026-09-30) — `/mcp` route, `whoami`, `list_productions`, bearer
+  personal tokens (hashed, revocable). Tests.
 ## Queue
 - [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
 - [ ] relay-durable-object (EPIC) — Replace public MQTT with the production's
   DO; keep the message shape and clock ordering. UNTIL: auth-magic-link.
-- [ ] mcp-scaffold — `/mcp` route, `whoami`, `list_productions`, bearer
-  personal tokens (hashed, revocable). Tests.
 - [ ] web-progress-view — owner/director table: per member cleared/total,
   weak lines. UNTIL: sync-progress.
 - [ ] mcp-add-script — `add_script` + `get_script`; one `parseScript` in
