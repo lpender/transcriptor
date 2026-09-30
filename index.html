@@ -1620,7 +1620,7 @@ async function landInvite(token) {
   $('joinChip').onclick = async () => {
     const email = $('joinEmail').value.trim();
     const r = await api(`/invites/${token}/accept`, me ? {} : { email });
-    if (r.status === 200) { note.textContent = `You are in ${r.production.name}.`; box.hidden = true; save('production', r.production.id); await loadCompany(); }
+    if (r.status === 200) { note.textContent = r.joined === 'joined' ? `You are in ${r.production.name}.` : `You were already in ${r.production.name}.`; box.hidden = true; save('production', r.production.id); await loadCompany(); }
     else if (r.status === 202) { note.textContent = `A link is on its way to ${email}.`; if (r.link) note.append(' ', el('a', { href: r.link, textContent: 'Open it here (dev).' })); }
     else note.textContent = r.message || `Could not join (${r.status}).`;
   };
