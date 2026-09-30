@@ -57,6 +57,15 @@ describe('productions', () => {
     const { members } = await (await ann.call('GET', `/productions/${production.id}`)).json() as { members: { email: string; parts: string[] }[] };
     expect(members.find((m) => m.email === 'bob4@example.com')?.parts).toEqual(['VLADIMIR', 'LUCKY']);
   });
+  it('renames for a director, not for cast', async () => {
+    const ann = await signIn('ann26@example.com'), bob = await signIn('bob26@example.com');
+    const { production } = await (await ann.call('POST', '/productions', { name: 'Untitled' })).json() as { production: { id: string } };
+    await env.DB.prepare("INSERT INTO members VALUES (?, ?, 'cast', '[]', '2026-09-30T00:00:00Z')").bind(bob.user.id, production.id).run();
+    expect((await bob.call('PUT', `/productions/${production.id}`, { name: 'Hamlet' })).status).toBe(403);
+    expect((await ann.call('PUT', `/productions/${production.id}`, { name: '  ' })).status).toBe(400);
+    expect(await (await ann.call('PUT', `/productions/${production.id}`, { name: ' The Tempest ' })).json()).toEqual({ production: { id: production.id, name: 'The Tempest' } });
+    expect(((await (await bob.call('GET', `/productions/${production.id}`)).json()) as { production: { name: string } }).production.name).toBe('The Tempest');
+  });
   it('401s signed out', async () => {
     expect((await handle(new Request('http://x/productions'), env)).status).toBe(401);
   });

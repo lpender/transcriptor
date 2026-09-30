@@ -1466,7 +1466,7 @@ async function drawCompany() {
     const pick = el('select', { onchange: () => { save('production', pick.value); current = productions.find(p => p.id === pick.value); drawCompany(); } });
     for (const p of productions) pick.append(el('option', { value: p.id, textContent: p.name, selected: p.id === current.id }));
     company.append(el('label', { className: 'loop' }, 'production ', pick));
-  } else company.append(el('h3', { textContent: group ? current.name : `${current.name} — your script` }));
+  } else company.append(el('h3', { textContent: group ? current.name : `${current.name} — your script`, title: shares(role) ? 'Rename' : '', style: shares(role) ? 'cursor:pointer' : '', onclick: shares(role) ? renameProduction : null }));
   for (const m of members) {
     const who = el('span', { className: 'who', textContent: (m.name || m.email) + (m.user_id === me.id ? ' (you)' : '') });
     const what = el('span', { textContent: m.role + (m.parts.length ? ' · ' + m.parts.join(', ') : '') + standing(m) });
@@ -1493,10 +1493,20 @@ async function drawCompany() {
     company.append(row, el('p', { id: 'inviteOut' }));
   }
 }
+// The script's own title line, if the paste starts with one (no colon), else a plain default.
+const guessName = () => { const first = (src.value.split('\n').find(l => l.trim()) || '').trim(); return first && !first.includes(':') ? first.slice(0, 80) : 'My play'; };
 async function createProduction() {
-  const name = (window.SCRIPT_TITLE || document.title || 'My script').trim();
+  const name = (prompt('Name this production', guessName()) || '').trim();
+  if (!name) return;
   const r = await api('/productions', { name });
   if (r.status !== 201) return accountNote.textContent = 'Could not create it.';
+  await loadCompany();
+}
+async function renameProduction() {
+  const name = (prompt('Name this production', current.name) || '').trim();
+  if (!name || name === current.name) return;
+  const r = await api(`/productions/${current.id}`, { name }, 'PUT');
+  if (r.status !== 200) return accountNote.textContent = r.message || 'Could not rename.';
   await loadCompany();
 }
 async function invite(role) {

@@ -27,6 +27,16 @@ route('GET', '/productions', async (req, env) => {
   return json({ productions: await myProductions(env.DB, user) });
 });
 
+// Rename. An owner or director; the name is what members and the tab show.
+route('PUT', '/productions/:id', async (req, env, { id }) => {
+  const g = await gate(env.DB, req, id, 'share');
+  if (g instanceof Response) return g;
+  const { name } = await body<{ name: string }>(req);
+  if (typeof name !== 'string' || !name.trim() || name.length > 120) return error('invalid_name', 400);
+  await env.DB.prepare('UPDATE productions SET name = ? WHERE id = ?').bind(name.trim(), id).run();
+  return json({ production: { id, name: name.trim() } });
+});
+
 route('GET', '/productions/:id', async (req, env, { id }) => {
   const g = await gate(env.DB, req, id, 'read');
   if (g instanceof Response) return g;

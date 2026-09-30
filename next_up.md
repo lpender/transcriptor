@@ -3,12 +3,6 @@
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
 ## Queue
-- [ ] production-name — a production made from the app is named after
-  `document.title`, now "Tablework" (signed-in drive 2026-09-30: the test one
-  is "Script Follower"). Ask for a name when creating ("Name this production",
-  default: the script's title line if any, else "My play"), and let an owner
-  rename it from the company panel (`PUT /productions/:id {name}` exists? add
-  it). Verify in Chrome.
 - [ ] sheet-sections-fold — the More sheet is 3,251 px tall at 390 wide when
   signed in (`tmp/qa/2026-09-30-signedin-390-sheet-top.png`): ten sections,
   the company at the bottom. Make each section a `<details>` whose open state
@@ -44,6 +38,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] production-name — DONE 2026-09-30: creating asks for a name (guessed from a title line in the paste, else "My play"); `PUT /productions/:id {name}` for owner/director; tap the name in the company panel to rename, tab title follows. 1 test; driven in Chrome ("Script Follower" → "Waiting").
 - [x] mcp-oauth — DONE 2026-09-30: `@cloudflare/workers-oauth-provider` 1.2.1 wraps the Worker (`api/src/oauth.ts`): discovery, dynamic registration, PKCE, tokens in OAUTH_KV; `/oauth/mcp` runs the same rpc for an OAuth user; the consent page (`routes/authorize.ts`) names the client, its host and your productions, with a sign-in form that returns to it. 1 end-to-end test: register → consent → allow → code → token → whoami. The claude.ai connection itself waits on a public URL (Gated).
 - [x] how-it-works-page — DONE 2026-09-30: `how.html`, eleven sections in plain words (try it, the script shape, productions and parts, invites, learning, voices and cost, sound, Together, your AI with the `claude mcp add` line, paying, your data), linked from the welcome and the Account section, cached by the service worker. Rendered at 390 with no horizontal scroll (`tmp/qa/2026-09-30-how-390.png`).
 - [x] web-relay — DONE 2026-09-30: signed in with a production, Lead/Follow use the production's Room over WebSocket (server-ordered moves, last move on join, presence in the header "Leading <name> · 2 here", auto-rejoin after a drop); the room word hides; signed out keeps MQTT. Driven in Chrome: leader's jumps arrive on a second socket as seq 7, 8; 101 passthrough bug in cors() found and fixed.
