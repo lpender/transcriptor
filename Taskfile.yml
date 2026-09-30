@@ -10,6 +10,11 @@ tasks:
     dir: api
     cmds: [npx wrangler dev]
 
+  install:
+    desc: Install the API's dependencies (npm needs legacy peer deps here, see QUIRKS)
+    dir: api
+    cmds: [npm install --legacy-peer-deps]
+
   db:migrate:
     desc: Apply D1 migrations to the local database (task dev needs this once)
     dir: api

@@ -7,6 +7,13 @@
   the default handler; everything testable lives in `router.ts`.
 - `wrangler dev` dies with `ERR_IPC_CHANNEL_CLOSED` when its stdin closes
   (a backgrounded tool call); start it with `</dev/null` via nohup, or `task dev`.
+- `npm install` in `api/` needs `--legacy-peer-deps` (npm 11.5 dies with
+  `Cannot read properties of null (reading 'edgesOut')` resolving the vitest
+  pool's peers). `vitest-pool-workers` 0.22 wants vitest 4 and is a Vite
+  plugin (`cloudflareTest()`), not `defineWorkersConfig`; `cloudflare:test`'s
+  `env` is typed empty, so tests import `env` from `test/env.ts`.
+- `compatibility_date` must not be newer than the bundled workerd (2026-08-22
+  with wrangler 4.145); a newer date fails every test with ERR_RUNTIME_FAILURE.
 - `@cloudflare/workers-types` must match wrangler's peer (v5 line with wrangler 4.145).
 
 - `sw.js` `CACHE` must be bumped on every deploy or installed copies keep the

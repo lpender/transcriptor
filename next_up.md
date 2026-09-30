@@ -2,11 +2,6 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-- [ ] auth-core (owner: loop, started 2026-09-30) — `api/src/auth.ts` per PLATFORM §1: users, magic_link_tokens
-  (hashed, 15 min, single use), sessions (hashed, 30 days) in migration 0002;
-  `issueMagicLink`, `verifyMagicLink`, `currentUser(req)` from cookie or
-  bearer. Unit tests on a local D1 via `wrangler d1 execute` fixtures or an
-  in-memory fake. No mail yet: dev prints the link to the log.
 ## Queue
 - [ ] auth-routes — `POST /auth/link` (email), `GET /auth/verify?token`
   (sets cookie, redirects to APP_ORIGIN), `GET /me`, `POST /auth/logout`.
@@ -70,6 +65,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] auth-core — DONE 2026-09-30: migration 0002 (magic_link_tokens, sessions), `api/src/auth.ts` (issue/verify links, sessions, `currentUser` from cookie or bearer), `ids.ts`; 5 tests on a real D1 via `@cloudflare/vitest-pool-workers` 0.22 + vitest 4.
 - [x] db-schema-0001 — DONE 2026-09-30: `api/migrations/0001_productions.sql` (users, productions, members, invites, scripts, notes), `api/src/access.ts` with the role × capability table and 4 tests; applied to local D1, CHECK on role verified.
 - [x] cf-scaffold — DONE 2026-09-30: `api/` Worker (router.ts + index.ts entry), vitest + tsc, `Taskfile.yml` with serve/dev/test/deploy; `task test` green; `wrangler dev` answers `/health` with CORS for the app origin.
 - [x] measure-loudness — DONE 2026-09-30: `loudness(blobOrUrl)` in index.html (Web Audio, mean-square dB). Playwright: OfficeFans −28.43 vs ffmpeg −28.4, SadDay −23.48 vs −23.5; a 0.1-amplitude tone −23.01 as expected.
