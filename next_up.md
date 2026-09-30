@@ -2,11 +2,7 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-
 ## Queue
-- [ ] design-sharing-model — Diverge → skeptic → spec in
-  `docs/design/sharing.md`: production, roles (owner, director, cast, crew),
-  invite link, what each role sees, notes privacy. Then D1 schema ADR.
 - [ ] design-mcp-ingest — Spec the MCP server: `whoami`,
   `list_productions`, `add_script`, `get_script`, `set_cues`,
   `upload_sound`. Claude converts PDFs client-side; server takes text.
@@ -15,9 +11,21 @@
 - [ ] design-sound-upload — Spec per-production music + room tone
   upload per scene, normalization in a Worker (port `normalize.py`), replaces
   `cues.js` + `sound/`.
-- [ ] cf-scaffold (EPIC) — `wrangler` project, D1 migration 0001, one health
+- [ ] cf-scaffold — `wrangler` project, D1 migration 0001, one health
   route, `Taskfile.yml` with `task dev`, `task test`, `task deploy` (deploy
-  is ACTION for Lee). UNTIL: design-sharing-model.
+  is ACTION for Lee). Verify: `task test` green, `curl localhost:8787/health` ok.
+- [ ] db-schema-0001 — D1 migration: users, productions, members, invites,
+  scripts, notes per `docs/design/sharing.md`; `can(role, cap)` table in
+  `api/src/access.ts` with a unit test. UNTIL: cf-scaffold.
+- [ ] api-productions — create/list/get, members, change role, remove, leave
+  (last owner rule). Tests against local D1. UNTIL: db-schema-0001.
+- [ ] api-invites — mint (role, 14 days), revoke, accept signed in / signed
+  out (via magic link purpose `invite`). UNTIL: auth-magic-link.
+- [ ] web-production-panel — More sheet: members, roles, invite link, seat
+  count and monthly price; the word "production" only with 2+ members.
+  UNTIL: api-invites.
+- [ ] web-progress-view — owner/director table: per member cleared/total,
+  weak lines. UNTIL: api-productions.
 - [ ] auth-magic-link (EPIC) — Resend + KV sessions; try-it path stays
   account-free. UNTIL: cf-scaffold.
 - [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
@@ -37,6 +45,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] design-sharing-model — DONE 2026-09-30: `docs/design/sharing.md` (diverge, skeptic, spec, role table), ADR 004; split into db-schema-0001, api-productions, api-invites, web-production-panel, web-progress-view.
 - [x] spike-cue-listening — DONE 2026-09-30: H switch "Hear me say it" in More; last two words of the sentence under test count as the press. Verified in Playwright with a stubbed SpeechRecognition (wrong words ignored, reveal, then right + next). UNTIL Lee tries it with a real mic: one-word pieces ("No.") will fire on any "no".
 - [x] productionize-billing-period — DECIDED 2026-09-30 (loop): monthly and yearly, yearly default (ADR 003 as written).
 - [x] productionize-name — DECIDED 2026-09-30 (loop): Tablework. Runner-up Run-through. Off Book rejected.
