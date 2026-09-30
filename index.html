@@ -532,6 +532,22 @@ function route(a, db) {
     ctx.createMediaElementSource(a).connect(a.gain).connect(ctx.destination);
   } catch (e) { console.warn('No gain for', a.src, e); }
 }
+// How loud a file is, in dB, the same measure as ffmpeg's volumedetect mean
+// (10·log10 of the mean square over every sample of every channel), so an upload
+// can be levelled on the spot: gain = target − loudness(file). Runs in the
+// browser; nothing is re-encoded.
+async function loudness(blobOrUrl) {
+  const buf = await (blobOrUrl instanceof Blob ? blobOrUrl.arrayBuffer() : fetch(blobOrUrl).then(r => r.arrayBuffer()));
+  ctx ??= new (window.AudioContext || window.webkitAudioContext)();
+  const pcm = await ctx.decodeAudioData(buf);
+  let sum = 0, n = 0;
+  for (let c = 0; c < pcm.numberOfChannels; c++) {
+    const d = pcm.getChannelData(c);
+    for (let k = 0; k < d.length; k++) sum += d[k] * d[k];
+    n += d.length;
+  }
+  return n ? 10 * Math.log10(sum / n) : -Infinity;
+}
 function spawn(kind, src, again) {
   const a = new Audio(src);
   route(a, gainOf(src));
