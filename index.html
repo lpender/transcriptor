@@ -1225,8 +1225,9 @@ $('email').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); sendL
 $('signoutChip').onclick = async () => { await api('/auth/logout', {}); me = null; accountNote.textContent = 'Signed out.'; drawAccount(); };
 {
   const q = new URLSearchParams(location.search);
-  if (q.has('signin') || q.has('joined')) {
-    accountNote.textContent = q.get('signin') === 'expired' ? 'That link has expired. Ask for another.' : '';
+  if (q.has('billing')) accountNote.textContent = { ok: 'Thank you. Billing is set up.', cancel: 'Nothing was charged.', managed: '' }[q.get('billing')] || '';
+  if (q.has('signin') || q.has('joined') || q.has('billing')) {
+    if (q.has('signin')) accountNote.textContent = q.get('signin') === 'expired' ? 'That link has expired. Ask for another.' : q.get('invite') === 'readonly' ? 'That production is not paid for, so nobody can join it right now.' : '';
     history.replaceState(null, '', location.pathname);
     if (q.get('signin') !== 'expired') whoami().then(() => sheet.showModal());
     else sheet.showModal();
@@ -1425,6 +1426,20 @@ async function drawCompany() {
   }
   if (shares(role)) {
     company.append(el('p', { className: 'seats', textContent: `${seats(members.length)}. Each member you invite is $1 a month.` }));
+    // How it is paid for, in words, and the one thing to press (docs/design/billing.md).
+    const bill = await api(`/productions/${current.id}/billing`);
+    if (gen !== drawGen) return;
+    if (bill.status === 200 && !bill.off) {
+      const line = el('p', { className: 'seats', textContent: bill.words });
+      const go = async (path, body) => { const r = await api(`/productions/${current.id}/billing/${path}`, body); r.url ? location.assign(r.url) : line.textContent = r.message || `Could not open billing (${r.status}).`; };
+      const row = el('div', { className: 'row' });
+      if (bill.subscribed) row.append(el('button', { className: 'chip wide', textContent: 'Manage billing', onclick: () => go('portal', {}) }));
+      else if (role === 'owner') row.append(
+        el('button', { className: 'chip wide', textContent: 'Pay $10 a seat a year', onclick: () => go('checkout', { plan: 'yearly' }) }),
+        el('button', { className: 'chip', textContent: 'or $1 a month', onclick: () => go('checkout', { plan: 'monthly' }) }),
+      );
+      company.append(line, row);
+    } else if (bill.status === 200 && bill.state !== 'trial') company.append(el('p', { className: 'seats', textContent: bill.words }));
     const row = el('div', { className: 'row' });
     for (const r of ['cast', 'crew', 'director']) row.append(el('button', { className: 'chip', textContent: `Invite ${r}`, onclick: () => invite(r) }));
     company.append(row, el('p', { id: 'inviteOut' }));

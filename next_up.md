@@ -2,9 +2,9 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-## Queue
-- [ ] web-billing — company panel: state in words and one button, Pay or
+- [ ] web-billing (owner: loop, started 2026-09-30) — company panel: state in words and one button, Pay or
   Manage. UNTIL: billing-routes.
+## Queue
 - [ ] relay-durable-object (EPIC) — Replace public MQTT with the production's
   DO; keep the message shape and clock ordering. UNTIL: auth-magic-link.
 - [ ] mcp-oauth — OAuth 2.1 provider + consent page listing productions.
