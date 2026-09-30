@@ -2,13 +2,14 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
+- [ ] mcp-parts-invite (owner: loop, started 2026-09-30) — `list_members`,
+  `set_parts`, `invite` over MCP, gated like the HTTP routes. Tests.
 ## Queue
 - [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
 - [ ] relay-durable-object (EPIC) — Replace public MQTT with the production's
   DO; keep the message shape and clock ordering. UNTIL: auth-magic-link.
-- [ ] mcp-cues-parts-invite — `set_cues`, `list_sound`, `set_parts`,
-  `invite`. UNTIL: mcp-add-script, api-invites.
+- [ ] mcp-cues — `set_cues`, `list_sound` over MCP. UNTIL: sound-api.
 - [ ] mcp-oauth — OAuth 2.1 provider + consent page listing productions.
   UNTIL: verify-cf-mcp-oauth, mcp-scaffold.
 - [ ] stress-per-line — `stress.json` becomes a per-line "say as" on the
