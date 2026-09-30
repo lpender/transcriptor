@@ -9,6 +9,10 @@ database_name = "tablework"
 database_id = "local"          # ACTION for Lee: replace after `wrangler d1 create tablework`
 migrations_dir = "migrations"
 
+[[r2_buckets]]
+binding = "CLIPS"
+bucket_name = "tablework-clips"   # ACTION for Lee: `wrangler r2 bucket create tablework-clips`
+
 [vars]
 APP_ORIGIN = "http://localhost:8799"
 API_ORIGIN = "http://localhost:8787"

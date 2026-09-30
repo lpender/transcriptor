@@ -64,7 +64,7 @@ before any render is bought.
 |---|---|---|
 | Try before signup | Paste a script, browser voices, no account; state in localStorage until signup, then uploaded | frontend |
 | Same play rendered by a second production | Every clip already in R2 by hash; price shown is $0 | API render endpoint |
-| ElevenLabs down mid-render | Render job is per line and resumable; lines done stay done; user sees progress and a retry | render Worker |
+| ElevenLabs down mid-render | The job is per line and idempotent by hash; failures are listed on the render, done lines stay done, Retry forgets the failures | `api/src/render.ts` |
 | Leader loses connection | DO keeps last move; follower reconnects and lands right; header says "no leader for 45 s" | DO + frontend |
 | Member removed from production | Session still valid, membership check on every production route returns 403; local cache of that script cleared on next load | API middleware |
 | Owner stops paying | Production goes read-only after grace; nothing deleted; export stays | Stripe webhook → production.state |
@@ -74,7 +74,7 @@ before any render is bought.
 
 | Service | Used for | Parser / adapter |
 |---|---|---|
-| ElevenLabs | Voice render | `voices/eleven.ts` → generic `Clip` |
+| ElevenLabs | Voice render | `api/src/eleven.ts` → `Rendered {audio, spans}` |
 | Stripe | Checkout, portal, webhooks | `billing/stripe.ts` → `Subscription` |
 | Resend | Magic-link email | `auth/mail.ts` |
 | Cloudflare D1/R2/DO/KV | Store, files, relay, sessions | direct |

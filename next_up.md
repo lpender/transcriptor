@@ -2,9 +2,6 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-- [ ] voices-render-job (owner: loop, started 2026-09-30) — Queues consumer, `voices/eleven.ts`, R2 write,
-  resumable per line. UNTIL: voices-quote. Testing spends credits: ACTION
-  for Lee to allow one small test render when it is ready.
 ## Queue
 - [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
@@ -27,6 +24,10 @@
   voices and cost, MCP setup, cues. Written from the specs above.
 
 ## Gated
+- [ ] eleven-key-and-bucket — ACTION: `cd api && npx wrangler r2 bucket create
+  tablework-clips` and `npx wrangler secret put ELEVEN_LABS_API_KEY`, then say
+  yes to one test render of the 3 unrendered lines (~700 characters, cents).
+  Spends credits. UNTIL: cf-account.
 - [ ] verify-cf-mcp-oauth — Spike: hello-world remote MCP on Workers with
   `@cloudflare/workers-oauth-provider`, connect from claude.ai as a custom
   connector, call `whoami`. Verify: a tool call round-trips. Local only
@@ -46,6 +47,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] voices-render-job — DONE 2026-09-30: migration 0006 `renders`; `api/src/eleven.ts` (adapter, tts.py's spans), `render.ts` (client-driven batches of 4, idempotent by hash, failures recorded, retry), routes start/next/retry/progress, `GET /productions/:id/clips` (clips.js shape), `GET /clips/:hash`; R2 binding `CLIPS`. 3 tests with a stub engine. A real render needs the key and credits (Gated).
 - [x] voices-quote — DONE 2026-09-30: migration 0005 `clips` + `voices`, `api/src/voices.ts` (cast, tts.py-compatible clip hash, $0.30/1k min $1, quote over uncached chars, dedup), routes `/voices`, `/productions/:id/voices`, `/render/quote`; `scripts/seed-clips.mjs` seeds the cache from clips.js. 4 tests; live: the real play quotes with its 3 unrendered lines only.
 - [x] mcp-parts-invite — DONE 2026-09-30: `list_members`, `set_parts` (own, or anyone's with share), `invite` (director/cast/crew) in `api/src/routes/mcp-members.ts`; 1 test walking all three plus refusals.
 - [x] web-script-from-production — DONE 2026-09-30: signed in, the production's script replaces the device's (place kept when identical); owner/director get "Save to the production" in the paste box with the validator's line numbers on refusal. Driven in Chrome: server line appears, paste-box line lands on the server, bad line refused.

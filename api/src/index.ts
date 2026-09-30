@@ -8,6 +8,7 @@ import './routes/mcp';
 import './routes/scripts';
 import './routes/mcp-members';
 import './routes/voices';
+import './routes/render';
 
 export default {
   fetch: async (req: Request, env: Env) => cors(req, env)(preflight(req) ?? (await handle(req, env))),

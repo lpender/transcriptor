@@ -8,6 +8,8 @@ export interface Env {
   API_ORIGIN: string;   // this Worker, for links in mail
   RESEND_API_KEY?: string;
   MAIL_FROM?: string;
+  ELEVEN_LABS_API_KEY?: string;   // secret; unset = rendering is off
+  CLIPS: R2Bucket;                // rendered clips, keyed by hash
 }
 
 export const VERSION = '0.1.0';

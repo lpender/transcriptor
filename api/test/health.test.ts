@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { cors, handle, preflight, VERSION, type Env } from '../src/router';
 
-const env = { DB: {} as D1Database, APP_ORIGIN: 'http://localhost:8799', API_ORIGIN: 'http://localhost:8787' } satisfies Env;
+const env = { DB: {} as D1Database, CLIPS: {} as R2Bucket, APP_ORIGIN: 'http://localhost:8799', API_ORIGIN: 'http://localhost:8787' } satisfies Env;
 
 describe('router', () => {
   it('answers /health', async () => {
