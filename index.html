@@ -124,7 +124,8 @@
   }
   .sheet-in h2:first-child { margin-top: 4px; }
   .row { display: flex; gap: 8px; align-items: center; padding: 3px 0; }
-  .row .who { flex: 1; min-width: 0; overflow-wrap: anywhere; font: 500 15px/1.2 ui-monospace, Menlo, monospace; letter-spacing: .04em; }
+  #company .row { flex-wrap: wrap; }   /* name, standing and controls stack on a phone rather than shred */
+  .row .who { flex: 1 1 9em; min-width: 0; overflow-wrap: anywhere; font: 500 15px/1.2 ui-monospace, Menlo, monospace; letter-spacing: .04em; }
   #roles .row, #cues .row { padding: 3px 8px; margin: 0 -8px; border-radius: 8px; }
   #roles .row:nth-child(odd), #cues .row:nth-child(odd) { background: rgba(255, 255, 255, .035); }
   #cues .row.cur .who { color: var(--cue); }
