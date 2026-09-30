@@ -2,9 +2,9 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
+- [ ] mcp-oauth (owner: loop, started 2026-09-30) — OAuth 2.1 provider + consent page listing productions.
+  (the provider builds and tests locally; only the claude.ai connection waits on a public URL)
 ## Queue
-- [ ] mcp-oauth — OAuth 2.1 provider + consent page listing productions.
-  UNTIL: verify-cf-mcp-oauth, mcp-scaffold.
 ## Gated
 - [ ] stripe-keys — ACTION: a Stripe account in test mode, two prices ($1/mo,
   $10/yr), then `cd api && npx wrangler secret put STRIPE_SECRET_KEY`,
