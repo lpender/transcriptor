@@ -902,7 +902,9 @@ function render() {
           : `${room.role === 'lead' ? 'Leading' : 'Following'} ${room.code}${room.up ? '' : room.role === 'lead' ? ' · connecting…' : ' · nothing heard'}`),
         blocked ? '♫ Touch the page to start the sound' : !hushed && window.CUES?.[cueAt] ? `♫ ${window.CUES[cueAt].name}${sounding()}` : '',
       ].filter(Boolean).join(' · ')
-    : drilling && !weak ? 'Weak lines cleared' : 'Keep going';
+    : drilling && !weak ? 'Weak lines cleared'
+    : items.length && cleared.size === items.length ? 'Off book — a clean run of the whole part'   // the north star, said out loud
+    : 'Keep going';
 
   for (const chip of roles.querySelectorAll('.chip')) {
     const name = chip.dataset.role;

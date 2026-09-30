@@ -212,6 +212,9 @@ reader pasted their own.
   the sheet on the Company section alone, saying what it joins; signed in
   you join at once, signed out you give an address and the link that arrives
   both signs you in and joins.
+- **Off book, said.** When every sentence of your parts is clear in one run,
+  the HUD says "Off book — a clean run of the whole part" instead of "Keep
+  going"; the same moment the production records as off book.
 - **Progress up.** Signed in and in a production, a graded sentence sends the
   best run, the size of your parts and the sentences still owed up to the
   production a beat later, so a director can see who is off book. Signed out
