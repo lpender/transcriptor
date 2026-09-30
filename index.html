@@ -123,7 +123,7 @@
   }
   .sheet-in h2:first-child { margin-top: 4px; }
   .row { display: flex; gap: 8px; align-items: center; padding: 3px 0; }
-  .row .who { flex: 1; font: 500 15px/1.2 ui-monospace, Menlo, monospace; letter-spacing: .04em; }
+  .row .who { flex: 1; min-width: 0; overflow-wrap: anywhere; font: 500 15px/1.2 ui-monospace, Menlo, monospace; letter-spacing: .04em; }
   #roles .row, #cues .row { padding: 3px 8px; margin: 0 -8px; border-radius: 8px; }
   #roles .row:nth-child(odd), #cues .row:nth-child(odd) { background: rgba(255, 255, 255, .035); }
   #cues .row.cur .who { color: var(--cue); }
@@ -144,7 +144,8 @@
   }
   .loop:has(.loopRow) { flex-wrap: wrap; }
   .loopRow { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
-  .chip.wide { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chip.wide { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+  .chip.wide .key { float: none; }
   .loop input[type=range] { flex: 1; width: auto; border: 0; background: none; accent-color: var(--ribbon); padding: 0; }
   #cues [data-loop] { padding: 0 9px; margin-left: -4px; }
   #cues .who { background: none; border: 0; padding: 8px 0; text-align: left; min-height: var(--tap); min-width: 0; }  /* wraps on a phone rather than pushing four chips off the edge */
@@ -1037,6 +1038,7 @@ const frame = (type, body) => {  // an MQTT packet: type, remaining length as a 
   do { let d = n % 128; n = Math.floor(n / 128); if (n) d |= 128; len.push(d); } while (n);
   return new Uint8Array([type, ...len, ...body]);
 };
+const clock = s => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}`; // 83 -> 1:23
 const hex = buf => [...new Uint8Array(buf)].map(x => x.toString(16).padStart(2, '0')).join('');
 const sha = async s => hex(await crypto.subtle.digest('SHA-256', enc.encode(s)));
 // The room word signs every message; the topic is its hash, so the word never travels.
@@ -1405,7 +1407,7 @@ async function drawSoundPanel() {
   } }));
   soundPanel.append(
     el('h3', { textContent: 'Sound files' }),
-    ...soundFiles.map(f => el('div', { className: 'row' }, el('span', { className: 'who', textContent: `${f.kind === 'bed' ? 'room' : 'music'} · ${f.name}` }), el('span', {}, `${f.gain_db >= 0 ? '+' : ''}${(+f.gain_db).toFixed(1)} dB `, el('button', { className: 'chip', textContent: 'Delete', onclick: async () => { const r = await api(`/productions/${current.id}/sound/${f.id}`, undefined, 'DELETE'); if (r.status !== 200) note.textContent = r.message || 'Could not delete.'; drawSoundPanel(); } })))),
+    ...soundFiles.map(f => el('div', { className: 'row' }, el('span', { className: 'who', textContent: `${f.kind === 'bed' ? 'room' : 'music'} · ${f.name}` }), el('span', { style: 'white-space:nowrap', title: `${f.gain_db >= 0 ? '+' : ''}${(+f.gain_db).toFixed(1)} dB` }, `${f.seconds ? clock(f.seconds) + ' · ' : ''}levelled `, el('button', { className: 'chip', textContent: 'Delete', onclick: async () => { const r = await api(`/productions/${current.id}/sound/${f.id}`, undefined, 'DELETE'); if (r.status !== 200) note.textContent = r.message || 'Could not delete.'; drawSoundPanel(); } })))),
     el('div', { className: 'row' }, upload('music'), upload('bed')),
     el('h3', { textContent: 'Scenes' }),
     list,
@@ -1434,7 +1436,7 @@ async function uploadSound(file, kind, note) {
   const q = new URLSearchParams({ name, kind, gain, seconds });
   const r = await fetch(`${API}/productions/${current.id}/sound?${q}`, { method: 'POST', credentials: 'include', headers: { 'content-type': file.type || 'audio/mpeg' }, body: file })
     .then(async x => ({ status: x.status, ...(await x.json().catch(() => ({}))) })).catch(() => ({ status: 0 }));
-  note.textContent = r.status === 201 ? `${name}: levelled by ${gain >= 0 ? '+' : ''}${gain} dB.` : (r.message || `Could not upload ${name} (${r.status}).`);
+  note.textContent = r.status === 201 ? `${name}: ${clock(seconds)}, levelled.` : (r.message || `Could not upload ${name} (${r.status}).`);
 }
 
 // Company voices (docs/design/voices.md): a voice per character from our cast,
