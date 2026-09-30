@@ -1179,6 +1179,7 @@ $('start').onclick = () => {
   const sameScript = load('script') === src.value;  // a new script starts from the top
   save('script', src.value);
   save('pasted', src.value !== (window.SCRIPT || ''));  // a pasted script wins over the bundled one
+  if (!sameScript) localStorage.removeItem('fromProduction');   // a new text is this device's own until pullScript says otherwise
   // "***" marks a scene break: a divider you pass over, not a line you step on.
   // Each scene takes the next sound cue in turn; a cue with `hold` is a stop of
   // its own, placed before the scene that follows it in cues.js.
@@ -1329,6 +1330,8 @@ const el = (tag, props = {}, ...kids) => { const e = Object.assign(document.crea
 async function loadCompany() {
   if (!me) { company.replaceChildren(); current = null; $('room').parentElement.hidden = false; joinRoom(); return; }
   productions = (await api('/productions')).productions || [];
+  const from = load('fromProduction', '');
+  if (from && !productions.some(p => p.id === from)) dropScript();   // left or removed: the script goes with the production
   const want = load('production', '');
   current = productions.find(p => p.id === want) || productions[0] || null;
   if (current) save('production', current.id);
@@ -1342,6 +1345,13 @@ async function loadCompany() {
 // The production's script is the one everyone reads: it replaces what this
 // device had, keeping the place when it is the same text. A director's paste
 // box can push a script the other way.
+// A production's script is private to it: when this device is no longer a member, the copy goes.
+function dropScript() {
+  for (const k of ['fromProduction', 'production', 'script', 'pasted']) localStorage.removeItem(k);
+  src.value = '';
+  stopPlay(); stopLearn(); hud.hidden = bar.hidden = true; read.hidden = true; edit.hidden = false;
+  edit.querySelector('p').textContent = 'You are no longer in that production, so its script has left this device. Paste a script, or open an invite.';
+}
 async function pullScript() {
   $('saveBtn').hidden = !(current && shares(current.role));
   if (current) edit.querySelector('p').textContent = `Paste a script — one speech per line, each starting with the character's name and a colon. Save it and everyone in ${current.name} reads it.`;
@@ -1349,6 +1359,7 @@ async function pullScript() {
   const r = await api(`/productions/${current.id}/script`);
   haveScript = !!(r.status === 200 && r.script);
   if (haveScript && r.script.text !== src.value) { src.value = r.script.text; $('start').click(); }
+  if (haveScript) save('fromProduction', current.id);   // the production's script, not this device's to keep
   // The company's rendered voices, in clips.js's shape, over whatever this device had.
   const c = await api(`/productions/${current.id}/clips`);
   if (c.status === 200 && c.clips) { window.CLIPS = { ...(window.CLIPS || {}), ...c.clips }; render(); }
@@ -1538,7 +1549,7 @@ async function drawCompany() {
     const gone = others ? el('button', { className: 'chip', textContent: '×', title: `Remove ${m.name || m.email}`, onclick: async () => { const r = await api(`/productions/${current.id}/members/${m.user_id}`, undefined, 'DELETE'); if (r.status !== 200) accountNote.textContent = r.message || 'Could not remove.'; drawCompany(); } }) : '';
     company.append(el('div', { className: 'row', title: m.email }, who, what, gone));
   }
-  if (role !== 'owner') company.append(el('div', { className: 'row' }, el('button', { className: 'chip', textContent: 'Leave this production', onclick: async () => { if (!confirm(`Leave ${current.name}? Your notes and progress there go with you.`)) return; const r = await api(`/productions/${current.id}/members/${me.id}`, undefined, 'DELETE'); if (r.status !== 200) return accountNote.textContent = r.message || 'Could not leave.'; localStorage.removeItem('production'); loadCompany(); } })));
+  if (role !== 'owner') company.append(el('div', { className: 'row' }, el('button', { className: 'chip', textContent: 'Leave this production', onclick: async () => { if (!confirm(`Leave ${current.name}? Your notes and progress there go with you.`)) return; const r = await api(`/productions/${current.id}/members/${me.id}`, undefined, 'DELETE'); if (r.status !== 200) return accountNote.textContent = r.message || 'Could not leave.'; const was = current.name; await loadCompany(); accountNote.textContent = `You left ${was}.`; } })));
   if (shares(role)) {
     company.append(el('p', { className: 'seats', textContent: `${seats(members.length)}. Each member you invite is $1 a month.` }));
     // How it is paid for, in words, and the one thing to press (docs/design/billing.md).

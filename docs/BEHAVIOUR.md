@@ -205,7 +205,9 @@ reader pasted their own.
   count and monthly price; for an owner or director each other member's
   role is a select (owner offered only to an owner) with a × to remove them,
   and anyone but an owner has "Leave this production" (the server keeps the
-  last owner either way). It makes invite links
+  last owner either way). A script pulled from a production is marked as its
+  own; when this device is no longer a member (left or removed) the copy is
+  dropped on the next load and the paste box says so. It makes invite links
   per role (14 days, copied to the clipboard). Opening an invite link opens
   the sheet on the Company section alone, saying what it joins; signed in
   you join at once, signed out you give an address and the link that arrives
