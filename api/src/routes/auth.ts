@@ -13,12 +13,29 @@ const cookie = (token: string, maxAge: number) =>
   `${SESSION_COOKIE}=${token}; Path=/; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Lax`;
 const sessionToken = (req: Request) => req.headers.get('cookie')?.match(new RegExp(`(?:^|;\\s*)${SESSION_COOKIE}=([^;]+)`))?.[1] ?? null;
 
+// A same-origin API path to land on after verify (the OAuth consent page); anything else is ignored.
+const safeNext = (x: unknown) => (typeof x === 'string' && /^\/[a-z][a-z0-9/_-]*(\?[^\s#]*)?$/i.test(x) && !x.startsWith('//') ? x : null);
+
+async function sendLink(env: Parameters<typeof send>[0] & { DB: D1Database; API_ORIGIN: string }, email: string, next: string | null) {
+  const { token } = await issueMagicLink(env.DB, email, 'login');
+  const link = `${env.API_ORIGIN}/auth/verify?token=${encodeURIComponent(token)}${next ? `&next=${encodeURIComponent(next)}` : ''}`;
+  const { sent } = await send(env, { to: email, subject: 'Your sign-in link', text: `Open this link to sign in. It works once, for 15 minutes.\n\n${link}` });
+  return { sent, link };
+}
+
+// The consent page's sign-in form (HTML, not the app).
+route('POST', '/auth/link-form', async (req, env) => {
+  const form = await req.formData();
+  const email = String(form.get('email') ?? '');
+  if (!validEmail(email)) return error('invalid_email', 400, 'That does not look like an email address.');
+  const { sent, link } = await sendLink(env, email, safeNext(form.get('next')));
+  return new Response(`<!doctype html><meta charset="utf-8"><title>Check your mail</title><body style="background:#13120E;color:#EFE7D6;font:17px Georgia,serif;padding:40px 20px"><h1>Check your mail</h1><p>A sign-in link is on its way to ${email.replace(/[&<>]/g, '')}. Open it and you will be brought back here.</p>${sent ? '' : `<p><a style="color:#EFE7D6" href="${link}">Open it here (dev).</a></p>`}`, { headers: { 'content-type': 'text/html; charset=utf-8' } });
+});
+
 route('POST', '/auth/link', async (req, env) => {
-  const body = await req.json().catch(() => ({})) as { email?: unknown };
+  const body = await req.json().catch(() => ({})) as { email?: unknown; next?: unknown };
   if (!validEmail(body.email)) return error('invalid_email', 400, 'That does not look like an email address.');
-  const { token } = await issueMagicLink(env.DB, body.email, 'login');
-  const link = `${env.API_ORIGIN}/auth/verify?token=${encodeURIComponent(token)}`;
-  const { sent } = await send(env, { to: body.email, subject: 'Your sign-in link', text: `Open this link to sign in. It works once, for 15 minutes.\n\n${link}` });
+  const { sent, link } = await sendLink(env, body.email, safeNext(body.next));
   // Dev and tests have no mail: the link comes back in the body so the flow can be walked.
   return json(sent ? { ok: true } : { ok: true, link }, 202);
 });
@@ -26,10 +43,12 @@ route('POST', '/auth/link', async (req, env) => {
 // A login link signs in; an invite link signs in and joins the production it
 // was minted for, if that invite is still live.
 route('GET', '/auth/verify', async (req, env) => {
-  const token = new URL(req.url).searchParams.get('token');
+  const url = new URL(req.url);
+  const token = url.searchParams.get('token');
   const hit = (await verifyMagicLink(env.DB, token, 'login')) ?? (await verifyMagicLink(env.DB, token, 'invite'));
   if (!hit) return Response.redirect(`${env.APP_ORIGIN}/?signin=expired`, 302);
-  let landing = `${env.APP_ORIGIN}/?signin=ok`;
+  const next = safeNext(url.searchParams.get('next'));
+  let landing = next ? `${env.API_ORIGIN}${next}` : `${env.APP_ORIGIN}/?signin=ok`;
   if (hit.inviteId) {
     const invite = await findInvite(env.DB, { id: hit.inviteId });
     const joined = invite ? await acceptInvite(env.DB, invite, hit.user.id) : 'gone';

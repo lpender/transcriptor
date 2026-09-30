@@ -13,6 +13,10 @@ migrations_dir = "migrations"
 binding = "CLIPS"
 bucket_name = "tablework-clips"   # ACTION for Lee: `wrangler r2 bucket create tablework-clips`
 
+[[kv_namespaces]]
+binding = "OAUTH_KV"
+id = "local"   # ACTION for Lee: `wrangler kv namespace create OAUTH_KV`
+
 [[durable_objects.bindings]]
 name = "ROOMS"
 class_name = "Room"

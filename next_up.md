@@ -2,8 +2,6 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-- [ ] mcp-oauth (owner: loop, started 2026-09-30) — OAuth 2.1 provider + consent page listing productions.
-  (the provider builds and tests locally; only the claude.ai connection waits on a public URL)
 ## Queue
 ## Gated
 - [ ] stripe-keys — ACTION: a Stripe account in test mode, two prices ($1/mo,
@@ -15,10 +13,10 @@
   `npx wrangler secret put SEALING_KEY` (any long random string), then say
   yes to one test render of the 3 unrendered lines (~700 characters, cents).
   Spends credits. UNTIL: cf-account.
-- [ ] verify-cf-mcp-oauth — Spike: hello-world remote MCP on Workers with
-  `@cloudflare/workers-oauth-provider`, connect from claude.ai as a custom
-  connector, call `whoami`. Verify: a tool call round-trips. Local only
-  until Lee has a domain; `workers.dev` subdomain is free. UNTIL: cf-account (claude.ai must reach a public URL).
+- [ ] connect-claude-ai — ACTION: once the API has a public URL (cf-account),
+  add a custom connector in claude.ai at `https://<api>/oauth/mcp`, walk the
+  consent page, call whoami. The provider and consent page are built and
+  tested locally. Also `wrangler kv namespace create OAUTH_KV` and paste the id.
 - [ ] resend-account — ACTION: a Resend account (free tier) with the domain
   verified in DNS, then `cd api && npx wrangler secret put RESEND_API_KEY`
   and `MAIL_FROM`. Until then sign-in links are only logged. UNTIL: buy-domain.
@@ -34,6 +32,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] mcp-oauth — DONE 2026-09-30: `@cloudflare/workers-oauth-provider` 1.2.1 wraps the Worker (`api/src/oauth.ts`): discovery, dynamic registration, PKCE, tokens in OAUTH_KV; `/oauth/mcp` runs the same rpc for an OAuth user; the consent page (`routes/authorize.ts`) names the client, its host and your productions, with a sign-in form that returns to it. 1 end-to-end test: register → consent → allow → code → token → whoami. The claude.ai connection itself waits on a public URL (Gated).
 - [x] how-it-works-page — DONE 2026-09-30: `how.html`, eleven sections in plain words (try it, the script shape, productions and parts, invites, learning, voices and cost, sound, Together, your AI with the `claude mcp add` line, paying, your data), linked from the welcome and the Account section, cached by the service worker. Rendered at 390 with no horizontal scroll (`tmp/qa/2026-09-30-how-390.png`).
 - [x] web-relay — DONE 2026-09-30: signed in with a production, Lead/Follow use the production's Room over WebSocket (server-ordered moves, last move on join, presence in the header "Leading <name> · 2 here", auto-rejoin after a drop); the room word hides; signed out keeps MQTT. Driven in Chrome: leader's jumps arrive on a second socket as seq 7, 8; 101 passthrough bug in cors() found and fixed.
 - [x] relay-do — DONE 2026-09-30: `api/src/room.ts` Room Durable Object (hibernation sockets, lead on/off gated by the role table, moves stamped with a sequence and kept as the last move, presence broadcasts, ping), `GET /productions/:id/room` upgrade route passing who and role, wrangler binding + SQLite migration. 2 tests with real WebSocket pairs.

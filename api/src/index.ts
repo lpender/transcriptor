@@ -1,5 +1,5 @@
 // The API Worker entry: nothing but the handler, see router.ts.
-import { cors, handle, preflight, type Env } from './router';
+import type { Env } from './router';
 import './routes/auth';
 import './routes/productions';
 import './routes/invites';
@@ -16,6 +16,11 @@ import './routes/billing';
 import './routes/room';
 export { Room } from './room';
 
+import './routes/authorize';
+import { providerFor, type OAuthEnv } from './oauth';
+
+// The OAuth provider wraps everything: /oauth/* and /authorize are its, the
+// rest falls through to the router with CORS (see oauth.ts).
 export default {
-  fetch: async (req: Request, env: Env) => cors(req, env)(preflight(req) ?? (await handle(req, env))),
+  fetch: (req: Request, env: Env, ctx: ExecutionContext) => providerFor(new URL(req.url).origin).fetch(req, env as OAuthEnv, ctx),
 } satisfies ExportedHandler<Env>;

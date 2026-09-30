@@ -16,6 +16,7 @@ export interface Env {
   STRIPE_PRICE_YEARLY?: string;
   CLIPS: R2Bucket;                // rendered clips, keyed by hash
   ROOMS: DurableObjectNamespace;  // one Room per production (Together)
+  OAUTH_KV: KVNamespace;          // the OAuth provider's store
 }
 
 export const VERSION = '0.1.0';
