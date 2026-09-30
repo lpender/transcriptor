@@ -2,13 +2,13 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
+- [ ] web-progress-view (owner: loop, started 2026-09-30) — owner/director table: per member cleared/total,
+  weak lines. UNTIL: sync-progress.
 ## Queue
 - [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
 - [ ] relay-durable-object (EPIC) — Replace public MQTT with the production's
   DO; keep the message shape and clock ordering. UNTIL: auth-magic-link.
-- [ ] web-progress-view — owner/director table: per member cleared/total,
-  weak lines. UNTIL: sync-progress.
 - [ ] mcp-add-script — `add_script` + `get_script`; one `parseScript` in
   `sentences.js` shared with the paste box, with the validator and speaker
   counts. Tests. UNTIL: mcp-scaffold.

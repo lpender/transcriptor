@@ -1189,6 +1189,15 @@ async function drawCompany() {
   if (detail.status !== 200) return company.append(el('p', { textContent: 'Could not load it.' }));
   const { members, role } = detail;
   const group = members.length > 1;
+  const shares = ['owner', 'director'].includes(role);
+  // Who is off book: an owner or director sees each member's best clean run
+  // against the size of their parts, and how many sentences they still owe.
+  const progress = shares ? Object.fromEntries((((await api(`/productions/${current.id}/progress`)).progress) || []).map(p => [p.email, p])) : {};
+  const standing = m => {
+    const p = progress[m.email];
+    if (!p || !p.total) return m.parts.length ? ' · not started' : '';
+    return ` · ${p.best === p.total ? 'off book' : `${p.best} of ${p.total} clear`}${p.weak ? `, ${p.weak} weak` : ''}`;
+  };
   if (productions.length > 1) {
     const pick = el('select', { onchange: () => { save('production', pick.value); current = productions.find(p => p.id === pick.value); drawCompany(); } });
     for (const p of productions) pick.append(el('option', { value: p.id, textContent: p.name, selected: p.id === current.id }));
@@ -1196,10 +1205,9 @@ async function drawCompany() {
   } else company.append(el('h3', { textContent: group ? current.name : `${current.name} — your script` }));
   for (const m of members) {
     const who = el('span', { className: 'who', textContent: (m.name || m.email) + (m.user_id === me.id ? ' (you)' : '') });
-    const what = el('span', { textContent: m.role + (m.parts.length ? ' · ' + m.parts.join(', ') : '') });
+    const what = el('span', { textContent: m.role + (m.parts.length ? ' · ' + m.parts.join(', ') : '') + standing(m) });
     company.append(el('div', { className: 'row', title: m.email }, who, what));
   }
-  const shares = ['owner', 'director'].includes(role);
   if (shares) {
     company.append(el('p', { className: 'seats', textContent: `${seats(members.length)}. Each member you invite is $1 a month.` }));
     const row = el('div', { className: 'row' });
