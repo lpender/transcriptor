@@ -52,7 +52,7 @@ describe('members over MCP', () => {
     expect((await b('who_is_off_book', { production: production.id })).isError).toBe(true);
     let s = (await a('who_is_off_book', { production: production.id })).json().summary as string;
     expect(s).toContain('bob28@example.com (VLADIMIR): not started.');
-    expect(s).toContain('ann28@example.com: no parts chosen yet.');
+    expect(s).toContain('ann28@example.com: no parts chosen yet (set_parts).');
     await bob.call('PUT', `/productions/${production.id}/me/progress`, { best: 3, total: 5, misses: { 'x': 1 } });
     s = (await a('who_is_off_book', { production: production.id })).json().summary as string;
     expect(s).toContain('bob28@example.com (VLADIMIR): 3 of 5 sentences clear, 1 weak.');

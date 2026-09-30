@@ -77,7 +77,7 @@ tool<{ production: string }>({
     const lines = rows.filter((r) => r.role !== 'crew').map((r) => {
       const who = r.name || r.email, parts = JSON.parse(r.parts) as string[];
       const weak = r.misses ? Object.keys(JSON.parse(r.misses) as object).length : 0;
-      if (!parts.length) return `${who}: no parts chosen yet.`;
+      if (!parts.length) return `${who}: no parts chosen yet (set_parts).`;
       if (!r.total) return `${who} (${parts.join(', ')}): not started.`;
       const when = r.updated_at ? ` Last worked ${r.updated_at.slice(0, 10)}.` : '';
       if (r.best! >= r.total) return `${who} (${parts.join(', ')}): off book${weak ? `, ${weak} sentence${weak > 1 ? 's' : ''} still shaky` : ''}.${when}`;

@@ -1412,14 +1412,18 @@ async function drawSoundPanel() {
   );
 }
 async function uploadSound(file, kind, note) {
-  let gain = 0, seconds = null;
+  let gain = 0, seconds = '';
   try {
-    const db = await loudness(file);
-    gain = +(TARGET_DB[kind] - db).toFixed(1);
-    seconds = null;
+    const buf = await file.arrayBuffer();
+    ctx ??= new (window.AudioContext || window.webkitAudioContext)();
+    const pcm = await ctx.decodeAudioData(buf.slice(0));
+    seconds = pcm.duration.toFixed(1);
+    let sum = 0, n = 0;
+    for (let c = 0; c < pcm.numberOfChannels; c++) { const d = pcm.getChannelData(c); for (let k = 0; k < d.length; k++) sum += d[k] * d[k]; n += d.length; }
+    gain = +(TARGET_DB[kind] - 10 * Math.log10(sum / n)).toFixed(1);
   } catch (e) { note.textContent = `Could not read ${file.name}: ${e.message}`; return; }
   const name = file.name.replace(/\.[^.]+$/, '');
-  const q = new URLSearchParams({ name, kind, gain });
+  const q = new URLSearchParams({ name, kind, gain, seconds });
   const r = await fetch(`${API}/productions/${current.id}/sound?${q}`, { method: 'POST', credentials: 'include', headers: { 'content-type': file.type || 'audio/mpeg' }, body: file })
     .then(async x => ({ status: x.status, ...(await x.json().catch(() => ({}))) })).catch(() => ({ status: 0 }));
   note.textContent = r.status === 201 ? `${name}: levelled by ${gain >= 0 ? '+' : ''}${gain} dB.` : (r.message || `Could not upload ${name} (${r.status}).`);

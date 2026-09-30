@@ -3,6 +3,10 @@
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
 ## Queue
+- [ ] user-name — members show as emails everywhere (persona round 2026-09-30:
+  `name: null` for all). Add `PUT /me {name}`, a name field in the Account
+  section (asked once after first sign-in), MCP `set_name`, and show the name
+  before the email in member lists and who_is_off_book. Tests + Chrome.
 ## Gated
 - [ ] stripe-keys — ACTION: a Stripe account in test mode, two prices ($1/mo,
   $10/yr), then `cd api && npx wrangler secret put STRIPE_SECRET_KEY`,
