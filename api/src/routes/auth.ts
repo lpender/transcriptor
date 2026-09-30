@@ -5,6 +5,7 @@
 //   POST /auth/logout              → revokes the session, clears the cookie
 import { createSession, currentUser, issueMagicLink, revokeSession, validEmail, verifyMagicLink, SESSION_COOKIE, SESSION_TTL_MS } from '../auth';
 import { send } from '../email';
+import { acceptInvite, findInvite } from '../invites';
 import { error, json, route } from '../router';
 
 const cookie = (token: string, maxAge: number) =>
@@ -21,12 +22,19 @@ route('POST', '/auth/link', async (req, env) => {
   return json(sent ? { ok: true } : { ok: true, link }, 202);
 });
 
+// A login link signs in; an invite link signs in and joins the production it
+// was minted for, if that invite is still live.
 route('GET', '/auth/verify', async (req, env) => {
   const token = new URL(req.url).searchParams.get('token');
-  const hit = await verifyMagicLink(env.DB, token, 'login');
+  const hit = (await verifyMagicLink(env.DB, token, 'login')) ?? (await verifyMagicLink(env.DB, token, 'invite'));
   if (!hit) return Response.redirect(`${env.APP_ORIGIN}/?signin=expired`, 302);
+  let landing = `${env.APP_ORIGIN}/?signin=ok`;
+  if (hit.inviteId) {
+    const invite = await findInvite(env.DB, { id: hit.inviteId });
+    landing = invite ? (await acceptInvite(env.DB, invite, hit.user.id), `${env.APP_ORIGIN}/?joined=${invite.production_id}`) : `${env.APP_ORIGIN}/?signin=ok&invite=gone`;
+  }
   const session = await createSession(env.DB, hit.user.id);
-  return new Response(null, { status: 302, headers: { location: `${env.APP_ORIGIN}/?signin=ok`, 'set-cookie': cookie(session.token, SESSION_TTL_MS / 1000) } });
+  return new Response(null, { status: 302, headers: { location: landing, 'set-cookie': cookie(session.token, SESSION_TTL_MS / 1000) } });
 });
 
 route('GET', '/me', async (req, env) => {

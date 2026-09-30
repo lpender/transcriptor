@@ -2,9 +2,11 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-- [ ] api-invites (owner: loop, started 2026-09-30) — mint (role, 14 days), revoke, accept signed in / signed
-  out (via magic link purpose `invite`). UNTIL: auth-magic-link.
 ## Queue
+- [ ] web-signin — the static app learns the API: `API` origin constant,
+  `api()` fetch helper with credentials, More sheet "Sign in" (email → link
+  sent → `?signin=ok` lands signed in), `/me` on load, "Signed in as … · Sign
+  out". Nothing else changes signed out. Verify against `task dev` in Chrome.
 - [ ] web-production-panel — More sheet: members, roles, invite link, seat
   count and monthly price; the word "production" only with 2+ members.
   UNTIL: api-invites.
@@ -61,6 +63,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] api-invites — DONE 2026-09-30: `api/src/invites.ts` + `routes/invites.ts` (mint 14-day multi-use link, list, revoke, public peek, accept signed in or via an invite magic link that joins on verify); 3 tests on D1.
 - [x] api-productions — DONE 2026-09-30: `api/src/productions.ts` + `routes/productions.ts` (create, list, get with members, set role, remove/leave, parts) behind `gate(cap)`; last-owner rule; 5 tests on D1.
 - [x] auth-routes — DONE 2026-09-30: `/auth/link`, `/auth/verify`, `/me`, `/auth/logout` in `api/src/routes/auth.ts`, mail through `email.ts` (Resend when keyed, logged otherwise). 3 route tests on D1; walked live on `wrangler dev` with curl: 202 → 302 with cookie → /me 200.
 - [x] auth-core — DONE 2026-09-30: migration 0002 (magic_link_tokens, sessions), `api/src/auth.ts` (issue/verify links, sessions, `currentUser` from cookie or bearer), `ids.ts`; 5 tests on a real D1 via `@cloudflare/vitest-pool-workers` 0.22 + vitest 4.
