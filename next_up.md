@@ -2,6 +2,8 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
+- [ ] web-sound-panel (owner: loop, started 2026-09-30) — Add music / Add room tone, per-scene assignment,
+  gain readout, measure on upload. UNTIL: sound-api, measure-loudness.
 ## Queue
 - [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
@@ -9,8 +11,6 @@
   DO; keep the message shape and clock ordering. UNTIL: auth-magic-link.
 - [ ] mcp-oauth — OAuth 2.1 provider + consent page listing productions.
   UNTIL: verify-cf-mcp-oauth, mcp-scaffold.
-- [ ] web-sound-panel — Add music / Add room tone, per-scene assignment,
-  gain readout, measure on upload. UNTIL: sound-api, measure-loudness.
 - [ ] how-it-works-page (EPIC) — Public docs page: productions, invites,
   voices and cost, MCP setup, cues. Written from the specs above.
 
