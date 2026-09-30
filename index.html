@@ -863,7 +863,9 @@ function render() {
     : loop ? `Looping ${loop[1] - loop[0] + 1} lines — Esc to stop`
     : playing ? (clipOf(cur()) ? 'Reading aloud' : "Reading with this device's voices")
     : !learn ? [
-        room.role && `${room.role === 'lead' ? 'Leading' : 'Following'} ${room.code}${room.up ? '' : room.role === 'lead' ? ' · connecting…' : ' · nothing heard'}`,
+        room.role && (link?.production
+          ? `${room.role === 'lead' ? 'Leading' : 'Following'} ${current?.name ?? ''}${room.up ? ` · ${(room.who || []).length} here${room.role === 'follow' && !(room.who || []).some(w => w.leading) ? ', nobody leading' : ''}` : ' · connecting…'}`
+          : `${room.role === 'lead' ? 'Leading' : 'Following'} ${room.code}${room.up ? '' : room.role === 'lead' ? ' · connecting…' : ' · nothing heard'}`),
         blocked ? '♫ Touch the page to start the sound' : !hushed && window.CUES?.[cueAt] ? `♫ ${window.CUES[cueAt].name}${sounding()}` : '',
       ].filter(Boolean).join(' · ')
     : drilling && !weak ? 'Weak lines cleared' : 'Keep going';
@@ -1017,8 +1019,9 @@ function joinRoom() {
   link?.close();
   link = null;
   clearInterval(heartbeat); clearInterval(watch);
-  room.up = false;
+  room.up = false; room.who = [];
   render();
+  if (typeof me !== 'undefined' && me && current) return joinProductionRoom();
   if (!room.role || !room.code) return;
   if (!crypto.subtle) return trouble('Together needs a secure page (https or localhost)');
   keys().then(() => {
@@ -1069,6 +1072,11 @@ async function follow(b) {
   const m = JSON.parse(body);
   if (m.t <= room.last) return;  // older than what we already have
   room.last = m.t;
+  land(m);
+}
+// Go where the leader is: the same script means the index is the truth, a
+// different cut means the nearest line with those words.
+function land(m) {
   room.heard = Date.now();
   if (!room.up) { room.up = true; render(); }
   let to;
@@ -1082,9 +1090,41 @@ async function follow(b) {
   if (to !== i) show(to);
 }
 async function tell() {
-  if (room.role !== 'lead' || link?.readyState !== 1 || !roomKey) return;
+  if (room.role !== 'lead' || link?.readyState !== 1) return;
+  if (link.production) return link.send(JSON.stringify({ type: 'move', i, text: cur().dataset.text, scriptId }));
+  if (!roomKey) return;
   const body = JSON.stringify({ i, text: cur().dataset.text, script: scriptId, t: Date.now(), n: ++room.seq, from: room.me });
   link.send(frame(0x31, [...mstr(roomTopic), ...enc.encode(body + '\n' + await sign(body))]));  // 0x31: retained
+}
+// Signed in with a production, Together runs on the production's own room
+// (docs/design/relay.md): the server orders the moves, keeps the last one for
+// a late joiner, and says who is here. No room word, no public broker.
+function joinProductionRoom() {
+  if (!room.role) return;
+  const ws = link = new WebSocket(`${API.replace(/^http/, 'ws')}/productions/${current.id}/room`);
+  ws.production = current.id;
+  let alive = true;
+  const ping = setInterval(() => {
+    if (ws.readyState !== 1) return;
+    if (!alive) return ws.close();
+    alive = false;
+    ws.send(JSON.stringify({ type: 'ping' }));
+  }, 20000);
+  ws.onopen = () => { room.up = true; room.last = 0; render(); if (room.role === 'lead') { ws.send(JSON.stringify({ type: 'lead', on: true })); tell(); } };
+  ws.onmessage = e => {
+    const m = JSON.parse(e.data);
+    alive = true;
+    if (m.type === 'hello' && m.last && room.role === 'follow') { room.last = m.last.seq; land({ i: m.last.i, text: m.last.text, script: m.last.scriptId }); }
+    else if (m.type === 'move' && room.role === 'follow' && m.seq > room.last) { room.last = m.seq; land({ i: m.i, text: m.text, script: m.scriptId }); }
+    else if (m.type === 'who') { room.who = m.who; render(); }
+    else if (m.type === 'refused') { trouble(m.why); if (room.role === 'lead') { room.role = ''; save('role', ''); render(); } }
+  };
+  ws.onclose = () => {
+    clearInterval(ping);
+    if (link !== ws) return;
+    link = null; room.up = false; render();
+    if (room.role && me && current) setTimeout(() => { if (!link && room.role) joinRoom(); }, 5000);   // back when the network is
+  };
 }
 function setRole(r) {
   room.role = room.role === r ? '' : r;
@@ -1244,12 +1284,14 @@ let productions = [], current = null;
 const seats = n => `${n} ${n === 1 ? 'member' : 'members'} · $${n}/month`;
 const el = (tag, props = {}, ...kids) => { const e = Object.assign(document.createElement(tag), props); e.append(...kids); return e; };
 async function loadCompany() {
-  if (!me) { company.replaceChildren(); current = null; return; }
+  if (!me) { company.replaceChildren(); current = null; $('room').parentElement.hidden = false; joinRoom(); return; }
   productions = (await api('/productions')).productions || [];
   const want = load('production', '');
   current = productions.find(p => p.id === want) || productions[0] || null;
   if (current) save('production', current.id);
   document.title = current ? `${current.name} · Tablework` : 'Tablework';
+  $('room').parentElement.hidden = !!current;   // the production is the room
+  joinRoom();
   drawCompany();
   pullScript();
 }

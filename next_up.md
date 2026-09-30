@@ -2,10 +2,10 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-## Queue
-- [ ] web-relay — signed in with a production, Together uses the DO (Lead /
+- [ ] web-relay (owner: loop, started 2026-09-30) — signed in with a production, Together uses the DO (Lead /
   Follow chips, presence in the header); signed out keeps the MQTT room
   word. Verify in Chrome with two browser contexts. UNTIL: relay-do.
+## Queue
 - [ ] mcp-oauth — OAuth 2.1 provider + consent page listing productions.
   UNTIL: verify-cf-mcp-oauth, mcp-scaffold.
 - [ ] how-it-works-page (EPIC) — Public docs page: productions, invites,
