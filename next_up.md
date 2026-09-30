@@ -2,11 +2,11 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-## Queue
-- [ ] relay-do — `api/src/room.ts` Durable Object (WebSocket hibernation,
+- [ ] relay-do (owner: loop, started 2026-09-30) — `api/src/room.ts` Durable Object (WebSocket hibernation,
   seq-ordered moves, last move kept, presence, lead capability enforced),
   `GET /productions/:id/room` upgrade route, wrangler binding + migration;
   test with two sockets. `docs/design/relay.md`.
+## Queue
 - [ ] web-relay — signed in with a production, Together uses the DO (Lead /
   Follow chips, presence in the header); signed out keeps the MQTT room
   word. Verify in Chrome with two browser contexts. UNTIL: relay-do.
