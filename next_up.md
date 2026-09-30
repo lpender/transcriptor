@@ -3,6 +3,20 @@
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
 ## Queue
+- [ ] welcome-landing — Naive-user test 2026-09-30 (`tmp/qa/2026-09-30-naive-390-landing.png`,
+  `-1280-landing.png`): a first visit drops into another show's script with
+  no name, no words, half a screen empty above "Before the show", and sign-in
+  is at the bottom of a nine-section sheet. Build: on a host other than the
+  show's (lpender.github.io) with no saved script and no account, show a
+  welcome: "Tablework — run lines with your company", three buttons: Paste a
+  script, Sign in, Try a sample (a short public-domain scene, not Waiting).
+  The bundled Waiting script and cues stay for the show's host. Verify at
+  390 and 1280 in Chrome, signed out.
+- [ ] app-title — `<title>` and the sheet say "Script Follower"; make it
+  "Tablework" (signed in: "<production> · Tablework"). Verify tab title.
+- [ ] aloud-loop-words — "play 0 then go back 0" (`tmp/qa/2026-09-30-naive-390-sheet.png`)
+  reads as jargon; say "read [N] lines, then go back [M]; 0 means straight
+  through". Verify in the sheet.
 - [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
 - [ ] relay-durable-object (EPIC) — Replace public MQTT with the production's
