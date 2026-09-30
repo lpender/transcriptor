@@ -30,5 +30,30 @@ const blocks = text => cut(text, /[^.!?…]+[.!?…]*[\s]*/g, 2);
 // dashes — but never an apostrophe, a quote or a hyphen inside a word.
 const sentences = text => cut(text, /[^.!?…,;:—–]+[.!?…,;:—–]*[\s]*/g, 3);
 
-if (typeof module !== 'undefined') module.exports = { blocks, sentences, norm };
-if (typeof window !== 'undefined') Object.assign(window, { blocks, sentences, norm });
+// The one script format, for the paste box and for an AI over MCP alike:
+//   NAME: what they say, on one line
+//   ***                 a scene break
+// Blank lines are ignored. Anything else is an error with its line number, so
+// a stage direction read as a speech is caught before it is saved. Speakers
+// are counted so "STAGE DIRECTION: 41 lines" is visible at a glance.
+const SPEECH = /^([A-Z][A-Z0-9 .'&-]{0,40}?):\s+(.+)$/;
+function parseScript(text) {
+  const scenes = [[]], speakers = {}, errors = [];
+  String(text).split(/\r?\n/).forEach((raw, k) => {
+    const line = raw.trim();
+    if (!line) return;
+    if (line === '***') { if (scenes[scenes.length - 1].length) scenes.push([]); return; }
+    const m = line.match(SPEECH);
+    if (!m) { errors.push({ line: k + 1, text: line.slice(0, 80) }); return; }
+    const speaker = m[1].replace(/\s+/g, ' ');
+    scenes[scenes.length - 1].push({ speaker, text: m[2].replace(/\s+/g, ' ').trim() });
+    speakers[speaker] = (speakers[speaker] || 0) + 1;
+  });
+  if (!scenes[scenes.length - 1].length) scenes.pop();
+  return { scenes, speakers, errors, lines: Object.values(speakers).reduce((a, b) => a + b, 0) };
+}
+// The format back again, exactly as the app pastes it.
+const printScript = scenes => scenes.map(sc => sc.map(l => `${l.speaker}: ${l.text}`).join('\n')).join('\n***\n');
+
+if (typeof module !== 'undefined') module.exports = { blocks, sentences, norm, parseScript, printScript };
+if (typeof window !== 'undefined') Object.assign(window, { blocks, sentences, norm, parseScript, printScript });

@@ -7,9 +7,10 @@
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
 - [ ] relay-durable-object (EPIC) — Replace public MQTT with the production's
   DO; keep the message shape and clock ordering. UNTIL: auth-magic-link.
-- [ ] mcp-add-script — `add_script` + `get_script`; one `parseScript` in
-  `sentences.js` shared with the paste box, with the validator and speaker
-  counts. Tests. UNTIL: mcp-scaffold.
+- [ ] web-script-from-production — signed in and in a production with a
+  script, the app loads it from `GET /productions/:id/script` instead of the
+  bundled `script.js` (bundled stays for the try-it path), and the paste box
+  offers "Save to the production" for owner/director (PUT). Verify in Chrome.
 - [ ] mcp-cues-parts-invite — `set_cues`, `list_sound`, `set_parts`,
   `invite`. UNTIL: mcp-add-script, api-invites.
 - [ ] mcp-oauth — OAuth 2.1 provider + consent page listing productions.
@@ -52,6 +53,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] mcp-add-script — DONE 2026-09-30: `parseScript`/`printScript` in `sentences.js` (shared), `api/src/scripts.ts`, `PUT/GET /productions/:id/script` and MCP `add_script`/`get_script` with the hard validator and speaker counts; 4 tests. Live over wrangler dev: the real Waiting script loads via MCP.
 - [x] web-progress-view — DONE 2026-09-30: an owner or director sees each member's standing on their row ("12 of 40 clear, 3 weak", "off book", "not started"). Fixed a double draw of the panel when two sign-in paths raced. Driven in Chrome (`tmp/qa/2026-09-30-progress.png`).
 - [x] web-tokens — DONE 2026-09-30: "Your AI" in the Account section: Connect your AI → labelled token shown once as a `claude mcp add` line (copied) plus the claude.ai connector note; tokens listed with last use and Revoke. Driven in Chrome: token lists MCP tools, revoked token gets 401 (`tmp/qa/2026-09-30-tokens.png`).
 - [x] mcp-scaffold — DONE 2026-09-30: `api/src/mcp.ts` (stateless Streamable-HTTP JSON-RPC: initialize, tools/list, tools/call, ping), `routes/mcp.ts` (`POST /mcp` with a bearer, personal tokens as labelled 10-year sessions: mint once, list, revoke), tools `whoami` + `list_productions`. 2 tests; live curl: initialize → whoami returns the user and production.

@@ -9,10 +9,12 @@
     "types": [
       "@cloudflare/workers-types",
       "@cloudflare/vitest-pool-workers/types"
-    ]
+    ],
+    "allowJs": true
   },
   "include": [
     "src",
-    "test"
+    "test",
+    "../sentences.js"
   ]
 }

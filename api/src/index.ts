@@ -5,6 +5,7 @@ import './routes/productions';
 import './routes/invites';
 import './routes/progress';
 import './routes/mcp';
+import './routes/scripts';
 
 export default {
   fetch: async (req: Request, env: Env) => cors(req, env)(preflight(req) ?? (await handle(req, env))),

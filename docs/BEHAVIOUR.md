@@ -183,6 +183,11 @@ reader pasted their own.
   best run, the size of your parts and the sentences still owed up to the
   production a beat later, so a director can see who is off book. Signed out
   nothing is sent; the browser keeps its own copy either way.
+- **The script format.** One speech per line as `NAME: what they say`, a line
+  of `***` between scenes, blank lines ignored, nothing else. `parseScript`
+  in `sentences.js` reads it for the paste box and for the API alike and
+  names every line that is not a speech, so a stage direction read as one is
+  caught before it is saved.
 - **Your AI.** Signed in, "Connect your AI" makes a personal token for
   Claude or any MCP client, shown once as a ready `claude mcp add` line
   (copied to the clipboard) with the MCP URL for a claude.ai connector.
