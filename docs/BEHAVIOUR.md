@@ -123,6 +123,11 @@ reader pasted their own.
   the two before it, hidden again to say over. The score is how far you get; the best run
   is kept per role. Tapping back to an earlier line, or jumping to a scene,
   restarts from there: every line from it onward is hidden and owed again.
+- **Hearing you.** H turns on the microphone while learning (Chrome and
+  Safari; the switch is hidden elsewhere). When the last two words of the
+  sentence under test are heard, that counts as the press: reveal, or right
+  and on to the next. Nothing is graded by ear; a miss is still yours to
+  mark with N.
 - **Pieces.** A line is tested in pieces split at full stops, commas,
   semicolons, colons and dashes, never at apostrophes, quotes or hyphens inside
   words. A piece under three words joins the one before it, and abbreviations

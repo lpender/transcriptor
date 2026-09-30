@@ -21,6 +21,8 @@
 
 ## Third-party
 
+- SpeechRecognition exists only in Chrome and Safari, needs mic permission and a secure origin (localhost counts). Test it with a stub class; Playwright has no mic.
+
 - ElevenLabs `eleven_v3` reads a trailing dash as a pause plus a noise; strip
   it before speaking. No SSML, no italics; emphasis by caps, quotes, ellipses.
 - The show's PDF font has no fi/fl ligatures; `convert.py` repairs six words.

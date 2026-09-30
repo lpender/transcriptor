@@ -216,6 +216,7 @@
     <h2>Practice</h2>
     <div class="row">
       <button class="chip wide" data-key="l" id="learnChip">Learn my lines<span class="key">L</span></button>
+      <button class="chip wide" data-key="h" id="earsChip">Hear me say it<span class="key">H</span></button>
     </div>
     <div class="row">
       <button class="chip wide" data-key="w" id="drillBtn">Drill weak lines<span class="key">W</span></button>
@@ -709,6 +710,7 @@ function next() {
 function render() {
   const weak = lines.filter(p => mine(p) && weakLine(p)).length;
   const on = (el, yes) => el.setAttribute('aria-pressed', yes ? 'true' : 'false');
+  $('earsChip').hidden = !Ears(); on($('earsChip'), ears);
 
   // The bar: back, the one thing to press, and a miss when there is one to record.
   mainBtn.textContent = quizzing() ? (shown ? 'Got it' : 'Reveal') : 'Next';
@@ -765,6 +767,32 @@ function stopLearn() {
   learn = drilling = false; items = []; cleared = new Set(); document.body.classList.remove('learn');
   lines.forEach(p => { plain(p); p.classList.toggle('mine', learnable(p)); });
   if (playing) { part = 0; play(); }  // a line the voice was waiting on is now its to read
+}
+
+// Hands free while learning: the browser listens, and the last words of the
+// sentence under test count as the press. Nothing is graded by ear; a wrong
+// word is yours to mark. Chrome and Safari have SpeechRecognition; others hide
+// the switch. ponytail: last two words only, no fuzzy match; add a similarity
+// score if real use shows misses on accents or names.
+const Ears = () => window.SpeechRecognition || window.webkitSpeechRecognition;
+let ears = false, rec = null;
+const tail = (t, n) => t.toLowerCase().replace(/[^a-z' ]+/g, ' ').trim().split(/\s+/).slice(-n).join(' ');
+function listen() {
+  if (!Ears() || rec) return;
+  rec = new (Ears())();
+  rec.continuous = true; rec.interimResults = true; rec.lang = 'en-US';
+  rec.onresult = e => {
+    const now = quizzing() && item();
+    if (!now) return;
+    const heard = Array.from(e.results, r => r[0].transcript).join(' ');
+    const want = tail(now.text, Math.min(2, now.text.split(/\s+/).length));
+    if (tail(heard, want.split(' ').length) !== want) return;
+    act(' ');
+    rec.abort();  // start clean, or the same words would press again
+  };
+  rec.onerror = e => { if (e.error === 'not-allowed') { ears = false; trouble('Microphone blocked: allow it in the address bar'); } };
+  rec.onend = () => { rec = null; if (ears) listen(); };
+  rec.start();
 }
 
 // A checkbox per character for the parts you are learning, and a speaker beside
@@ -1019,6 +1047,7 @@ function act(k) {
   else if (k === 's') hush(!hushed);
   else if (k === 't') { stopPlay(); loop = null; markLoop(null); jump(0); sheet.close(); }
   else if (k === 'm' || k === 'r') live(k === 'm' ? 'music' : 'bed');
+  else if (k === 'h') { ears = !ears; ears ? listen() : rec?.abort(); }
   else if (k === 'k') { keywords = !keywords; save('keywords', keywords); lines.forEach(p => p !== cur() && plain(p)); learn ? paint() : plain(cur()); }
   else if (k === 'w') learn && drilling ? startLearn() : startLearn(true);
   else return false;
