@@ -1497,7 +1497,7 @@ async function drawCompany() {
   const gen = ++drawGen;
   company.replaceChildren();
   if (!current) {
-    company.append(el('div', { className: 'row' }, el('button', { className: 'chip wide', textContent: 'Keep this script under your account', onclick: createProduction })));
+    company.append(el('div', { className: 'row' }, el('button', { className: 'chip wide', textContent: src.value.trim() ? 'Keep this script under your account' : 'Start a production', onclick: createProduction })));
     return;
   }
   const detail = await api(`/productions/${current.id}`);
@@ -1554,6 +1554,7 @@ async function createProduction() {
   if (r.status !== 201) return accountNote.textContent = 'Could not create it.';
   current = r.production; save('production', current.id);
   if (src.value.trim()) await pushScript();   // "keep this script" keeps it: the paste box goes up first
+  else accountNote.textContent = `${name} has no script yet: paste one under Script, or ask your AI to load it.`;
   await loadCompany();
 }
 async function renameProduction() {
@@ -1763,7 +1764,7 @@ for (const d of document.querySelectorAll('details.sec')) {
 function arrangeSheet() {
   const acc = document.querySelector('details[data-sec="account"]'), first = document.querySelector('details.sec');
   acc.querySelector('summary').textContent = me ? 'Company' : 'Account';
-  if (me && current && first !== acc) first.before(acc);
+  if (me && first !== acc) first.before(acc);   // signed in, the company comes first, production or not
   else if (!me && first === acc) $('closeSheet').before(acc);   // signed out it goes last again
 }
 $('closeSheet').onclick = () => sheet.close();
