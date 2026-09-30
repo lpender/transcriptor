@@ -1,7 +1,7 @@
 {
   "name": "Tablework",
   "short_name": "Tablework",
-  "description": "Follow a script, hear it, and learn your lines.",
+  "description": "Run lines with your company: one script, one set of voices, everyone's place in it.",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
