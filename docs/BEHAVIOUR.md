@@ -207,6 +207,11 @@ reader pasted their own.
   in `sentences.js` reads it for the paste box and for the API alike and
   names every line that is not a speech, so a stage direction read as one is
   caught before it is saved.
+- **Paying.** An owner sees how the production is paid for in words (a
+  14-day trial, paid until a date, a failed card) and one button: Pay ($10 a
+  seat a year, or $1 a month) which goes to Stripe, or Manage billing once
+  subscribed. An unpaid production keeps reading, learning and following;
+  saving, inviting and rendering say plainly that it is not paid for.
 - **Company voices.** An owner or director picks a voice per character from
   the cast, sees what a render costs (only lines nobody has rendered in that
   voice count), and presses Render; the app fetches the clips a few at a

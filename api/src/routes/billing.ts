@@ -39,15 +39,17 @@ route('POST', '/productions/:id/billing/checkout', async (req, env, { id }) => {
   if (!price) return error('invalid_plan', 400, 'monthly or yearly.');
   const b = (await billingOf(env.DB, id))!;
   if (b.stripe_subscription_id) return error('already_subscribed', 409, 'This production already has a subscription; use Manage.');
-  let customer = b.stripe_customer_id;
-  if (!customer) {
-    customer = (await s.createCustomer(g.user.email, g.user.name ?? undefined)).id;
-    await env.DB.prepare('UPDATE productions SET stripe_customer_id = ? WHERE id = ?').bind(customer, id).run();
-  }
-  const seats = (await env.DB.prepare('SELECT COUNT(*) AS n FROM members WHERE production_id = ?').bind(id).first<{ n: number }>())!.n;
-  const trialLeft = b.trial_ends_at ? Math.ceil((new Date(b.trial_ends_at).getTime() - Date.now()) / 86400000) : 0;
-  const { url } = await s.createCheckout({ customer, price, quantity: Math.max(1, seats), reference: id, success: `${env.APP_ORIGIN}/?billing=ok`, cancel: `${env.APP_ORIGIN}/?billing=cancel`, trialDays: trialLeft > 0 ? trialLeft : undefined });
-  return json({ url });
+  try {
+    let customer = b.stripe_customer_id;
+    if (!customer) {
+      customer = (await s.createCustomer(g.user.email, g.user.name ?? undefined)).id;
+      await env.DB.prepare('UPDATE productions SET stripe_customer_id = ? WHERE id = ?').bind(customer, id).run();
+    }
+    const seats = (await env.DB.prepare('SELECT COUNT(*) AS n FROM members WHERE production_id = ?').bind(id).first<{ n: number }>())!.n;
+    const trialLeft = b.trial_ends_at ? Math.ceil((new Date(b.trial_ends_at).getTime() - Date.now()) / 86400000) : 0;
+    const { url } = await s.createCheckout({ customer, price, quantity: Math.max(1, seats), reference: id, success: `${env.APP_ORIGIN}/?billing=ok`, cancel: `${env.APP_ORIGIN}/?billing=cancel`, trialDays: trialLeft > 0 ? trialLeft : undefined });
+    return json({ url });
+  } catch (e) { console.error('checkout:', e); return error('billing_unavailable', 502, 'Billing is not reachable right now. Nothing was charged.'); }
 });
 
 route('POST', '/productions/:id/billing/portal', async (req, env, { id }) => {
@@ -57,7 +59,8 @@ route('POST', '/productions/:id/billing/portal', async (req, env, { id }) => {
   if (!s) return error('billing_off', 503);
   const b = (await billingOf(env.DB, id))!;
   if (!b.stripe_customer_id) return error('no_billing', 404, 'Nothing to manage yet.');
-  return json({ url: (await s.createPortal(b.stripe_customer_id, `${env.APP_ORIGIN}/?billing=managed`)).url });
+  try { return json({ url: (await s.createPortal(b.stripe_customer_id, `${env.APP_ORIGIN}/?billing=managed`)).url }); }
+  catch (e) { console.error('portal:', e); return error('billing_unavailable', 502, 'Billing is not reachable right now.'); }
 });
 
 // Stripe's events → the production's state. Verified, idempotent, and quiet

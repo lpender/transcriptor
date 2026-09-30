@@ -34,7 +34,11 @@ export async function handle(req: Request, env: Env): Promise<Response> {
   const url = new URL(req.url);
   for (const r of routes) {
     const m = r.method === req.method && r.pattern.exec(url);
-    if (m) return r.handler(req, env, Object.fromEntries(Object.entries(m.pathname.groups).map(([k, v]) => [k, v ?? ''])));
+    if (m) {
+      // A route that throws answers as JSON with CORS, not a bare Worker error the app cannot read.
+      try { return await r.handler(req, env, Object.fromEntries(Object.entries(m.pathname.groups).map(([k, v]) => [k, v ?? '']))); }
+      catch (e) { console.error(`${req.method} ${url.pathname}:`, e); return error('server_error', 500, (e as Error).message?.slice(0, 300)); }
+    }
   }
   return error('not_found', 404);
 }

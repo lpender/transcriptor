@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cors, handle, preflight, VERSION, type Env } from '../src/router';
+import { cors, handle, preflight, route, VERSION, type Env } from '../src/router';
 
 const env = { DB: {} as D1Database, CLIPS: {} as R2Bucket, APP_ORIGIN: 'http://localhost:8799', API_ORIGIN: 'http://localhost:8787' } satisfies Env;
 
@@ -13,6 +13,15 @@ describe('router', () => {
     const res = await handle(new Request('http://x/nope'), env);
     expect(res.status).toBe(404);
     expect(await res.json()).toEqual({ error: 'not_found' });
+  });
+});
+
+describe('errors', () => {
+  it('answers a throwing route as a JSON 500', async () => {
+    route('GET', '/boom', () => { throw new Error('kaboom'); });
+    const res = await handle(new Request('http://x/boom'), env);
+    expect(res.status).toBe(500);
+    expect(await res.json()).toEqual({ error: 'server_error', message: 'kaboom' });
   });
 });
 

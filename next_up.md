@@ -2,8 +2,6 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-- [ ] web-billing (owner: loop, started 2026-09-30) — company panel: state in words and one button, Pay or
-  Manage. UNTIL: billing-routes.
 ## Queue
 - [ ] relay-durable-object (EPIC) — Replace public MQTT with the production's
   DO; keep the message shape and clock ordering. UNTIL: auth-magic-link.
@@ -41,6 +39,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] web-billing — DONE 2026-09-30: the company panel shows how the production is paid for in words and one action: Pay $10 a seat a year (or $1 a month) for the owner, Manage billing once subscribed; `?billing=` landings say what happened; routes answer Stripe outages as a plain 502; any throwing route now answers JSON 500 with CORS. Driven in Chrome with a dummy key: trial line, Pay reaches Stripe (`tmp/qa/2026-09-30-billing.png`).
 - [x] billing-gate — DONE 2026-09-30: `gate()` answers 402 with a plain message for write capabilities (script, cues, render, share) when the production may not save; invite accept and MCP writes refuse the same way; reading, learning, progress and Together untouched. 1 test.
 - [x] billing-seats — DONE 2026-09-30: `api/src/seats.ts` sets the subscription quantity after a join or removal, best effort; 1 test.
 - [x] billing-routes — DONE 2026-09-30: `GET /billing/plans` (from Stripe, cached), `GET /productions/:id/billing` (state in words, seats), checkout (quantity = members, remaining trial carried), portal, `POST /webhooks/stripe` (signature, checkout/subscription/invoice events → state). 2 tests with a stubbed Stripe walking trial → active → past_due → readonly.
