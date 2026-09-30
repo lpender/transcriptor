@@ -28,7 +28,7 @@ describe('quote', () => {
     const text = 'NELSON: No.\nNELSON: No.\nRECEPTIONIST: Highlights for Children.';
     const before = await quote(env.DB, text, {});
     expect(before).toMatchObject({ lines: 3, characters: 3 + 24, cached: 0, toRender: 27, priceCents: 100, speakers: { NELSON: { lines: 2 }, RECEPTIONIST: { lines: 1 } } });
-    await env.DB.prepare("INSERT INTO clips VALUES (?, 3, 'clips/x.mp3', '2026-09-30T00:00:00Z')").bind(await clipHash(CAST[0].id, 'No.')).run();
+    await env.DB.prepare("INSERT INTO clips (hash, chars, r2_key, created_at) VALUES (?, 3, 'clips/x.mp3', '2026-09-30T00:00:00Z')").bind(await clipHash(CAST[0].id, 'No.')).run();
     const after = await quote(env.DB, text, {});
     expect(after).toMatchObject({ cached: 3, toRender: 24, priceCents: 100 });
     // a different voice is a different clip

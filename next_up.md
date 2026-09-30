@@ -2,9 +2,6 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-- [ ] web-voices-panel (owner: loop, started 2026-09-30) — More sheet: voice per character, quote, render,
-  "say as" per line in the notes column,
-  progress, BYO key. UNTIL: voices-quote.
 ## Queue
 - [ ] billing-stripe (EPIC) — Checkout per production, portal, webhook →
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
@@ -13,6 +10,9 @@
 - [ ] mcp-cues — `set_cues`, `list_sound` over MCP. UNTIL: sound-api.
 - [ ] mcp-oauth — OAuth 2.1 provider + consent page listing productions.
   UNTIL: verify-cf-mcp-oauth, mcp-scaffold.
+- [ ] web-say-as — a "say as" field beside a line's note (owner/director,
+  signed in): how the voice should say it; saved to `/sayas`; the quote shows
+  the line as unrendered after. Verify in Chrome.
 - [ ] sound-api — D1 `sound` + `cues`, presigned R2 upload URL, rows, cues
   PUT, delete refused when in use. UNTIL: db-schema-0001.
 - [ ] web-sound-panel — Add music / Add room tone, per-scene assignment,
@@ -45,6 +45,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] web-voices-panel — DONE 2026-09-30: "Company voices" in the Account section (owner/director): a voice per speaker from our cast, the quote in plain words, "Render the voices for $X" that drives the batches to done; clips come from the API in clips.js's shape (spans now stored on the clip row, seed updated). Driven in Chrome against local D1: 6 speakers, $1.00 quote, render refused politely without a key (`tmp/qa/2026-09-30-voices.png`).
 - [x] stress-per-line — DONE 2026-09-30: migration 0008 `sayas` (per production, keyed by full line), `plan()`/quote/render take it and hash on the spoken text, `GET/PUT /productions/:id/sayas` [script]. 2 tests. `stress.json` is that table's shape and can be PUT as-is; the notes-column editor comes with web-voices-panel.
 - [x] voices-byo-key — DONE 2026-09-30: migration 0007, `api/src/seal.ts` (AES-GCM under `SEALING_KEY`), routes get/put/delete `/productions/:id/eleven-key` (owner only, last4 shown), `keyFor()` picks the production's key over ours, quote is $0 with an own key. 2 tests.
 - [x] voices-render-job — DONE 2026-09-30: migration 0006 `renders`; `api/src/eleven.ts` (adapter, tts.py's spans), `render.ts` (client-driven batches of 4, idempotent by hash, failures recorded, retry), routes start/next/retry/progress, `GET /productions/:id/clips` (clips.js shape), `GET /clips/:hash`; R2 binding `CLIPS`. 3 tests with a stub engine. A real render needs the key and credits (Gated).

@@ -9,6 +9,7 @@ const rows = Object.entries(window.CLIPS).map(([line, c]) => {
   const f = typeof c === 'string' ? c : c.f;
   const hash = f.replace(/^clips\//, '').replace(/\.mp3$/, '');
   const chars = line.split(':').slice(1).join(':').trim().length;
-  return `('${hash}', ${chars}, '${f}', '2026-09-30T00:00:00Z')`;
+  const spans = JSON.stringify(typeof c === 'string' ? [] : c.s || []);
+  return `('${hash}', ${chars}, '${f}', '2026-09-30T00:00:00Z', '${spans}')`;
 });
-console.log(`INSERT OR IGNORE INTO clips (hash, chars, r2_key, created_at) VALUES\n${rows.join(',\n')};`);
+console.log(`INSERT OR IGNORE INTO clips (hash, chars, r2_key, created_at, spans) VALUES\n${rows.join(',\n')};`);

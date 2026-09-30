@@ -194,6 +194,11 @@ reader pasted their own.
   in `sentences.js` reads it for the paste box and for the API alike and
   names every line that is not a speech, so a stage direction read as one is
   caught before it is saved.
+- **Company voices.** An owner or director picks a voice per character from
+  the cast, sees what a render costs (only lines nobody has rendered in that
+  voice count), and presses Render; the app fetches the clips a few at a
+  time until done and plays them from then on. Signed in, the company's
+  rendered voices replace the bundled clips.
 - **Your AI.** Signed in, "Connect your AI" makes a personal token for
   Claude or any MCP client, shown once as a ready `claude mcp add` line
   (copied to the clipboard) with the MCP URL for a claude.ai connector.

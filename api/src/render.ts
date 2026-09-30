@@ -58,7 +58,7 @@ export async function renderNext(db: D1Database, bucket: R2Bucket, key: string, 
       const out = await speak(l.voice, l.say, key);
       await bucket.put(`clips/${l.hash}.mp3`, out.audio, { httpMetadata: { contentType: 'audio/mpeg' } });
       await bucket.put(`clips/${l.hash}.json`, JSON.stringify(out.spans), { httpMetadata: { contentType: 'application/json' } });
-      await db.prepare('INSERT OR IGNORE INTO clips (hash, chars, r2_key, created_at) VALUES (?, ?, ?, ?)').bind(l.hash, l.chars, `clips/${l.hash}.mp3`, now()).run();
+      await db.prepare('INSERT OR IGNORE INTO clips (hash, chars, r2_key, created_at, spans) VALUES (?, ?, ?, ?, ?)').bind(l.hash, l.chars, `clips/${l.hash}.mp3`, now(), JSON.stringify(out.spans)).run();
       have.add(l.hash);
     } catch (e) {
       r.failed.push({ hash: l.hash, speaker: l.speaker, error: (e as Error).message.slice(0, 200) });

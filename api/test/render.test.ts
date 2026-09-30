@@ -47,7 +47,8 @@ describe('rendering', () => {
     expect(r2.failed).toEqual([expect.objectContaining({ speaker: 'C', error: 'engine says no' })]);
     expect(calls).toHaveLength(6);   // "One." rendered once
     // the clip is served and listed
-    const { clips } = await (await ann.call('GET', `/productions/${production.id}/clips`)).json() as { clips: Record<string, { f: string }> };
+    const { clips } = await (await ann.call('GET', `/productions/${production.id}/clips`)).json() as { clips: Record<string, { f: string; s: number[][] }> };
+    expect(clips['A: One.'].s).toEqual([[0, 1]]);
     expect(Object.keys(clips).sort()).toEqual(['A: Five.', 'A: One.', 'A: Three.', 'B: Four.', 'B: Two.']);
     const name = clips['A: One.'].f.split('/').pop()!;
     const served = await handle(new Request(`http://x/clips/${name}`), env);

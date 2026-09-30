@@ -68,16 +68,18 @@ route('GET', '/productions/:id/clips', async (req, env, { id }) => {
   if (!sv) return json({ clips: {} });
   const lines = await plan(sv.script.text, sv.voiceOf, sv.sayAs);
   const hashes = [...new Set(lines.map((l) => l.hash))];
-  const have = new Set<string>();
+  const have = new Map<string, [number, number][]>();
   for (let i = 0; i < hashes.length; i += 100) {
     const chunk = hashes.slice(i, i + 100);
-    for (const r of (await env.DB.prepare(`SELECT hash FROM clips WHERE hash IN (${chunk.map(() => '?').join(',')})`).bind(...chunk).all<{ hash: string }>()).results) have.add(r.hash);
+    for (const r of (await env.DB.prepare(`SELECT hash, spans FROM clips WHERE hash IN (${chunk.map(() => '?').join(',')})`).bind(...chunk).all<{ hash: string; spans: string }>()).results) have.set(r.hash, JSON.parse(r.spans));
   }
-  const clips: Record<string, { f: string; s?: string }> = {};
+  // The same shape as clips.js: { "NAME: line": { f, s } }.
+  const clips: Record<string, { f: string; s: [number, number][] }> = {};
   let k = 0;
   for (const scene of parseScript(sv.script.text).scenes) for (const s of scene) {
     const l = lines[k++];
-    if (have.has(l.hash)) clips[`${s.speaker}: ${s.text}`] = { f: `${env.API_ORIGIN}/clips/${l.hash}.mp3`, s: `${env.API_ORIGIN}/clips/${l.hash}.json` };
+    const spans = have.get(l.hash);
+    if (spans) clips[`${s.speaker}: ${s.text}`] = { f: `${env.API_ORIGIN}/clips/${l.hash}.mp3`, s: spans };
   }
   return json({ clips });
 });

@@ -149,10 +149,11 @@
   #edit { max-width: 40em; margin: 0 auto; padding: 24px 20px 40px; font: 400 15px/1.55 ui-monospace, Menlo, monospace; color: var(--faded); }
   #edit p { color: var(--cue); }
   #accountNote { color: var(--cue); font-size: .9em; min-height: 1.2em; margin: 6px 0 0; }
-  #company h3, #ai h3 { margin: 10px 0 4px; font-weight: 500; }
-  #ai .row, #company .row { padding: 3px 8px; margin: 0 -8px; border-radius: 8px; justify-content: space-between; }
-  #ai .row:nth-of-type(odd), #company .row:nth-child(odd) { background: rgba(255, 255, 255, .035); }
-  #ai .seats, #company .seats, #joinNote { color: var(--cue); font-size: .9em; margin: 6px 0; }
+  #company h3, #voices h3, #ai h3 { margin: 10px 0 4px; font-weight: 500; }
+  #voices .row, #ai .row, #company .row { padding: 3px 8px; margin: 0 -8px; border-radius: 8px; justify-content: space-between; }
+  #voices .row:nth-of-type(odd), #ai .row:nth-of-type(odd), #company .row:nth-child(odd) { background: rgba(255, 255, 255, .035); }
+  #voices .seats, #ai .seats, #company .seats, #joinNote { color: var(--cue); font-size: .9em; margin: 6px 0; }
+  #voices select { max-width: 60%; font: inherit; font-size: .85em; background: #100F0B; color: var(--paper); border: 1px solid var(--edge); border-radius: 6px; padding: 2px 4px; }
   #ai input, #inviteOut input { width: 100%; font: inherit; font-size: .85em; padding: 4px 6px; border-radius: 6px; border: 1px solid var(--edge); background: #100F0B; color: var(--paper); }
   #accountNote a { color: var(--paper); }
   #src {
@@ -252,6 +253,7 @@
     </div>
     <div id="signedIn" hidden>
       <div id="company"></div>
+      <div id="voices"></div>
       <div id="ai"></div>
       <div class="row">
         <button class="chip wide" id="signoutChip">Sign out</button>
@@ -1188,9 +1190,52 @@ async function pullScript() {
   $('saveBtn').hidden = !(current && shares(current.role));
   if (!current) return;
   const r = await api(`/productions/${current.id}/script`);
-  if (r.status !== 200 || !r.script || r.script.text === src.value) return;
-  src.value = r.script.text;
-  $('start').click();
+  if (r.status === 200 && r.script && r.script.text !== src.value) { src.value = r.script.text; $('start').click(); }
+  // The company's rendered voices, in clips.js's shape, over whatever this device had.
+  const c = await api(`/productions/${current.id}/clips`);
+  if (c.status === 200 && c.clips) { window.CLIPS = { ...(window.CLIPS || {}), ...c.clips }; render(); }
+  drawVoices();
+}
+
+// Company voices (docs/design/voices.md): a voice per character from our cast,
+// what a render would cost, and the render itself, a few lines a call until done.
+const voicesBox = $('voices');
+let cast = null, voicesGen = 0;
+async function drawVoices() {
+  const gen = ++voicesGen;   // two draws in flight paint once, like the company panel
+  voicesBox.replaceChildren();
+  if (!current || !shares(current.role)) return;
+  cast ??= (await api('/voices')).voices || [];
+  const [mine, q] = await Promise.all([api(`/productions/${current.id}/voices`), api(`/productions/${current.id}/render/quote`, {})]);
+  if (gen !== voicesGen || q.status === 404) return;   // superseded, or no script yet
+  voicesBox.replaceChildren();
+  const chosen = mine.voices || {};
+  voicesBox.append(el('h3', { textContent: 'Company voices' }));
+  const speakers = q.quote ? Object.keys(q.quote.speakers) : [];
+  for (const sp of speakers) {
+    const pick = el('select', { onchange: async () => { chosen[sp] = pick.value; await api(`/productions/${current.id}/voices`, chosen, 'PUT'); drawVoices(); } });
+    for (const v of cast) pick.append(el('option', { value: v.id, textContent: `${v.name} — ${v.about}`, selected: (chosen[sp] || cast[0].id) === v.id }));
+    voicesBox.append(el('div', { className: 'row' }, el('span', { className: 'who', textContent: sp }), pick));
+  }
+  if (!q.quote) return;
+  const { toRender, cached, characters, priceCents, ownKey } = q.quote;
+  const price = priceCents ? `$${(priceCents / 100).toFixed(2)}` : 'nothing';
+  const note = el('p', { className: 'seats', textContent: toRender ? `${toRender.toLocaleString()} of ${characters.toLocaleString()} characters still to render${cached ? ` (${cached.toLocaleString()} already done)` : ''} · ${ownKey ? 'on your own key' : price}` : 'Every line is rendered.' });
+  voicesBox.append(note);
+  if (toRender) voicesBox.append(el('div', { className: 'row' }, el('button', { className: 'chip wide', textContent: `Render the voices for ${price}`, onclick: () => renderVoices(note) })));
+}
+async function renderVoices(note) {
+  const started = await api(`/productions/${current.id}/render`, {});
+  if (started.status !== 201) return note.textContent = started.message || `Could not start (${started.status}).`;
+  let r = started.render;
+  while (r.state === 'running') {
+    note.textContent = `Rendering… ${r.done} of ${r.total}`;
+    const next = await api(`/productions/${current.id}/render/${r.id}/next`, {});
+    if (next.status !== 200) return note.textContent = next.message || `Stopped (${next.status}).`;
+    r = next.render;
+  }
+  note.textContent = r.failed.length ? `${r.done} of ${r.total} rendered; ${r.failed.length} failed (${r.failed[0].error}).` : `All ${r.total} rendered.`;
+  pullScript();
 }
 $('saveBtn').onclick = async () => {
   const p = edit.querySelector('p');
