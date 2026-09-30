@@ -34,7 +34,7 @@ flowchart LR
 | `api/` | The Workers backend: `src/index.ts` entry (handler only), `src/router.ts`, `src/routes/*.ts` (one file per area), `src/auth.ts`, `src/access.ts`, `src/email.ts`, `migrations/` D1, `test/` vitest on a real D1 |
 | `api/src/oauth.ts`, `api/src/routes/authorize.ts` | OAuth 2.1 for claude.ai connectors (provider wraps the Worker; `/oauth/mcp`, `/authorize` consent page) |
 | `api/src/room.ts` | The Room Durable Object: Together's relay per production |
-| `api/src/mcp.ts`, `api/src/routes/mcp*.ts`, `routes/scripts.ts` | The MCP server (`POST /mcp`, bearer personal tokens) and its tools: whoami, list_productions, list_members, set_parts, set_name, invite, add_script, get_script, list_sound, set_cues, who_is_off_book |
+| `api/src/mcp.ts`, `api/src/routes/mcp*.ts`, `routes/scripts.ts` | The MCP server (`POST /mcp`, bearer personal tokens) and its tools: whoami, list_productions, list_members, set_parts, set_name, set_role, remove_member, invite, add_script, get_script, list_sound, set_cues, who_is_off_book |
 | `Taskfile.yml` | `task serve` (app), `task dev` (API on :8787), `task test` (gate), `task deploy` (Lee) |
 | `docs/BEHAVIOUR.md` | Exact behaviour of the app as it stands |
 

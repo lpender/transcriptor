@@ -38,6 +38,21 @@ describe('members over MCP', () => {
     expect((await handle(new Request(`http://x/invites/${token}`), env)).status).toBe(200);
     expect((await a('list_members', { production: 'nope' })).isError).toBe(true);
   });
+  it('changes roles and removes members by the same rules as the routes', async () => {
+    const ann = await signIn('ann31@example.com'), bob = await signIn('bob31@example.com'), cy = await signIn('cy31@example.com');
+    const { production } = await (await ann.call('POST', '/productions', { name: 'Godot' })).json() as { production: { id: string } };
+    for (const u of [bob, cy]) await env.DB.prepare("INSERT INTO members VALUES (?, ?, 'cast', '[]', '2026-09-30T00:00:00Z')").bind(u.user.id, production.id).run();
+    const a = mcpFor((await (await ann.call('POST', '/tokens', { label: 'a' })).json() as { token: string }).token);
+    const b = mcpFor((await (await bob.call('POST', '/tokens', { label: 'b' })).json() as { token: string }).token);
+    expect((await b('set_role', { production: production.id, email: 'cy31@example.com', role: 'crew' })).text).toContain('may not change roles');
+    expect((await a('set_role', { production: production.id, email: 'bob31@example.com', role: 'director' })).json().role).toBe('director');
+    expect((await b('set_role', { production: production.id, email: 'cy31@example.com', role: 'owner' })).text).toContain('Only an owner');
+    expect((await a('set_role', { production: production.id, email: 'ann31@example.com', role: 'cast' })).text).toContain('last owner');
+    expect((await b('remove_member', { production: production.id, email: 'cy31@example.com' })).json().removed).toBe('cy31@example.com');
+    expect((await a('remove_member', { production: production.id })).text).toContain('last owner');
+    expect((await b('remove_member', { production: production.id })).json().removed).toBe('bob31@example.com');
+    expect((await a('list_members', { production: production.id })).json().members).toHaveLength(1);
+  });
   it('checks parts against the script and reports who is off book', async () => {
     const ann = await signIn('ann28@example.com'), bob = await signIn('bob28@example.com');
     const { production } = await (await ann.call('POST', '/productions', { name: 'Book' })).json() as { production: { id: string } };

@@ -3,7 +3,8 @@
 import { can, isRole } from '../access';
 import { mintInvite } from '../invites';
 import { tool, DATA_NOTE } from '../mcp';
-import { members, roleOf, setParts, writable, READONLY_MESSAGE } from '../productions';
+import { members, roleOf, setParts, setRole, removeMember, writable, READONLY_MESSAGE } from '../productions';
+import { syncSeats } from '../seats';
 import { currentScript } from '../scripts';
 import { parseScript } from '../shared';
 
@@ -60,6 +61,45 @@ tool<{ production: string; role: string }>({
     if (!isRole(role) || role === 'owner') throw new Error('Invite as director, cast or crew.');
     const { token, invite } = await mintInvite(env.DB, production, role, user.id);
     return { url: `${env.APP_ORIGIN}/?invite=${token}`, role, expiresAt: invite.expires_at };
+  },
+});
+
+// A member by email, for the tools that act on someone else.
+const memberByEmail = async (db: D1Database, production: string, email: unknown) => {
+  if (typeof email !== 'string') throw new Error('Pass the member\'s email.');
+  const m = (await members(db, production)).find((x) => x.email === email.toLowerCase());
+  if (!m) throw new Error('No member with that email.');
+  return m;
+};
+
+tool<{ production: string; email: string; role: string }>({
+  name: 'set_role',
+  description: 'Change a member\'s role: owner, director, cast or crew. Owners and directors may do this; only an owner can make an owner; the last owner cannot be demoted.' + DATA_NOTE,
+  inputSchema: { type: 'object', properties: { production: { type: 'string' }, email: { type: 'string' }, role: { type: 'string', enum: ['owner', 'director', 'cast', 'crew'] } }, required: ['production', 'email', 'role'] },
+  run: async ({ production, email, role }, { user, env }) => {
+    const mine = await need(env.DB, user.id, production);
+    if (!can(mine, 'share')) throw new Error(`Your role (${mine}) may not change roles.`);
+    if (!isRole(role)) throw new Error('Role must be owner, director, cast or crew.');
+    if (role === 'owner' && mine !== 'owner') throw new Error('Only an owner can make an owner.');
+    const m = await memberByEmail(env.DB, production, email);
+    const r = await setRole(env.DB, production, m.user_id, role);
+    if (r === 'last_owner') throw new Error('That is the last owner; name another owner first.');
+    return { ok: true, email: m.email, role };
+  },
+});
+
+tool<{ production: string; email?: string }>({
+  name: 'remove_member',
+  description: 'Remove a member from the production, or leave it yourself (omit email). Owners and directors may remove others; the last owner cannot leave.' + DATA_NOTE,
+  inputSchema: { type: 'object', properties: { production: { type: 'string' }, email: { type: 'string' } }, required: ['production'] },
+  run: async ({ production, email }, { user, env }) => {
+    const mine = await need(env.DB, user.id, production);
+    const target = email ? await memberByEmail(env.DB, production, email) : null;
+    if (target && target.user_id !== user.id && !can(mine, 'share')) throw new Error(`Your role (${mine}) may not remove others.`);
+    const r = await removeMember(env.DB, production, target ? target.user_id : user.id);
+    if (r === 'last_owner') throw new Error('That is the last owner; name another owner first.');
+    await syncSeats(env, production);
+    return { ok: true, removed: target ? target.email : user.email };
   },
 });
 
