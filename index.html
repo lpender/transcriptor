@@ -1616,6 +1616,7 @@ async function landInvite(token) {
   document.querySelectorAll('details.sec').forEach(d => { d.open = d === acc; });
   document.querySelector('details.sec').before(acc);
   sheet.scrollTop = 0;
+  (me ? $('joinChip') : $('joinEmail')).focus();  // not the first section's summary
   $('joinChip').onclick = async () => {
     const email = $('joinEmail').value.trim();
     const r = await api(`/invites/${token}/accept`, me ? {} : { email });
