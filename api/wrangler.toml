@@ -30,3 +30,14 @@ APP_ORIGIN = "http://localhost:8799"
 API_ORIGIN = "http://localhost:8787"
 SEALING_KEY = "local-dev-only-not-a-secret"   # prod: `wrangler secret put SEALING_KEY` (Lee)
 # RESEND_API_KEY and MAIL_FROM are secrets: `wrangler secret put` (Lee). Unset = links are logged.
+
+# Live. Deployed by Lee: `task deploy` (wrangler deploy --env production).
+# Secrets are set once with `wrangler secret put <NAME> --env production`.
+[env.production]
+name = "tablework-api"
+routes = [{ pattern = "api.tablework.com", custom_domain = true }]
+vars = { APP_ORIGIN = "https://tablework.com", API_ORIGIN = "https://api.tablework.com" }
+d1_databases = [{ binding = "DB", database_name = "tablework", database_id = "local", migrations_dir = "migrations" }]   # ACTION: paste the id from `wrangler d1 create tablework`
+r2_buckets = [{ binding = "CLIPS", bucket_name = "tablework-clips" }]
+kv_namespaces = [{ binding = "OAUTH_KV", id = "local" }]   # ACTION: paste the id from `wrangler kv namespace create OAUTH_KV`
+durable_objects = { bindings = [{ name = "ROOMS", class_name = "Room" }] }

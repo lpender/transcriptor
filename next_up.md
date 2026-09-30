@@ -3,6 +3,14 @@
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
 ## Queue
+- [ ] notes-sync — signed in and in a production, a member's notes go up
+  (`PUT /productions/:id/me/notes` {line text: note}, `GET` back) and merge
+  with the device's on load, newest wins; the `notes` table exists. A note
+  can be shared to the production later (flag exists). Tests + Chrome.
+- [ ] mcp-progress — `who_is_off_book` over MCP for owner/director: per member
+  cleared/total and weak count, in words. Test.
+- [ ] mcp-parts-by-name — `set_parts` should accept the speaker names as they
+  appear in the script and refuse unknown ones with the list. Test.
 ## Gated
 - [ ] stripe-keys — ACTION: a Stripe account in test mode, two prices ($1/mo,
   $10/yr), then `cd api && npx wrangler secret put STRIPE_SECRET_KEY`,
@@ -20,9 +28,10 @@
 - [ ] resend-account — ACTION: a Resend account (free tier) with the domain
   verified in DNS, then `cd api && npx wrangler secret put RESEND_API_KEY`
   and `MAIL_FROM`. Until then sign-in links are only logged. UNTIL: buy-domain.
-- [ ] cf-account — ACTION: `cd api && npx wrangler login`, then `npx wrangler d1
-  create tablework` and paste the id into `api/wrangler.toml`. Free tier;
-  needs your browser. Until then everything runs on local D1 only.
+- [ ] cf-account — ACTION: the go-live runbook, steps 1–5 in
+  `docs/ARCHITECTURE.md` (login, create D1/KV/R2, paste ids, secrets,
+  `task deploy`). Free tier; needs your browser. Until then everything runs
+  locally only.
 - [ ] buy-domain — ACTION: buy tablework.com (free 2026-09-30) and point
   it at Pages (or Cloudflare once cf-scaffold lands). Costs money. Name is
   decided: Tablework (LOG 2026-09-30).
@@ -32,6 +41,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] deploy-config — DONE 2026-09-30: `[env.production]` in `api/wrangler.toml` (live origins, custom domain, bindings), `task deploy` / `task deploy:check`, Pages `_headers`, and the go-live runbook in `docs/ARCHITECTURE.md`. `wrangler deploy --dry-run --env production` passes.
 - [x] sheet-sections-fold — DONE 2026-09-30: every More section is a `<details>` with its open state remembered; Parts, Practice and Account open by default; signed in, Account becomes "Company" and moves to the top. At 390 the sheet went from 3,251 to 1,857 px with the company on the first screen (`tmp/qa/2026-09-30-sheet-folded-390.png`).
 - [x] production-name — DONE 2026-09-30: creating asks for a name (guessed from a title line in the paste, else "My play"); `PUT /productions/:id {name}` for owner/director; tap the name in the company panel to rename, tab title follows. 1 test; driven in Chrome ("Script Follower" → "Waiting").
 - [x] mcp-oauth — DONE 2026-09-30: `@cloudflare/workers-oauth-provider` 1.2.1 wraps the Worker (`api/src/oauth.ts`): discovery, dynamic registration, PKCE, tokens in OAUTH_KV; `/oauth/mcp` runs the same rpc for an OAuth user; the consent page (`routes/authorize.ts`) names the client, its host and your productions, with a sign-in form that returns to it. 1 end-to-end test: register → consent → allow → code → token → whoami. The claude.ai connection itself waits on a public URL (Gated).

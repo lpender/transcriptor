@@ -54,12 +54,32 @@ before any render is bought.
 
 ## Hosting and deploy
 
-- Today: GitHub Pages from `main`; push = deploy; bump `sw.js` CACHE.
-- Target: Cloudflare Pages (frontend) + `wrangler deploy` (Workers, D1
-  migrations, DO). Deploys are `ACTION:` items for Lee until a CI path is
-  recorded here.
-- Environments: `task dev` runs the Worker on :8787 with a local D1 and no
-  login; prod needs `wrangler login` and a D1 id in `api/wrangler.toml`.
+Today the app is GitHub Pages from `main` (push = deploy, bump `sw.js`
+CACHE); the API runs only locally (`task dev`). The live shape below is
+configured and dry-runs green (`task deploy:check`); bringing it up is a
+one-time runbook for Lee, every step an `ACTION:` in `next_up.md`:
+
+1. `cd api && npx wrangler login` (browser).
+2. `npx wrangler d1 create tablework`, `npx wrangler kv namespace create
+   OAUTH_KV`, `npx wrangler r2 bucket create tablework-clips`; paste the two
+   ids into `[env.production]` in `api/wrangler.toml`.
+3. Secrets, once: `npx wrangler secret put SEALING_KEY --env production`
+   (any long random string), then as they exist: `RESEND_API_KEY`,
+   `MAIL_FROM`, `ELEVEN_LABS_API_KEY`, `STRIPE_SECRET_KEY`,
+   `STRIPE_WEBHOOK_SECRET`; price ids go in `vars`.
+4. Domain: `api.tablework.com` is the Worker's custom domain (in
+   `routes`); the app is a Cloudflare Pages project on `tablework.com`
+   built from this repo's root with no build step (`_headers` keeps
+   `index.html` and `sw.js` uncached at the edge).
+5. `task deploy` — applies migrations to the remote D1, deploys the
+   Worker. Pages deploys on push once connected to the repo.
+6. Stripe webhook: point it at `https://api.tablework.com/webhooks/stripe`.
+7. claude.ai connector: `https://api.tablework.com/oauth/mcp`.
+
+Environments: local `task dev` (`[vars]` at the top of `wrangler.toml`,
+local D1/KV/R2, no login); production `[env.production]`. The app picks
+its API by hostname (`localhost` → `:8787`, else `api.tablework.com`).
+Loops never run `task deploy`.
 
 ## Scenarios
 
