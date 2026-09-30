@@ -120,7 +120,9 @@ reader pasted their own.
   (`window.GAINS` in `cues.js`, dB, 0 when absent) so a file can be levelled
   without re-encoding; `loudness(file)` measures a file in the browser on
   the same scale as ffmpeg's volumedetect, so the gain for an upload is
-  target minus loudness. The beds are levelled to one
+  target minus loudness; the upload also measures the file's length. The
+  Sound files list reads "1:23 · levelled" (the dB in the title), and the
+  scene editor's selects say "music: Name" / "room tone: Name". The beds are levelled to one
   loudness by `normalize.py` (a flat gain each, no compression) so one slider
   fits them all, and the music to another, 5 dB louder. Tapping a scene's name there goes to its
   first line and keeps the sheet open. The header names the scene sounding.
@@ -187,17 +189,23 @@ reader pasted their own.
 - **Account.** The More sheet's Account section takes an email address and
   sends a sign-in link (the API at `localhost:8787` in dev, `api.tablework.com`
   live); opening the link on this device signs it in and returns to the app
-  with the sheet open. Signed in, the sheet shows the address and Sign out.
-  Signed out, or with no API reachable, nothing else about the app changes.
-- **Company.** Signed in, the Account section keeps the script under a
-  production (one button; the word "production" appears only once there is
-  more than one member). It lists members with role and parts (and, for an owner or director,
+  with the sheet open. Signed in, the sheet shows the address, a name field
+  (how the company and a director's AI see you) and Sign out, and the welcome
+  landing is gone. Signed out, or with no API reachable, nothing else about
+  the app changes.
+- **Company.** Signed in, the Company section comes first in the sheet. With
+  no production yet it has one button: "Keep this script under your account"
+  when the device has a script (the paste box goes up with the production),
+  "Start a production" when it does not (the new production then says to
+  paste a script or ask your AI). The word "production" appears only once
+  there is more than one member. It lists members by name (or address) with role and parts (and, for an owner or director,
   each member's standing: sentences clear of their parts, weak ones, or
   "off book"), the seat
   count and monthly price, and for an owner or director makes invite links
-  per role (14 days, copied to the clipboard). Opening an invite link shows
-  what it joins; signed in you join at once, signed out you give an address
-  and the link that arrives both signs you in and joins.
+  per role (14 days, copied to the clipboard). Opening an invite link opens
+  the sheet on the Company section alone, saying what it joins; signed in
+  you join at once, signed out you give an address and the link that arrives
+  both signs you in and joins.
 - **Progress up.** Signed in and in a production, a graded sentence sends the
   best run, the size of your parts and the sentences still owed up to the
   production a beat later, so a director can see who is off book. Signed out
@@ -205,7 +213,12 @@ reader pasted their own.
 - **One script for the company.** Signed in and in a production that has a
   script, that script is the one this device reads; the bundled one and a
   local paste are for the try-it path. An owner or director's paste box has
-  "Save to the production", which validates and, on a bad line, names it.
+  "Save to the production", which validates and, on a bad line, names it;
+  saved, the script is read at once and the voices are priced.
+- **The sheet closes on a start.** A chip that starts something (learn, read
+  aloud, drill, edit, top, listen, Lead, Follow) closes the More sheet so what
+  it started is on screen; toggles (sound, key words, music, room) keep it
+  open.
 - **The script format.** One speech per line as `NAME: what they say`, a line
   of `***` between scenes, blank lines ignored, nothing else. `parseScript`
   in `sentences.js` reads it for the paste box and for the API alike and
