@@ -1,18 +1,14 @@
 # Next Up — transcriptor
 
 ## Now
-- [ ] recon-competitors (owner: loop, started 2026-09-30) — Try Go Offbook (web, no signup) and read Offbook,
-  coldRead, ActOnCue marketing + pricing; write `docs/recon/competitors.md`:
-  one table (import, voices, grading, multi-user, cues, price). Verify: file
-  exists, every claim has a URL.
-
-## Queue
-- [ ] platform-conventions — Write `~/dev/godfiles/conventions/PLATFORM.md`:
+- [ ] platform-conventions (owner: loop, started 2026-09-30) — Write `~/dev/godfiles/conventions/PLATFORM.md`:
   how every app does magic-link auth, Stripe web billing (Checkout, portal,
   webhook flag, no IAP), ownership/sharing/invites (owner/editor/viewer +
   invite token), one MCP server per app (`whoami` + ingest tools), and a
   "How it works" doc page. Reference bodylang's Stripe controllers. Commit in
   godfiles; link from this repo's CLAUDE.md (already does).
+
+## Queue
 - [ ] design-sharing-model (EPIC) — Diverge → skeptic → spec in
   `docs/design/sharing.md`: production, roles (owner, director, cast, crew),
   invite link, what each role sees, notes privacy. Then D1 schema ADR.
@@ -33,6 +29,7 @@
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
 - [ ] relay-durable-object (EPIC) — Replace public MQTT with the production's
   DO; keep the message shape and clock ordering. UNTIL: auth-magic-link.
+- [ ] spike-cue-listening — Web Speech API: advance on the last word of your line, no grading. Verify: one scene in Chrome, hands free. Feeds design-voices-render.
 - [ ] how-it-works-page (EPIC) — Public docs page: productions, invites,
   voices and cost, MCP setup, cues. Written from the specs above.
 
@@ -49,6 +46,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] recon-competitors — DONE 2026-09-30: `docs/recon/competitors.md`, five products, every claim linked. Finding: cue-listening via speech recognition is the one feature we lack; queued as a spike.
 - [x] productionize-docs — DONE 2026-09-30: kind tool → app; VISION, ADR
   001 positioning, 002 stack, 003 pricing/voices, product LOG, ARCHITECTURE
   with target shape, QUIRKS; `specification.md` moved to `docs/BEHAVIOUR.md`.
