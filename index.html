@@ -441,7 +441,7 @@ function noteOf(p) {
       const text = box.value.trim();
       text ? notes[p.dataset.text] = text : delete notes[p.dataset.text];
       save('notes', JSON.stringify(notes));
-      if (me && current) api(`/productions/${current.id}/me/notes`, { [p.dataset.text]: text }, 'PUT');   // yours, kept by the production too
+      if (me && current && learns(current.role)) api(`/productions/${current.id}/me/notes`, { [p.dataset.text]: text }, 'PUT');   // yours, kept by the production too
       if (sayBox && (sayBox.value.trim() || '') !== (sayAs[p.dataset.text] || '')) {
         const say = sayBox.value.trim();
         say ? sayAs[p.dataset.text] = say : delete sayAs[p.dataset.text];
@@ -1349,7 +1349,7 @@ async function pullScript() {
   if (c.status === 200 && c.clips) { window.CLIPS = { ...(window.CLIPS || {}), ...c.clips }; render(); }
   pullCues();
   // Your notes from other devices: the production's copy is the newest, since every edit goes up at once.
-  const mineNotes = await api(`/productions/${current.id}/me/notes`);
+  const mineNotes = learns(current.role) ? await api(`/productions/${current.id}/me/notes`) : {};
   if (mineNotes.status === 200 && mineNotes.notes) {
     Object.assign(notes, mineNotes.notes);
     save('notes', JSON.stringify(notes));
@@ -1488,6 +1488,7 @@ $('saveBtn').onclick = async () => {
     : `Not saved (${r.error || r.status}).`;
 };
 const shares = role => ['owner', 'director'].includes(role);
+const learns = role => role !== 'crew';   // crew run the show; they keep no lines and no notes up there
 let drawGen = 0;  // two draws in flight (sign-in landing and whoami both call) must not both paint
 async function drawCompany() {
   const gen = ++drawGen;
