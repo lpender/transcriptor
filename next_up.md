@@ -3,8 +3,13 @@
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
 ## Queue
-- [ ] relay-durable-object (EPIC) — Replace public MQTT with the production's
-  DO; keep the message shape and clock ordering. UNTIL: auth-magic-link.
+- [ ] relay-do — `api/src/room.ts` Durable Object (WebSocket hibernation,
+  seq-ordered moves, last move kept, presence, lead capability enforced),
+  `GET /productions/:id/room` upgrade route, wrangler binding + migration;
+  test with two sockets. `docs/design/relay.md`.
+- [ ] web-relay — signed in with a production, Together uses the DO (Lead /
+  Follow chips, presence in the header); signed out keeps the MQTT room
+  word. Verify in Chrome with two browser contexts. UNTIL: relay-do.
 - [ ] mcp-oauth — OAuth 2.1 provider + consent page listing productions.
   UNTIL: verify-cf-mcp-oauth, mcp-scaffold.
 - [ ] how-it-works-page (EPIC) — Public docs page: productions, invites,
