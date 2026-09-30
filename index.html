@@ -397,8 +397,13 @@ function play() {
   const clip = clipOf(cur());
   // A silenced voice still plays, silently, so the gap is exactly as long as the line.
   audio.muted = muted.has(speaker(cur()));
-  // A line with no clip (a script edited since tts.py last ran) is skipped, not a full stop.
-  if (!clip) { trouble(`No clip for line ${i + 1} — rerun tts.py`); return void setTimeout(() => playing && step(1), 600); }
+  // A line with no clip is read by this device's own voices; with none of those
+  // either (a script edited since tts.py last ran, on a browser without speech), skipped.
+  if (!clip) {
+    if (speak(cur())) return;
+    trouble(`No clip for line ${i + 1} — rerun tts.py`);
+    return void setTimeout(() => playing && step(1), 600);
+  }
   const span = spansOf(cur())[part = Math.min(part, spansOf(cur()).length - 1)];
   const at = span ? span[0] : 0;
   advanced = false;
@@ -419,7 +424,31 @@ function play() {
     if (playing && audio.paused) trouble(`Stuck on line ${i + 1}: ${audio.src.split('/').pop()} will not play (state ${audio.readyState})`);
   }, 2000);
 }
-function stopPlay() { playing = false; audio.pause(); }
+function stopPlay() { playing = false; audio.pause(); window.speechSynthesis?.cancel(); }
+
+// The device's own voices, for lines nobody has rendered: one voice per character,
+// picked by the name so it is the same voice every time on this device. A silenced
+// character is still "read", at no volume, so the gap is as long as the line.
+// ponytail: the whole speech as one utterance, so Back and Next move by line here,
+// not by sentence; split by sentences() when a rendered clip is not the norm.
+const voiceOf = name => {
+  const all = speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'));
+  if (!all.length) return null;
+  let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return all[h % all.length];
+};
+function speak(p) {
+  if (!window.speechSynthesis || !window.SpeechSynthesisUtterance) return false;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(words(p).trim().replace(/[-–—]\s*$/, ''));
+  u.voice = voiceOf(speaker(p));
+  u.volume = muted.has(speaker(p)) ? 0 : 1;
+  const at = i;
+  u.onend = u.onerror = () => { if (playing && i === at && !advanced) { advanced = true; advance(); } };
+  speechSynthesis.speak(u);
+  clearTimeout(stuck);
+  return true;
+}
 
 // A short falling blip when playback jumps backwards, so a loop is audible.
 let tones;
@@ -723,7 +752,7 @@ function render() {
   hint.textContent = quizzing() ? (shown ? 'Right, or say you missed it' : `Say it, then reveal${atLine().length > 1 ? ` (${atLine().indexOf(item()) + 1} of ${atLine().length})` : ''}`)
     : playing && muted.has(speaker(cur())) ? `${speaker(cur())} is silenced`
     : loop ? `Looping ${loop[1] - loop[0] + 1} lines — Esc to stop`
-    : playing ? 'Reading aloud'
+    : playing ? (clipOf(cur()) ? 'Reading aloud' : "Reading with this device's voices")
     : !learn ? [
         room.role && `${room.role === 'lead' ? 'Leading' : 'Following'} ${room.code}${room.up ? '' : room.role === 'lead' ? ' · connecting…' : ' · nothing heard'}`,
         blocked ? '♫ Touch the page to start the sound' : !hushed && window.CUES?.[cueAt] ? `♫ ${window.CUES[cueAt].name}${sounding()}` : '',

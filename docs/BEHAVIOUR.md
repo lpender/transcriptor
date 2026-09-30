@@ -93,7 +93,9 @@ reader pasted their own.
   centred, and the ends join up: past the last line is the first.
 - **Reading aloud.** Plays each line's clip and advances. Two boxes set a loop:
   play N lines, drop back M, so it creeps forward while repeating. A line with
-  no clip is skipped rather than stopping playback. With learn mode on, the
+  no clip is read by the device's own voices (one per character, the
+  same each time on that device; a silenced character is read at no
+  volume), and skipped only where the browser has none. With learn mode on, the
   voice reads everyone else and stops at each of your lines until you have
   said and graded it; stopping learn mode mid-wait lets the voice read on.
 - **The show's sound.** `cues.js` lists James's sound design scene by scene:

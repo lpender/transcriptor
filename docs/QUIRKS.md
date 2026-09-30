@@ -21,6 +21,8 @@
 
 ## Third-party
 
+- `window.speechSynthesis` is a non-writable getter: stub it in tests with `Object.defineProperty(window, 'speechSynthesis', { value, configurable: true })`, not assignment. `getVoices()` can be empty until `voiceschanged`; a null voice means the default.
+
 - SpeechRecognition exists only in Chrome and Safari, needs mic permission and a secure origin (localhost counts). Test it with a stub class; Playwright has no mic.
 
 - ElevenLabs `eleven_v3` reads a trailing dash as a pause plus a noise; strip
