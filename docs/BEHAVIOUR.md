@@ -170,6 +170,13 @@ reader pasted their own.
   live); opening the link on this device signs it in and returns to the app
   with the sheet open. Signed in, the sheet shows the address and Sign out.
   Signed out, or with no API reachable, nothing else about the app changes.
+- **Company.** Signed in, the Account section keeps the script under a
+  production (one button; the word "production" appears only once there is
+  more than one member). It lists members with role and parts, the seat
+  count and monthly price, and for an owner or director makes invite links
+  per role (14 days, copied to the clipboard). Opening an invite link shows
+  what it joins; signed in you join at once, signed out you give an address
+  and the link that arrives both signs you in and joins.
 - **Controls.** Every control is a button in the bar or the More sheet (Back, Play, Learn, Keys, Start from the top,
   Drill weak, Edit, Next) with its keyboard shortcut printed under it. Nothing
   is reachable by key alone.

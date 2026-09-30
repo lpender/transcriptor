@@ -149,6 +149,11 @@
   #edit { max-width: 40em; margin: 0 auto; padding: 24px 20px 40px; font: 400 15px/1.55 ui-monospace, Menlo, monospace; color: var(--faded); }
   #edit p { color: var(--cue); }
   #accountNote { color: var(--cue); font-size: .9em; min-height: 1.2em; margin: 6px 0 0; }
+  #company h3 { margin: 6px 0; font-weight: 500; }
+  #company .row { padding: 3px 8px; margin: 0 -8px; border-radius: 8px; justify-content: space-between; }
+  #company .row:nth-child(odd) { background: rgba(255, 255, 255, .035); }
+  #company .seats, #joinNote { color: var(--cue); font-size: .9em; margin: 6px 0; }
+  #inviteOut input { width: 100%; font: inherit; font-size: .85em; padding: 4px 6px; border-radius: 6px; border: 1px solid var(--edge); background: #100F0B; color: var(--paper); }
   #accountNote a { color: var(--paper); }
   #src {
     width: 100%; height: 58vh; padding: 12px; border-radius: 10px;
@@ -245,11 +250,19 @@
       </div>
     </div>
     <div id="signedIn" hidden>
+      <div id="company"></div>
       <div class="row">
         <button class="chip wide" id="signoutChip">Sign out</button>
       </div>
     </div>
     <p id="accountNote"></p>
+    <div id="joinBox" hidden>
+      <p id="joinNote"></p>
+      <label class="loop" id="joinEmailRow" title="A link is sent there; opening it joins on this device">email <input id="joinEmail" type="email" autocapitalize="off" autocomplete="email" spellcheck="false"></label>
+      <div class="row">
+        <button class="chip wide" id="joinChip">Join</button>
+      </div>
+    </div>
 
     <button id="closeSheet">Close</button>
   </div>
@@ -1116,6 +1129,7 @@ function drawAccount() {
   $('signedOut').hidden = !!me;
   $('signedIn').hidden = !me;
   if (me) accountNote.textContent = `Signed in as ${me.email}`;
+  loadCompany();
 }
 async function whoami() {
   const r = await api('/me');
@@ -1145,6 +1159,84 @@ $('signoutChip').onclick = async () => { await api('/auth/logout', {}); me = nul
   }
 }
 whoami();
+
+// The company (docs/design/sharing.md): the productions this account is in,
+// the one this device is on, its members, and invite links. The word
+// "production" is not shown until there is more than one member: alone, it
+// is just your script.
+const company = $('company');
+let productions = [], current = null;
+const seats = n => `${n} ${n === 1 ? 'member' : 'members'} · $${n}/month`;
+const el = (tag, props = {}, ...kids) => { const e = Object.assign(document.createElement(tag), props); e.append(...kids); return e; };
+async function loadCompany() {
+  if (!me) { company.replaceChildren(); current = null; return; }
+  productions = (await api('/productions')).productions || [];
+  const want = load('production', '');
+  current = productions.find(p => p.id === want) || productions[0] || null;
+  if (current) save('production', current.id);
+  drawCompany();
+}
+async function drawCompany() {
+  company.replaceChildren();
+  if (!current) {
+    company.append(el('div', { className: 'row' }, el('button', { className: 'chip wide', textContent: 'Keep this script under your account', onclick: createProduction })));
+    return;
+  }
+  const detail = await api(`/productions/${current.id}`);
+  if (detail.status !== 200) return company.append(el('p', { textContent: 'Could not load it.' }));
+  const { members, role } = detail;
+  const group = members.length > 1;
+  if (productions.length > 1) {
+    const pick = el('select', { onchange: () => { save('production', pick.value); current = productions.find(p => p.id === pick.value); drawCompany(); } });
+    for (const p of productions) pick.append(el('option', { value: p.id, textContent: p.name, selected: p.id === current.id }));
+    company.append(el('label', { className: 'loop' }, 'production ', pick));
+  } else company.append(el('h3', { textContent: group ? current.name : `${current.name} — your script` }));
+  for (const m of members) {
+    const who = el('span', { className: 'who', textContent: (m.name || m.email) + (m.user_id === me.id ? ' (you)' : '') });
+    const what = el('span', { textContent: m.role + (m.parts.length ? ' · ' + m.parts.join(', ') : '') });
+    company.append(el('div', { className: 'row', title: m.email }, who, what));
+  }
+  const shares = ['owner', 'director'].includes(role);
+  if (shares) {
+    company.append(el('p', { className: 'seats', textContent: `${seats(members.length)}. Each member you invite is $1 a month.` }));
+    const row = el('div', { className: 'row' });
+    for (const r of ['cast', 'crew', 'director']) row.append(el('button', { className: 'chip', textContent: `Invite ${r}`, onclick: () => invite(r) }));
+    company.append(row, el('p', { id: 'inviteOut' }));
+  }
+}
+async function createProduction() {
+  const name = (window.SCRIPT_TITLE || document.title || 'My script').trim();
+  const r = await api('/productions', { name });
+  if (r.status !== 201) return accountNote.textContent = 'Could not create it.';
+  await loadCompany();
+}
+async function invite(role) {
+  const r = await api(`/productions/${current.id}/invites`, { role });
+  const out = $('inviteOut');
+  if (r.status !== 201) return out.textContent = 'Could not make a link.';
+  out.replaceChildren(el('span', { textContent: `Send this to the ${role} (works for 14 days): ` }), el('input', { value: r.url, readOnly: true, onclick: e => e.target.select() }));
+  try { await navigator.clipboard.writeText(r.url); out.append(' Copied.'); } catch {}
+}
+// Landing on an invite link: say what it joins, then join (signed in) or ask for an address.
+async function landInvite(token) {
+  const peek = await api(`/invites/${token}`);
+  const box = $('joinBox'), note = $('joinNote');
+  box.hidden = false;
+  if (peek.status !== 200) { note.textContent = peek.message || 'That invite is not valid.'; $('joinEmailRow').hidden = $('joinChip').hidden = true; return; }
+  note.textContent = `Join ${peek.production.name} as ${peek.role}.`;
+  $('joinEmailRow').hidden = !!me;
+  $('joinChip').onclick = async () => {
+    const email = $('joinEmail').value.trim();
+    const r = await api(`/invites/${token}/accept`, me ? {} : { email });
+    if (r.status === 200) { note.textContent = `You are in ${r.production.name}.`; box.hidden = true; save('production', r.production.id); await loadCompany(); }
+    else if (r.status === 202) { note.textContent = `A link is on its way to ${email}.`; if (r.link) note.append(' ', el('a', { href: r.link, textContent: 'Open it here (dev).' })); }
+    else note.textContent = r.message || `Could not join (${r.status}).`;
+  };
+}
+{
+  const q = new URLSearchParams(location.search);
+  if (q.has('invite')) { history.replaceState(null, '', location.pathname); whoami().then(() => { landInvite(q.get('invite')); sheet.showModal(); }); }
+}
 
 // One handler for keyboard shortcuts and the phone button bar. Returns false for unused keys.
 function act(k) {
