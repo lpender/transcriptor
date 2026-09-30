@@ -31,6 +31,11 @@ about $30, thirty months of one subscriber. Competitors charge $12/month
 
 ## Consequences
 
+- Checked 2026-09-30: ElevenLabs Creator is ~$0.18 per 1k characters, so a
+  full play is $11–18, not $30; the shape of the decision is unchanged.
+- A BYO-key render's clips join the shared cache: the voices are ours, the
+  user paid for generation, not exclusivity.
+
 - Never a negative-margin user. Popular plays trend to zero marginal cost.
 - The cache is a shared asset across productions; only clip audio is shared,
   never which production rendered it.

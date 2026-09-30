@@ -2,12 +2,17 @@
 
 ## Now
 <!-- autodev until 2026-09-30 17:42 -->
-- [ ] design-voices-render (owner: loop, started 2026-09-30) — Spec the render flow: price quote from
-  uncached characters, per-line resumable job, R2 cache by hash, BYO key.
 ## Queue
-- [ ] design-sound-upload — Spec per-production music + room tone
-  upload per scene, normalization in a Worker (port `normalize.py`), replaces
-  `cues.js` + `sound/`.
+- [ ] browser-voices — speechSynthesis fallback when a line has no clip: one
+  system voice per character (stable pick by name), `onboundary` seeking, P
+  works with no clips. Header: "Reading with this device's voices". Verify
+  in Chrome; Safari by Lee. `docs/design/voices.md`.
+- [ ] engine-gain-node — play music and beds through an AudioContext
+  GainNode with a per-file gain (0 today). Verify: play, fade, crossfade
+  unchanged with the stubbed engine and in Chrome. `docs/design/sound-upload.md`.
+- [ ] measure-loudness — `loudness(file)` in the browser via Web Audio RMS;
+  test on a generated tone; matches `normalize.py` on one `sound/` file
+  within 1 dB.
 - [ ] cf-scaffold — `wrangler` project, D1 migration 0001, one health
   route, `Taskfile.yml` with `task dev`, `task test`, `task deploy` (deploy
   is ACTION for Lee). Verify: `task test` green, `curl localhost:8787/health` ok.
@@ -42,6 +47,21 @@
   `invite`. UNTIL: mcp-add-script, api-invites.
 - [ ] mcp-oauth — OAuth 2.1 provider + consent page listing productions.
   UNTIL: verify-cf-mcp-oauth, mcp-scaffold.
+- [ ] stress-per-line — `stress.json` becomes a per-line "say as" on the
+  script, editable in the notes column, part of the clip hash. UNTIL: db-schema-0001.
+- [ ] voices-quote — `clips` cache table + quote endpoint; unit test on the
+  arithmetic ($0.30 per 1k uncached chars, min $1). UNTIL: cf-scaffold.
+- [ ] voices-render-job — Queues consumer, `voices/eleven.ts`, R2 write,
+  resumable per line. UNTIL: voices-quote. Testing spends credits: ACTION
+  for Lee to allow one small test render when it is ready.
+- [ ] voices-byo-key — encrypted per-production ElevenLabs key; quote and
+  charge skipped. UNTIL: voices-render-job.
+- [ ] web-voices-panel — More sheet: voice per character, quote, render,
+  progress, BYO key. UNTIL: voices-quote.
+- [ ] sound-api — D1 `sound` + `cues`, presigned R2 upload URL, rows, cues
+  PUT, delete refused when in use. UNTIL: db-schema-0001.
+- [ ] web-sound-panel — Add music / Add room tone, per-scene assignment,
+  gain readout, measure on upload. UNTIL: sound-api, measure-loudness.
 - [ ] how-it-works-page (EPIC) — Public docs page: productions, invites,
   voices and cost, MCP setup, cues. Written from the specs above.
 
@@ -55,6 +75,8 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] design-sound-upload — DONE 2026-09-30: `docs/design/sound-upload.md`; never re-encode, measure in the browser, GainNode at playback; split into engine-gain-node, measure-loudness, sound-api, web-sound-panel.
+- [x] design-voices-render — DONE 2026-09-30: `docs/design/voices.md`; ElevenLabs cost checked ($0.18/1k, play $11–18), ADR 003 amended; split into browser-voices, stress-per-line, voices-quote, voices-render-job, voices-byo-key, web-voices-panel.
 - [x] design-mcp-ingest — DONE 2026-09-30: `docs/design/mcp-ingest.md`, ADR 005 (text in the paste format, no files over MCP, OAuth + bearer); split into verify-cf-mcp-oauth, mcp-scaffold, mcp-add-script, mcp-cues-parts-invite, mcp-oauth.
 - [x] design-sharing-model — DONE 2026-09-30: `docs/design/sharing.md` (diverge, skeptic, spec, role table), ADR 004; split into db-schema-0001, api-productions, api-invites, web-production-panel, web-progress-view.
 - [x] spike-cue-listening — DONE 2026-09-30: H switch "Hear me say it" in More; last two words of the sentence under test count as the press. Verified in Playwright with a stubbed SpeechRecognition (wrong words ignored, reveal, then right + next). UNTIL Lee tries it with a real mic: one-word pieces ("No.") will fire on any "no".
