@@ -20,6 +20,13 @@ tasks:
     dir: api
     cmds: [npx wrangler d1 migrations apply tablework --local]
 
+  db:seed-clips:
+    desc: Put the show's rendered clips into the local clip cache (quote = $0 for them)
+    dir: api
+    cmds:
+      - node scripts/seed-clips.mjs > ../tmp/seed-clips.sql
+      - npx wrangler d1 execute tablework --local --file ../tmp/seed-clips.sql
+
   test:
     desc: The gate — API unit tests, typecheck, and a syntax pass over index.html
     cmds:
