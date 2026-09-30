@@ -3,15 +3,16 @@
 ## Now
 
 ## Queue
-- [ ] design-sharing-model (EPIC) — Diverge → skeptic → spec in
+- [ ] spike-cue-listening — Web Speech API: advance on the last word of your line, no grading. Verify: one scene in Chrome, hands free. Feeds design-voices-render.
+- [ ] design-sharing-model — Diverge → skeptic → spec in
   `docs/design/sharing.md`: production, roles (owner, director, cast, crew),
   invite link, what each role sees, notes privacy. Then D1 schema ADR.
-- [ ] design-mcp-ingest (EPIC) — Spec the MCP server: `whoami`,
+- [ ] design-mcp-ingest — Spec the MCP server: `whoami`,
   `list_productions`, `add_script`, `get_script`, `set_cues`,
   `upload_sound`. Claude converts PDFs client-side; server takes text.
-- [ ] design-voices-render (EPIC) — Spec the render flow: price quote from
+- [ ] design-voices-render — Spec the render flow: price quote from
   uncached characters, per-line resumable job, R2 cache by hash, BYO key.
-- [ ] design-sound-upload (EPIC) — Spec per-production music + room tone
+- [ ] design-sound-upload — Spec per-production music + room tone
   upload per scene, normalization in a Worker (port `normalize.py`), replaces
   `cues.js` + `sound/`.
 - [ ] cf-scaffold (EPIC) — `wrangler` project, D1 migration 0001, one health
@@ -23,7 +24,6 @@
   production.state; $1/seat/month, $10/seat/year. UNTIL: auth-magic-link.
 - [ ] relay-durable-object (EPIC) — Replace public MQTT with the production's
   DO; keep the message shape and clock ordering. UNTIL: auth-magic-link.
-- [ ] spike-cue-listening — Web Speech API: advance on the last word of your line, no grading. Verify: one scene in Chrome, hands free. Feeds design-voices-render.
 - [ ] how-it-works-page (EPIC) — Public docs page: productions, invites,
   voices and cost, MCP setup, cues. Written from the specs above.
 
