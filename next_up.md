@@ -4,7 +4,6 @@
 <!-- autodev until 2026-09-30 17:42 -->
 
 ## Queue
-- [ ] loop-row-phone — the Aloud loop row ("read 0 sentences, then go back 0 (0: straight through)") is cramped and unreadable at 390 (tmp/naive-390-sheet-3.png). Stack it: "Loop: read [0] sentences, then go back [0]" on one line, "0 = straight through" as a faded line below. Also "Hear me say it H" wraps its key badge (tmp/naive-390-sheet-4.png): keep key badges from wrapping in `.big` buttons. Verify: 390 shot.
 - [ ] sound-plain-words — Sound files rows show "+0.4 dB", jargon to a stage manager (tmp/naive-390-sheet-3.png). Show "levelled · 12.3 s" (seconds already stored) instead; keep dB in the title attribute. Verify: 390 shot, vitest untouched.
 - [ ] scenes-editor-labels — the Scenes editor rows at 390 are two unlabelled selects plus "hold" and ×; nothing says which is music and which is room tone (tmp/naive-390-sheet-4.png). Prefix each select's options ("music: OfficeFansCelli", "room: OfficeFans") or put a small label above each. Verify: 390 shot.
 ## Gated
@@ -37,6 +36,7 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] loop-row-phone (2026-09-30) — loop row restacked ("loop [n] sentences, back [n]" + faded "0 = straight through"); wide chips no longer wrap. Verified: 390 shot tmp/loop-row-390.png.
 - [x] user-name (2026-09-30) — `PUT /me {name}`, MCP `set_name`, name field in Account; names before emails in company rows and who_is_off_book. Verified: vitest (60), Chrome (name saved, survives reload, row reads "Lee P (you)").
 - [x] mcp-progress — DONE 2026-09-30: `who_is_off_book` over MCP for owner/director, one line per member in words (not started / N of M clear, K weak / off book, last worked). 1 test.
 - [x] mcp-parts-by-name — DONE 2026-09-30: `set_parts` matches speaker names against the current script (case-insensitive) and refuses unknown ones with the speaker list. Same test.
