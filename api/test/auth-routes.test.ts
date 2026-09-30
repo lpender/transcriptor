@@ -28,7 +28,7 @@ describe('sign in', () => {
 
     const out = await post('/auth/logout', {}, { cookie });
     expect(out.headers.get('set-cookie')).toContain('Max-Age=0');
-    expect((await handle(new Request('http://x/me', { headers: { cookie } }), env)).status).toBe(401);
+    expect((await (await handle(new Request('http://x/me', { headers: { cookie } }), env)).json() as { user: null }).user).toBeNull();
   });
   it('refuses a bad address and never leaks whether one is known', async () => {
     expect((await post('/auth/link', { email: 'nope' })).status).toBe(400);
@@ -47,7 +47,7 @@ describe('sign in', () => {
     expect((await (await handle(new Request('http://x/me', { headers: { cookie } }), env)).json() as { user: { name: string } }).user.name).toBe('Dee Dee');
     expect((await (await put('')).json() as { user: { name: null } }).user.name).toBeNull();
   });
-  it('401s without a session', async () => {
-    expect((await handle(new Request('http://x/me'), env)).status).toBe(401);
+  it('answers nobody without a session', async () => {
+    expect((await (await handle(new Request('http://x/me'), env)).json() as { user: null }).user).toBeNull();
   });
 });

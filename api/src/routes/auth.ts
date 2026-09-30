@@ -60,8 +60,8 @@ route('GET', '/auth/verify', async (req, env) => {
 });
 
 route('GET', '/me', async (req, env) => {
-  const user = await currentUser(env.DB, req);
-  return user ? json({ user }) : error('unauthorized', 401);
+  // Signed out is an answer, not an error: the app asks on every load.
+  return json({ user: await currentUser(env.DB, req) });
 });
 
 // Your name, as members and the director's AI see you.

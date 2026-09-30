@@ -1282,7 +1282,7 @@ function drawAccount() {
 }
 async function whoami() {
   const r = await api('/me');
-  me = r.status === 200 ? r.user : null;
+  me = r.user || null;
   drawAccount();
 }
 async function sendLink() {
