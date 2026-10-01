@@ -1284,7 +1284,7 @@ $('start').onclick = () => {
   const holds = [], sceneCue = [];
   (window.CUES || []).forEach((c, n) => c.hold ? holds.push({ before: sceneCue.length, n }) : sceneCue.push(n));
   const stops = at => holds.filter(h => h.before === at).flatMap(h => {
-    const p = line('♫ ' + window.CUES[h.n].name, h.n);
+    const c = window.CUES[h.n], p = line((c.music || c.bed ? '♫ ' : '') + c.name, h.n);   // the note only when something plays
     p.dataset.cue = '';
     p.className = 'cue';
     return [document.createElement('hr'), p];

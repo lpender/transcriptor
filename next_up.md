@@ -38,6 +38,10 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 18 (2026-10-01) — the stage manager's AI sets cues with
+  holds and crew leads through them: both devices stop at "Before the
+  show" and move together; the hold line wore a ♫ with no music attached
+  (fixed: the note only when the scene has music or room tone).
 - Persona round 17 (2026-10-01) — crew leads, cast follows: the follower
   moved with the leader, but the HUD ran the learn nudge into the room line
   (fixed: no nudge in the room) and a cast member could press Lead and get
