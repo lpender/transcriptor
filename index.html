@@ -1455,10 +1455,13 @@ async function pullCues() {
   cueRows = r.cues;
   await drawSoundPanel();
 }
+let soundGen = 0;   // two draws in flight (script arrival and cue pull) must not both append
 async function drawSoundPanel() {
+  const gen = ++soundGen;
   soundPanel.replaceChildren();
   if (!editsSound()) return;
   soundFiles = (await api(`/productions/${current.id}/sound`)).sound || [];
+  if (gen !== soundGen) return;
   const pick = (kind, chosen) => {
     const word = kind === 'bed' ? 'room tone' : 'music', sel = el('select', { title: word });
     sel.append(el('option', { value: '', textContent: `no ${word}` }));

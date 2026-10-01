@@ -4,12 +4,7 @@
 <!-- autodev until 2026-10-01 13:56 -->
 
 ## Queue
-- [ ] crew-show-drawn-twice — the Show section draws "Sound files" and
-  "Scenes" twice for crew (seen in `task demo:shots` 10-crew-show.png,
-  2026-10-01). Verify: sign in as crew, open Show at 390: one block each.
-- [ ] member-row-remove-wraps — in Company at 390 the × remove button drops
-  under a cast row with a long standing (05-company.png, 2026-10-01).
-  Verify: Bob's row keeps select, standing and × within two lines.
+
 ## Gated
 - [ ] stripe-keys — ACTION: a Stripe account in test mode, two prices ($1/mo,
   $10/yr), then `cd api && npx wrangler secret put STRIPE_SECRET_KEY`,
@@ -38,6 +33,11 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] crew-show-drawn-twice — 2026-10-01: two drawSoundPanel calls in flight
+  (script arrival and the cue pull) both appended after their await; a
+  generation counter drops the stale one, as drawCompany already does.
+- [x] member-row-remove-wraps — 2026-10-01: gone with company-in-sentences;
+  the controls follow the sentence and wrap under it as a group.
 - [x] your-productions-home — 2026-10-01: Company opens on "Your
   productions" cards (name; "You play Lane · 4 in the company"; open one
   outlined; tap switches, script follows) plus "Start a new production"
