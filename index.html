@@ -206,6 +206,7 @@
   #company .prod[aria-pressed="true"] { border-color: var(--ribbon); }
   #company .start { display: grid; gap: 8px; margin: 8px 0 14px; }
   #company .start p { margin: 0; font-size: 1.05em; }
+  #roomNote { color: var(--cue); font-size: .9em; margin: 4px 0 8px; }
   #signedOut .seats { color: var(--cue); font-size: .9em; margin: 4px 0 8px; }
   #company .start .chip.wide { background: var(--ribbon); border-color: var(--ribbon); color: #fff; }
   #voices .row, #ai .row, #company .row { padding: 3px 8px; margin: 0 -8px; border-radius: 8px; justify-content: space-between; }
@@ -318,6 +319,7 @@
 
     <details class="sec" data-sec="together">
       <summary>Together</summary>
+    <p id="roomNote" class="seats"></p>
     <label class="loop" title="Any word; the same on every device that should move together">room <input id="room" type="text" autocapitalize="off" autocomplete="off" spellcheck="false"></label>
     <div class="row">
       <button class="chip wide" id="leadChip" title="Every move here is sent to the room">Lead</button>
@@ -974,6 +976,11 @@ function render() {
   $('playChip').firstChild.textContent = playing ? 'Stop reading aloud' : 'Read aloud';
   $('hushChip').firstChild.textContent = hushed ? 'Sound off' : 'Sound on';
   on($('leadChip'), room.role === 'lead'); on($('followChip'), room.role === 'follow');
+  // What Together is, and who is in the room now.
+  const here = (room.who || []).map(w => `${companyNames[w.email] || w.email}${w.leading ? ' (leading)' : ''}`);
+  $('roomNote').textContent = me && current
+    ? `One person leads; everyone in ${current.name} who presses Follow goes where they go.${room.up ? here.length ? ` Here now: ${here.join(', ')}.` : ' Nobody else here yet.' : ''}`
+    : 'Pick a room word, the same on every device that should move together. One leads, the others follow.';
   for (const chip of $('cues').querySelectorAll('.chip')) {
     const { cue, kind } = chip.dataset;
     on(chip, 'loop' in chip.dataset ? looping(+cue, kind) : !off.has(cueKey(+cue, kind)));
@@ -1388,7 +1395,7 @@ whoami();
 // "production" is not shown until there is more than one member: alone, it
 // is just your script.
 const company = $('company');
-productions = []; current = null;
+productions = []; current = null; let companyNames = {};
 const seats = n => `${n} ${n === 1 ? 'member' : 'members'} · $${n}/month`;
 const el = (tag, props = {}, ...kids) => { const e = Object.assign(document.createElement(tag), props); e.append(...kids); return e; };
 async function loadCompany() {
@@ -1628,6 +1635,7 @@ async function drawCompany() {
   company.replaceChildren();
   const { members, role } = detail;
   const group = members.length > 1;
+  companyNames = Object.fromEntries(members.map(m => [m.email, m.name || m.email]));
   // Each member's standing, in words: best clean run against their parts, what they still owe.
   // Your own standing comes from this device: cast do not read the progress table.
   const own = () => { const its = lines.filter(p => !isCue(p) && myRoles.has(speaker(p))).flatMap(p => sentences(words(p))); return { best: +load(bestKey(), 0), total: its.length, weak: its.filter(missCount).length }; };
