@@ -206,8 +206,9 @@ reader pasted their own.
   pays the bill." / "Cy runs the sound and the cues." / "… directs." / "…
   has no part yet."; standing ("Not started.", "Off book.", "Quiet N
   days.") is shown to an owner or director. Then the seat count and monthly
-  price; for an owner or director each other member's
-  role is a select (owner offered only to an owner) with a × to remove them,
+  price; for an owner or director each other member's row ends with
+  "change" (unfolds owner / director / cast / crew chips; owner offered only
+  to an owner; a move to crew drops their parts) and a × to remove them,
   and anyone but an owner has "Leave this production" (the server keeps the
   last owner either way). A script pulled from a production is marked as its
   own; when this device is no longer a member (left or removed) the copy is

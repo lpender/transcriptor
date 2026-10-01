@@ -4,12 +4,6 @@
 <!-- autodev until 2026-10-01 17:17 -->
 
 ## Queue
-- [ ] role-chips-not-select — Lee, 2026-10-01 ("yikes" at the native role
-  dropdown): replace the `<select>` on a member row with a small "change"
-  chip that unfolds four role chips inline (owner only for an owner);
-  pressing one sets the role and folds back. Verify: at 390 as Ann, Bob's
-  row shows the sentence, "change", ×; tap change → chips; tap crew → row
-  rereads "runs the sound and the cues".
 
 ## Gated
 - [ ] hear-me-on-device — ACTION (on-device): open the live app on your
@@ -44,6 +38,10 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] role-chips-not-select — 2026-10-01: "change" unfolds role chips inline,
+  one press sets the role and folds back; a move to crew drops the member's
+  parts; standing hidden when there is no part. Verified with peek.mjs as
+  Ann (crew and back), 61 tests green.
 - Persona round 7 (2026-10-01) — two members in the production's room
   (`api/scripts/walk-room.mjs`): Lead/Follow worked, the follower moved
   with the leader; the Together section had no words (fixed: one sentence

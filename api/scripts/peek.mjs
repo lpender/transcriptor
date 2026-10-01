@@ -17,7 +17,7 @@ const executablePath = rev ? join(cache, rev, 'chrome-mac-arm64/Google Chrome fo
 const browser = await chromium.launch(executablePath && existsSync(executablePath) ? { executablePath } : {});
 const page = await (await browser.newContext({ viewport: { width: +(process.env.WIDTH || 390), height: +(process.env.HEIGHT || 844) }, deviceScaleFactor: 2, colorScheme: 'dark' })).newPage();
 const errors = [];
-page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+page.on('console', (m) => m.type() === 'error' && errors.push(m.text())); page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
 if (email && email !== '-') {
   const { link } = await (await fetch(`${API}/auth/link`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email }) })).json();
   await page.goto(link); await page.waitForURL(`${APP}/**`);

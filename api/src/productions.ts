@@ -47,7 +47,8 @@ export async function setRole(db: D1Database, productionId: string, userId: stri
   const current = await roleOf(db, userId, productionId);
   if (!current) return 'not_member';
   if (current === 'owner' && role !== 'owner' && (await owners(db, productionId)) <= 1) return 'last_owner';
-  await db.prepare('UPDATE members SET role = ? WHERE user_id = ? AND production_id = ?').bind(role, userId, productionId).run();
+  // Crew do not learn lines, so a move to crew drops the parts.
+  await db.prepare("UPDATE members SET role = ?, parts = CASE WHEN ? = 'crew' THEN '[]' ELSE parts END WHERE user_id = ? AND production_id = ?").bind(role, role, userId, productionId).run();
   return 'ok';
 }
 

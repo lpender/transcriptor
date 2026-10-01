@@ -128,7 +128,9 @@
   .row { display: flex; gap: 8px; align-items: center; padding: 3px 0; }
   #company .row { flex-wrap: wrap; }   /* the sentence and its controls stack on a phone rather than shred */
   #company .row .who { font: inherit; letter-spacing: 0; flex: 1 1 14em; }   /* one typeface for the list: the roster is prose */
-  #company .tools { display: flex; gap: 6px; align-items: center; margin-left: auto; }
+  #company .tools { display: flex; gap: 6px; align-items: center; margin-left: auto; flex-wrap: wrap; }
+  #company .roles { display: flex; gap: 6px; flex-wrap: wrap; }
+  #company .roles .chip[disabled] { border-color: var(--ribbon); opacity: 1; }
   .row .who { flex: 1 1 9em; min-width: 0; overflow-wrap: anywhere; font: 500 15px/1.2 ui-monospace, Menlo, monospace; letter-spacing: .04em; }
   #roles .row, #cues .row { padding: 3px 8px; margin: 0 -8px; border-radius: 8px; }
   #roles .row:nth-child(odd), #cues .row:nth-child(odd) { background: rgba(255, 255, 255, .035); }
@@ -1640,8 +1642,9 @@ async function drawCompany() {
   // Your own standing comes from this device: cast do not read the progress table.
   const own = () => { const its = lines.filter(p => !isCue(p) && myRoles.has(speaker(p))).flatMap(p => sentences(words(p))); return { best: +load(bestKey(), 0), total: its.length, weak: its.filter(missCount).length }; };
   const standing = m => {
+    if (!m.parts.length) return '';   // no part, nothing owed, whatever an old run said
     const p = progress[m.email] || (m.user_id === me.id && myRoles.size ? own() : null);
-    if (!p || !p.total || !p.best) return m.parts.length ? 'Not started.' : '';
+    if (!p || !p.total || !p.best) return 'Not started.';
     const days = p.updatedAt ? Math.floor((Date.now() - new Date(p.updatedAt)) / 864e5) : 0;
     return `${p.best === p.total ? 'Off book' : `${p.best} of ${p.total} sentences clear`}${p.weak ? `, ${p.weak} weak` : ''}.${days > 6 ? ` Quiet ${days} days.` : ''}`;
   };
@@ -1669,9 +1672,11 @@ async function drawCompany() {
     const others = shares(role) && m.user_id !== me.id;   // an owner or director shapes the others' rows
     const tools = el('span', { className: 'tools' });
     if (others) {
-      const pick = el('select', { title: 'Role', onchange: async () => { const r = await api(`/productions/${current.id}/members/${m.user_id}`, { role: pick.value }, 'PUT'); if (r.status !== 200) accountNote.textContent = r.message || 'Could not change the role.'; drawCompany(); } });
-      for (const r of ['owner', 'director', 'cast', 'crew']) if (r !== 'owner' || role === 'owner') pick.append(el('option', { value: r, textContent: r, selected: r === m.role }));
-      tools.append(pick, el('button', { className: 'chip', textContent: '×', title: `Remove ${m.name || m.email}`, onclick: async () => { const r = await api(`/productions/${current.id}/members/${m.user_id}`, undefined, 'DELETE'); if (r.status !== 200) accountNote.textContent = r.message || 'Could not remove.'; drawCompany(); } }));
+      // The role as chips, not a native menu: "change" unfolds the four, one press sets it and folds back.
+      const changeRole = async (r) => { const x = await api(`/productions/${current.id}/members/${m.user_id}`, { role: r }, 'PUT'); if (x.status !== 200) accountNote.textContent = x.message || 'Could not change the role.'; drawCompany(); };
+      const roles = el('span', { className: 'roles', hidden: true }, ...['owner', 'director', 'cast', 'crew'].filter(r => r !== 'owner' || role === 'owner').map(r => el('button', { className: 'chip', textContent: r, disabled: r === m.role, onclick: () => changeRole(r) })));
+      const change = el('button', { className: 'chip', textContent: 'change', title: `Change ${m.name || m.email}'s role`, onclick: () => { roles.hidden = !roles.hidden; } });
+      tools.append(change, roles, el('button', { className: 'chip', textContent: '×', title: `Remove ${m.name || m.email}`, onclick: async () => { const r = await api(`/productions/${current.id}/members/${m.user_id}`, undefined, 'DELETE'); if (r.status !== 200) accountNote.textContent = r.message || 'Could not remove.'; drawCompany(); } }));
     }
     company.append(el('div', { className: 'row', title: m.email }, who, tools));
   }
