@@ -420,7 +420,7 @@ let muted = new Set(JSON.parse(load('muted', '[]')));
 // Parts blocked out on the page, so you recite them instead of reading them.
 let covered = new Set(JSON.parse(load('covered', '[]')));
 const speaker = p => p.dataset.text.split(':')[0];
-const speakers = () => [...new Set(lines.filter(p => !isCue(p)).map(speaker))];
+const speakers = () => [...new Set(lines.filter(p => !isCue(p) && p.dataset.text.includes(':')).map(speaker))];   // a line without a colon is a heading or a direction, not a part
 const titleCase = s => s.replace(/\S+/g, w => w[0] + w.slice(1).toLowerCase());   // LANE → Lane, for prose
 const listOf = parts => parts.map(titleCase).join(' and ');
 const said = p => p.querySelector('.said');  // where a line's words are drawn; the note sits beside
@@ -1303,6 +1303,12 @@ $('start').onclick = () => {
   scriptId = ''; if (crypto.subtle) sha(src.value).then(h => { scriptId = h.slice(0, 16); tell(); });
   lines.forEach(plain);
   buildRoles(speakers());
+  // Lines that are not "NAME: speech" read fine but belong to nobody; say so, so the next paste can drop them.
+  const odd = lines.filter(p => !isCue(p) && !p.dataset.text.includes(':')).map(p => p.dataset.text.slice(0, 40));
+  $('pasteHint').textContent = odd.length
+    ? `${odd.length} ${odd.length === 1 ? 'line is' : 'lines are'} not "NAME: speech" and will not be anyone's part: ${odd.slice(0, 3).map(t => `“${t}”`).join(', ')}${odd.length > 3 ? ', …' : ''}. Headings and stage directions can go; a line with only *** marks a scene break.`
+    : current ? `Paste a script — one speech per line, each starting with the character's name and a colon. Save it and everyone in ${current.name} reads it.`
+    : "Paste a script — one speech per line, each starting with the character's name and a colon. Your place, your parts and your score are kept in this browser.";
   buildCues();
   stopLearn();
   edit.hidden = true; read.hidden = bar.hidden = false;

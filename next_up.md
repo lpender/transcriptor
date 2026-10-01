@@ -47,6 +47,11 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 25 (2026-10-01) — a first-timer pastes a script with a
+  heading, a stage direction and a line missing its colon: the Parts list
+  offered "ACT ONE" and "(He sits.)" as characters and nothing said why.
+  Fixed: lines without a colon are never parts, and the paste hint names
+  the misshapen lines and what to do. Verified signed out with peek.mjs.
 - 2026-10-01 sweep after round 24: the show's lines were quoted in
   next_up.md (reworded to point at clips.js) and how.html (fixed earlier);
   `tts.py` and BEHAVIOUR name a character only. The bigger finding went to
