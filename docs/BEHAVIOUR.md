@@ -277,3 +277,7 @@ the sheet, opens the paste box). Crew: "You're on crew for X. The sound and
 the cues are under Show." and "Open Show". Parts flow both ways: a Mine chip sends the
 device's parts to the production, and a device with none takes the parts a
 director set.
+
+A signed-in actor with a part and nothing running sees a one-line HUD nudge
+("Lane: 2 of 7 clear · More, then Keep learning") so an idle reading
+screen still points at the job.

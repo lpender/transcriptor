@@ -38,6 +38,10 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] idle-actor-nudge — 2026-10-01 (loop, north star): a signed-in actor
+  with a part and nothing running sees "Lane and Merriman: 2 of 7 clear ·
+  More, then Keep learning" in the HUD instead of a blank screen. Verified
+  with walk-return.mjs (day-two cold open).
 - Persona round 12 (2026-10-01) — the two emails a real actor reads first:
   "Your sign-in link / Open this link to sign in" said nothing about what
   Tablework is or what happens if ignored (fixed: "Sign in to Tablework",
