@@ -1676,12 +1676,13 @@ async function drawCompany() {
   const learners = members.filter(m => m.parts.length && m.role !== 'crew');
   const offBook = learners.filter(m => { const p = progress[m.email]; return p && p.total && p.best >= p.total; }).length;
   const uncast = members.filter(m => m.role === 'cast' && !m.parts.length).length;
+  const owners = members.filter(m => m.role === 'owner').length;
   company.append(drawStart(role, mine, members.length, (learners.length ? `${offBook} of ${learners.length} off book` : 'script loaded') + (uncast ? `, ${uncast} cast without a part yet` : '')));
   company.append(el('h3', { textContent: group ? 'The company' : 'Just you so far', title: shares(role) ? 'Rename the production' : '', style: shares(role) ? 'cursor:pointer' : '', onclick: shares(role) ? renameProduction : null }));
   for (const m of members) {
     const name = (m.name || m.email) + (m.user_id === me.id ? ' (you)' : '');
     const who = el('span', { className: 'who', textContent: `${name} ${job(m)}. ${standing(m)}`.trim() });
-    const others = shares(role) && m.user_id !== me.id;   // an owner or director shapes the others' rows
+    const others = shares(role) && m.user_id !== me.id && !(m.role === 'owner' && owners === 1);   // an owner or director shapes the others' rows; the only owner stays put
     const tools = el('span', { className: 'tools' });
     if (others) {
       // The role as chips, not a native menu: "change" unfolds the four, one press sets it and folds back.

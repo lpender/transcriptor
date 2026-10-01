@@ -38,6 +38,10 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 16 (2026-10-01) — a director tries to remove or demote the
+  only owner: both refused with "Name another owner first." (correct), but
+  the controls were offered at all. Fixed: the only owner's row carries no
+  change or × for anyone. Verified with peek.mjs as Bob (director).
 - Persona round 15 (2026-10-01) — a member of two productions switching
   cards: the script followed into a production that has none (Earnest's
   10 lines stayed on screen under "Empty Stage"). Fixed: switching to a
