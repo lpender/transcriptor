@@ -38,6 +38,12 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 12 (2026-10-01) — the two emails a real actor reads first:
+  "Your sign-in link / Open this link to sign in" said nothing about what
+  Tablework is or what happens if ignored (fixed: "Sign in to Tablework",
+  "Tap the link below … on this device … If you did not ask for this,
+  ignore it; nothing happens"); the invite mail now says it also signs you
+  in. Only logged until Resend is set up.
 - Persona round 11 (2026-10-01) — a cast member's device after the director
   replaced the script over MCP: the new cut arrived (4 lines), the recast
   parts came down ("You play Lane and Merriman, 3 lines"), standing

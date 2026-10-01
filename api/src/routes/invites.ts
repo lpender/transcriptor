@@ -50,6 +50,6 @@ route('POST', '/invites/:token/accept', async (req, env, { token }) => {
   const { email } = (await req.json().catch(() => ({}))) as { email?: unknown };
   if (!validEmail(email)) return error('unauthorized', 401, 'Sign in, or give an email address to be sent a link.');
   const link = `${env.API_ORIGIN}/auth/verify?token=${encodeURIComponent((await issueMagicLink(env.DB, email, 'invite', invite.id)).token)}`;
-  const { sent } = await send(env, { to: email, subject: `Join ${invite.production_name}`, text: `Open this link to join ${invite.production_name} as ${invite.role}. It works once, for 15 minutes.\n\n${link}` });
+  const { sent } = await send(env, { to: email, subject: `Join ${invite.production_name} on Tablework`, text: `Tap the link below to join ${invite.production_name} as ${invite.role} and sign in on this device. It works once, for 15 minutes.\n\n${link}\n\nIf you were not expecting this, ignore it; nothing happens.` });
   return json(sent ? { ok: true } : { ok: true, link }, 202);
 });

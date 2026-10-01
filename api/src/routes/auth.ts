@@ -19,7 +19,7 @@ const safeNext = (x: unknown) => (typeof x === 'string' && /^\/[a-z][a-z0-9/_-]*
 async function sendLink(env: Parameters<typeof send>[0] & { DB: D1Database; API_ORIGIN: string }, email: string, next: string | null) {
   const { token } = await issueMagicLink(env.DB, email, 'login');
   const link = `${env.API_ORIGIN}/auth/verify?token=${encodeURIComponent(token)}${next ? `&next=${encodeURIComponent(next)}` : ''}`;
-  const { sent } = await send(env, { to: email, subject: 'Your sign-in link', text: `Open this link to sign in. It works once, for 15 minutes.\n\n${link}` });
+  const { sent } = await send(env, { to: email, subject: 'Sign in to Tablework', text: `Tap the link below to sign in to Tablework on this device. It works once, for 15 minutes.\n\n${link}\n\nIf you did not ask for this, ignore it; nothing happens.` });
   return { sent, link };
 }
 
