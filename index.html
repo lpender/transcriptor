@@ -208,7 +208,7 @@
   #company .prod[aria-pressed="true"] { border-color: var(--ribbon); }
   #company .start { display: grid; gap: 8px; margin: 8px 0 14px; }
   #company .start p { margin: 0; font-size: 1.05em; }
-  #roomNote { color: var(--cue); font-size: .9em; margin: 4px 0 8px; }
+  #roomNote, #aloudNote { color: var(--cue); font-size: .9em; margin: 4px 0 8px; }
   #signedOut .seats { color: var(--cue); font-size: .9em; margin: 4px 0 8px; }
   #company .start p.seats { font-size: .9em; color: var(--cue); }
   #company .start .chip.wide { background: var(--ribbon); border-color: var(--ribbon); color: #fff; }
@@ -301,12 +301,13 @@
 
     <details class="sec" data-sec="aloud">
       <summary>Aloud</summary>
+    <p class="seats" id="aloudNote">The other parts are read to you and the reading stops at your line. Without a part chosen, every line is read.</p>
     <div class="row">
       <button class="chip wide" data-key="p" id="playChip">Read aloud<span class="key">P</span></button>
     </div>
     <label class="loop" title="While reading aloud: read this many sentences, then go back this many; 0 means straight through">
-      <span class="loopRow">loop <input id="chunk" type="number" min="0" max="99" inputmode="numeric"> sentences, back <input id="rewind" type="number" min="0" max="99" inputmode="numeric"></span>
-      <span class="dim">0 = straight through</span>
+      <span class="loopRow">repeat a stretch: <input id="chunk" type="number" min="0" max="99" inputmode="numeric"> sentences, then back <input id="rewind" type="number" min="0" max="99" inputmode="numeric"></span>
+      <span class="dim">0 means straight through, no repeats</span>
     </label>
     </details>
 

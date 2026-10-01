@@ -47,6 +47,12 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 26 (2026-10-01) — the Aloud section as a stranger: "Read
+  aloud" said nothing about what is read or whose voices, and "loop 0
+  sentences, back 0 / 0 = straight through" was jargon. Fixed: a sentence
+  ("The other parts are read to you and the reading stops at your line…")
+  and "repeat a stretch: N sentences, then back N; 0 means straight
+  through, no repeats".
 - Persona round 25 (2026-10-01) — a first-timer pastes a script with a
   heading, a stage direction and a line missing its colon: the Parts list
   offered "ACT ONE" and "(He sits.)" as characters and nothing said why.
