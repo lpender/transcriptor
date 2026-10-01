@@ -3,6 +3,12 @@
 ## Now
 
 ## Queue
+- [ ] crew-show-drawn-twice — the Show section draws "Sound files" and
+  "Scenes" twice for crew (seen in `task demo:shots` 10-crew-show.png,
+  2026-10-01). Verify: sign in as crew, open Show at 390: one block each.
+- [ ] member-row-remove-wraps — in Company at 390 the × remove button drops
+  under a cast row with a long standing (05-company.png, 2026-10-01).
+  Verify: Bob's row keeps select, standing and × within two lines.
 ## Gated
 - [ ] stripe-keys — ACTION: a Stripe account in test mode, two prices ($1/mo,
   $10/yr), then `cd api && npx wrangler secret put STRIPE_SECRET_KEY`,

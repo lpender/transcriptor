@@ -34,6 +34,17 @@ tasks:
       - cd api && npx tsc --noEmit
       - node -e "const h=require('fs').readFileSync('index.html','utf8');for(const b of h.match(/<script>([\s\S]*?)<\/script>/g)){try{new Function(b.replace(/<\/?script>/g,''))}catch(e){if(!/window|document|localStorage|await/.test(e.message)){console.error('index.html:',e.message);process.exit(1)}}}console.log('index.html syntax ok')"
 
+  demo:shots:
+    desc: Seed a synthetic production on the local API and screenshot the app at phone width for the /demo walkthrough (tmp/demo/)
+    cmds:
+      - mkdir -p tmp
+      - cd api && (nohup npx wrangler dev --port 8787 > ../tmp/wrangler-dev.log 2>&1 </dev/null &)
+      - (nohup python3 -m http.server 8799 > tmp/http.log 2>&1 </dev/null &)
+      - sleep 8
+      - node api/scripts/demo-shots.mjs
+      - pkill -f "wrangler dev --port 8787" || true
+      - pkill -f "http.server 8799" || true
+
   deploy:
     desc: Deploy the API Worker to production (Lee only — needs `wrangler login`; see docs/ARCHITECTURE.md)
     dir: api
