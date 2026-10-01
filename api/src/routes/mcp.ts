@@ -49,9 +49,21 @@ route('DELETE', '/tokens/:id', async (req, env, { id }) => {
 // The first tools. Ingest and cues come with mcp-add-script and mcp-cues-parts-invite.
 tool({
   name: 'whoami',
-  description: 'Who is signed in and which productions they are in, with their role in each. Call this first; pass a production id to the other tools.' + DATA_NOTE,
+  description: 'Who is signed in and which productions they are in, with their role, parts and the next step in each. Call this first; pass a production id to the other tools.' + DATA_NOTE,
   inputSchema: { type: 'object', properties: {} },
-  run: async (_a, { user, env }) => ({ user: { email: user.email, name: user.name }, productions: await myProductions(env.DB, user) }),
+  run: async (_a, { user, env }) => {
+    // Each production carries its next step in words, the same job the app's Start here block names.
+    const productions = await myProductions(env.DB, user);
+    const withNext = await Promise.all(productions.map(async (p) => {
+      const hasScript = !!(await env.DB.prepare('SELECT 1 FROM scripts WHERE production_id = ? AND replaced_at IS NULL').bind(p.id).first());
+      const next = p.role === 'crew' ? 'Sound and cues are yours: list_sound, set_cues.'
+        : p.role === 'cast' ? (p.parts.length ? `Learn ${p.parts.join(' and ')}; who_is_off_book shows your standing.` : 'Choose a part first: set_parts.')
+        : !hasScript ? 'No script yet: load it with add_script (one speech per line).'
+        : p.members === 1 ? 'Script loaded; invite the cast (invite).' : 'Script loaded; who_is_off_book tells you where everyone is.';
+      return { ...p, next };
+    }));
+    return { user: { email: user.email, name: user.name }, productions: withNext };
+  },
 });
 tool({
   name: 'list_productions',

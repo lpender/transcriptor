@@ -27,7 +27,7 @@ describe('personal tokens and MCP', () => {
     const who = await (await call(token, { jsonrpc: '2.0', id: 3, method: 'tools/call', params: { name: 'whoami', arguments: {} } })).json() as { result: { content: { text: string }[] } };
     const parsed = JSON.parse(who.result.content[0].text) as { user: { email: string }; productions: { name: string; role: string }[] };
     expect(parsed.user.email).toBe('ann10@example.com');
-    expect(parsed.productions).toEqual([expect.objectContaining({ name: 'Uncle Vanya', role: 'owner' })]);
+    expect(parsed.productions).toEqual([expect.objectContaining({ name: 'Uncle Vanya', role: 'owner', next: 'No script yet: load it with add_script (one speech per line).' })]);
     const bad = await (await call(token, { jsonrpc: '2.0', id: 4, method: 'tools/call', params: { name: 'nope' } })).json() as { error: { code: number } };
     expect(bad.error.code).toBe(-32602);
     expect((await (await call(token, { jsonrpc: '2.0', id: 5, method: 'bogus' })).json() as { error: { code: number } }).error.code).toBe(-32601);

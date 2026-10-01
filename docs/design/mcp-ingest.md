@@ -59,7 +59,7 @@ Tools (all scoped to the caller; production named by id or exact name):
 
 | tool | args | returns |
 |---|---|---|
-| `whoami` | – | user email, productions [{id, name, role, members, script?}] |
+| `whoami` | – | user email and name, productions [{id, name, role, parts, members, next}] — `next` is the role's next step in words |
 | `list_productions` | – | same list (alias kept for discoverability) |
 | `create_production` | name | production |
 | `add_script` | production, title, text | speakers [{name, lines}], scenes, warnings; error with the offending line numbers |
