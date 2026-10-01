@@ -38,6 +38,12 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 21 (2026-10-01) — cast and director on a production whose
+  trial lapsed: cast saw nothing and would learn with progress silently
+  not kept; the director's "Not paid" line sat far below. Fixed: the Start
+  here block opens with the state in words for every role (billing is
+  read-gated, so one fetch serves all). Verified as Bob and Ann with the
+  trial moved into the past, then restored.
 - Persona round 20 (2026-10-01) — the full demo recipe on the latest build
   read as a stranger: director, cast and crew screens all read as sentences
   with one job each; only stumble was the upload chips standing taller than
