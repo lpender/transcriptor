@@ -38,6 +38,10 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 24 (2026-10-01) — how.html at 390: reads clean, no sideways
+  scroll, but the script example quoted three lines of the show's own
+  (copyrighted) script on a public page. Replaced with the public-domain
+  Wilde sample. Hard rule: the show's script never leaves its production.
 - Persona round 23 (2026-10-01) — a sign-in link used twice: "That link has
   expired. Ask for another." was right but the sheet opened on Parts with
   the message far down and no field focused. Fixed: the Account section
