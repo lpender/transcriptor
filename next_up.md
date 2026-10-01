@@ -4,16 +4,21 @@
 <!-- autodev until 2026-10-01 13:56 -->
 
 ## Queue
-- [ ] (EPIC) product-landing-and-first-run — Lee, 2026-10-01, on the /demo:
-  "I have no clue what this is supposed to be. Is this supposed to be clear
-  to an actor / director?" and "The landing page is really weird. This
-  should look like a ProductHunt app." Design round first
-  (`docs/design/first-run.md`): (a) the landing as a product page — what it
-  is, who for, one screenshot, one call to action, the price; (b) the first
-  screen after joining, per role: cast ("You play Lane. 14 lines." + Start),
-  director (company + invite), crew (sound + cues); (c) Company in
-  sentences, theatre words (no "owner", no "standing"), one typeface per
-  list. Then split into one-fire items below this line.
+- [ ] landing-product-page — `docs/design/first-run.md` §Landing: pitch,
+  primary "Try a sample scene", live learn-mode preview from the sample,
+  three tiles, price line; paste box below titled "Paste your script".
+  Verify: signed out at 390 and 1280, a stranger can say what it is, who
+  it is for, what it costs, in one screen; sample still starts.
+- [ ] start-here-cast — `drawStart` for cast: "You're in X. You play Lane,
+  14 lines." + "Learn Lane's lines" (sets part, closes sheet, learn mode);
+  no part → the part chips. Sheet opens on it after an invite is accepted.
+  Verify: join as cast via invite at 390, one press lands in learn mode.
+- [ ] start-here-director-crew — `drawStart` for owner/director (invite the
+  cast / paste your script) and crew (open Show). Verify: sign in as each.
+- [ ] company-in-sentences — roster rows as sentences in theatre words
+  (plays / directs / pays the bill / runs sound and cues; standing words),
+  serif, controls after the sentence. Verify: 05-company.png redone reads
+  as prose at 390.
 - [ ] crew-show-drawn-twice — the Show section draws "Sound files" and
   "Scenes" twice for crew (seen in `task demo:shots` 10-crew-show.png,
   2026-10-01). Verify: sign in as crew, open Show at 390: one block each.
@@ -48,6 +53,8 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] (EPIC) product-landing-and-first-run — 2026-10-01 design round done:
+  `docs/design/first-run.md`; split into the four items above.
 - [x] demo-fixture-names — 2026-10-01: demo seeds now Ann Reyes, Bob Okafor,
   Cy Nakamura (Lee: "What is a fixture?"). Verified: grep in demo-shots.mjs.
 - [x] scenes-editor-labels (2026-09-30) — scene selects say "music: X" / "room tone: Y" so a filled row still names its kind. Verified: 390 shot tmp/scenes-labels-390.png.
