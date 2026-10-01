@@ -12,7 +12,7 @@ describe('productions', () => {
     expect(made.status).toBe(201);
     const { production } = await made.json() as { production: { id: string; name: string } };
     expect(production.name).toBe('Waiting');
-    const mine = await (await ann.call('GET', '/productions')).json() as { productions: { id: string; role: string; members: number }[] };
+    const mine = await (await ann.call('GET', '/productions')).json() as { productions: { id: string; role: string; members: number; parts: string[] }[] };
     expect(mine.productions).toEqual([expect.objectContaining({ id: production.id, role: 'owner', members: 1 })]);
   });
   it('hides a production from non-members and gates by role', async () => {

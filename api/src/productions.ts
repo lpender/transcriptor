@@ -19,11 +19,11 @@ export async function createProduction(db: D1Database, owner: User, name: string
 
 export async function myProductions(db: D1Database, user: User) {
   const rows = await db
-    .prepare(`SELECT p.id, p.name, p.state, p.created_at, m.role, (SELECT COUNT(*) FROM members x WHERE x.production_id = p.id) AS members
+    .prepare(`SELECT p.id, p.name, p.state, p.created_at, m.role, m.parts, (SELECT COUNT(*) FROM members x WHERE x.production_id = p.id) AS members
               FROM members m JOIN productions p ON p.id = m.production_id WHERE m.user_id = ? ORDER BY p.created_at DESC`)
     .bind(user.id)
-    .all<Production & { role: Role; members: number }>();
-  return rows.results;
+    .all<Production & { role: Role; parts: string; members: number }>();
+  return rows.results.map((r) => ({ ...r, parts: JSON.parse(r.parts) as string[] }));
 }
 
 export async function roleOf(db: D1Database, userId: string, productionId: string): Promise<Role | null> {

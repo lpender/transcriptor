@@ -1,5 +1,5 @@
 //   POST   /productions                         {name}            → create, caller is owner
-//   GET    /productions                                           → mine, with role and member count
+//   GET    /productions                                           → mine, with role and member count (with your role, parts, member count)
 //   GET    /productions/:id                                       → production, members, my role   [read]
 //   PUT    /productions/:id/members/:user       {role}            → change a role                  [share]
 //   DELETE /productions/:id/members/:user                         → remove; self = leave           [share, or self]

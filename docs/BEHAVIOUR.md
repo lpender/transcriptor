@@ -258,6 +258,13 @@ reader pasted their own.
   Drill weak, Edit, Next) with its keyboard shortcut printed under it. Nothing
   is reachable by key alone.
 
+Your productions (`docs/design/first-run.md`): signed in, Company opens on
+one card per production you are in: the name, then "You play Lane · 4 in
+the company" / "You direct · just you so far" / "You run the sound · …";
+the open one is outlined, a tap opens another (the device's script follows),
+and "Start a new production" asks a name and opens on the paste box without
+carrying the current script across.
+
 Start here (`docs/design/first-run.md`): the first thing in Company is the
 role's first job in a sentence and one button that does it. Cast: "You're in
 X. You play Lane, 14 lines." and "Learn Lane's lines" (sets the part, closes

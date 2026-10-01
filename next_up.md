@@ -2,14 +2,6 @@
 
 ## Now
 <!-- autodev until 2026-10-01 13:56 -->
-- [ ] your-productions-home — owner: loop, 2026-10-01 — Lee, 2026-10-01: "It should obviously have a
-  thing with like 'my scripts'". Signed in, Company opens on **Your
-  productions**: one card per production (name, what you do there — "You
-  play Lane", "You direct" — who else is in it, standing), tap to open; a
-  "Start a new production" button (name + paste); the current one marked.
-  Replaces the hidden `<select>`. Spec in `docs/design/first-run.md`
-  §Your productions. Verify: a director in two productions and an actor in
-  one each see their list at 390 and can switch.
 
 ## Queue
 - [ ] crew-show-drawn-twice — the Show section draws "Sound files" and
@@ -46,6 +38,12 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] your-productions-home — 2026-10-01: Company opens on "Your
+  productions" cards (name; "You play Lane · 4 in the company"; open one
+  outlined; tap switches, script follows) plus "Start a new production"
+  (never carries the script across). `GET /productions` now returns parts.
+  Verified at 390 as Dan in two productions (tmp/productions-home-390.png,
+  tmp/productions-home-switched-390.png); 61 tests green.
 - [x] company-in-sentences — 2026-10-01: one sentence per member ("Bob
   plays Lane. 9 of 14 sentences clear, 1 weak."), serif, controls after;
   service worker off on localhost. Verified at 390 as Ann

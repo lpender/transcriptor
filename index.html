@@ -198,6 +198,11 @@
   .sec h2 { display: none; }
   #accountNote { color: var(--cue); font-size: .9em; min-height: 1.2em; margin: 6px 0 0; }
   #company h3, #voices h3, #ai h3 { margin: 10px 0 4px; font-weight: 500; }
+  #company .prods { display: grid; gap: 8px; margin: 10px 0 18px; }
+  #company .prod { display: grid; gap: 2px; text-align: left; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--edge); background: #100F0B; color: var(--paper); font: inherit; }
+  #company .prod b { font-weight: 500; }
+  #company .prod span { color: var(--cue); font-size: .9em; }
+  #company .prod[aria-pressed="true"] { border-color: var(--ribbon); }
   #company .start { display: grid; gap: 8px; margin: 8px 0 14px; }
   #company .start p { margin: 0; font-size: 1.05em; }
   #company .start .chip.wide { background: var(--ribbon); border-color: var(--ribbon); color: #fff; }
@@ -1611,7 +1616,6 @@ async function drawCompany() {
   const group = members.length > 1;
   const mine = members.find(m => m.user_id === me.id);
   if (mine?.parts.length && !myRoles.size) { myRoles = new Set(mine.parts); save('roles', JSON.stringify([...myRoles])); buildRoles(speakers()); }   // the director cast you
-  company.append(drawStart(role, mine, members.length));
   // Who is off book: an owner or director sees each member's best clean run
   // against the size of their parts, and how many sentences they still owe.
   // Each member's standing, in words: best clean run against their parts, what they still owe.
@@ -1623,11 +1627,15 @@ async function drawCompany() {
   };
   // What each member does, in theatre words: a part if they have one, else the role.
   const job = m => m.parts.length ? `plays ${listOf(m.parts)}` : { owner: 'pays the bill', director: 'directs', crew: 'runs the sound and the cues', cast: 'has no part yet' }[m.role];
-  if (productions.length > 1) {
-    const pick = el('select', { onchange: () => { save('production', pick.value); current = productions.find(p => p.id === pick.value); drawCompany(); } });
-    for (const p of productions) pick.append(el('option', { value: p.id, textContent: p.name, selected: p.id === current.id }));
-    company.append(el('label', { className: 'loop' }, 'production ', pick));
-  } else company.append(el('h3', { textContent: group ? current.name : `${current.name} — your script`, title: shares(role) ? 'Rename' : '', style: shares(role) ? 'cursor:pointer' : '', onclick: shares(role) ? renameProduction : null }));
+  // Your productions (docs/design/first-run.md): one card each, the open one marked, and the way to a new one.
+  const yours = p => `${p.parts.length ? `You play ${listOf(p.parts)}` : { owner: 'You pay the bill', director: 'You direct', crew: 'You run the sound', cast: 'You are cast' }[p.role]} · ${p.members === 1 ? 'just you so far' : `${p.members} in the company`}`;
+  const list = el('div', { className: 'prods' }, el('h3', { textContent: 'Your productions' }));
+  for (const p of productions) list.append(el('button', { className: 'prod', ariaPressed: p.id === current.id ? 'true' : 'false', onclick: () => { if (p.id === current.id) return; save('production', p.id); loadCompany(); } },
+    el('b', { textContent: p.name }), el('span', { textContent: yours(p) })));
+  list.append(el('button', { className: 'chip wide', textContent: 'Start a new production', onclick: createProduction }));
+  company.append(list);
+  company.append(drawStart(role, mine, members.length));
+  company.append(el('h3', { textContent: group ? current.name : `${current.name} — your script`, title: shares(role) ? 'Rename' : '', style: shares(role) ? 'cursor:pointer' : '', onclick: shares(role) ? renameProduction : null }));
   for (const m of members) {
     const name = (m.name || m.email) + (m.user_id === me.id ? ' (you)' : '');
     const who = el('span', { className: 'who', textContent: `${name} ${job(m)}. ${standing(m)}`.trim() });
@@ -1669,8 +1677,10 @@ async function createProduction() {
   if (!name) return;
   const r = await api('/productions', { name });
   if (r.status !== 201) return accountNote.textContent = 'Could not create it.';
+  const first = !current;   // "keep this script" keeps it: the paste box goes up first. A second production starts empty.
   current = r.production; save('production', current.id);
-  if (src.value.trim()) await pushScript();   // "keep this script" keeps it: the paste box goes up first
+  if (first && src.value.trim()) await pushScript();
+  else if (!first) { localStorage.removeItem('fromProduction'); src.value = ''; stopPlay(); stopLearn(); hud.hidden = bar.hidden = true; read.hidden = true; read.replaceChildren(); lines = []; edit.hidden = false; }
   else accountNote.textContent = `${name} has no script yet: paste one under Script, or ask your AI to load it.`;
   await loadCompany();
 }

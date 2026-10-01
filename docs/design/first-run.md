@@ -123,5 +123,17 @@ started.", "{b} of {t} lines clear, {w} weak.", "Off book.", "Quiet {d}
 days." Controls (role select, remove) stay on the row for owner/director,
 after the sentence, and wrap under it at 390.
 
+**Your productions** (Lee, 2026-10-01: "it should obviously have a thing
+with like 'my scripts'"). Signed in, above the Start here block, Company
+lists every production you are in, one card each: the name, then what you
+do there and who is with you in one line ("You play Lane · 3 in the
+company", "You direct · just you so far", "You run the sound · 8 in the
+company"); the open one is marked and the others open on a tap (the
+device's script follows). Below the list: **Start a new production**,
+which asks for a name and opens on the paste box; it never carries the
+current production's script across. With a single production the list is
+one card, still with the button, so the way to a second production is
+always on screen. The hidden `<select>` goes.
+
 Items, one fire each: `landing-product-page`, `start-here-cast`,
-`start-here-director-crew`, `company-in-sentences`.
+`start-here-director-crew`, `company-in-sentences`, `your-productions-home`.
