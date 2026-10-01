@@ -38,6 +38,10 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 23 (2026-10-01) — a sign-in link used twice: "That link has
+  expired. Ask for another." was right but the sheet opened on Parts with
+  the message far down and no field focused. Fixed: the Account section
+  opens alone with the email field focused, as an invite landing does.
 - Persona round 22 (2026-10-01) — the director's AI asks who is off book:
   no one-line picture and a bare "Last worked 2026-09-10" for an actor
   three weeks quiet. Fixed: the summary opens "0 of 1 off book, 1 quiet

@@ -1393,7 +1393,12 @@ $('signoutChip').onclick = async () => { await api('/auth/logout', {}); me = nul
     if (q.has('signin')) accountNote.textContent = q.get('signin') === 'expired' ? 'That link has expired. Ask for another.' : q.get('invite') === 'readonly' ? 'That production is not paid for, so nobody can join it right now.' : '';
     history.replaceState(null, '', location.pathname);
     if (q.get('signin') !== 'expired') whoami().then(() => openSheet());
-    else openSheet();
+    else {   // an expired link: the sign-in box, alone, with the field ready
+      const acc = document.querySelector('details[data-sec="account"]');
+      document.querySelectorAll('details.sec').forEach(d => { d.open = d === acc; });
+      document.querySelector('details.sec').before(acc);
+      openSheet(); setTimeout(() => $('email').focus(), 300);   // after whoami's redraw
+    }
   }
 }
 whoami();
