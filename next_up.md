@@ -38,6 +38,11 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] own-standing-and-off-book-count — 2026-10-01 (loop, north star): cast
+  see their own standing from the device ("You play Lane, 5 lines. 3 of 14
+  sentences clear."), not a permanent "Not started"; a director's start line
+  reads "3 in the company, 0 of 1 off book". Verified with peek.mjs as Bob
+  and Ann.
 - Persona round 5 (2026-10-01) — stage manager at 390
   (`api/scripts/walk-crew.mjs`, two generated WAVs): Open Show, two uploads
   levelled and timed, a scene with music and room tone saved and back
