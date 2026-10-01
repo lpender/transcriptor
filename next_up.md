@@ -38,6 +38,11 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 17 (2026-10-01) — crew leads, cast follows: the follower
+  moved with the leader, but the HUD ran the learn nudge into the room line
+  (fixed: no nudge in the room) and a cast member could press Lead and get
+  "Only the leader moves the room" (fixed: Lead hidden for cast; the note
+  says "Press Follow and your script goes where the leader goes").
 - [x] owner-handover-in-app — 2026-10-01 (loop): an owner can make another
   member owner from the role chips and then "Leave this production" appears
   for them too; a member with a part who also directs or owns reads "plays

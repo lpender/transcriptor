@@ -953,7 +953,7 @@ function render() {
   missBtn.hidden = !(quizzing() && shown);
   backBtn.innerHTML = '&uarr;';
   // A signed-in actor with a part and nothing running gets a one-line nudge toward learning.
-  const nudge = !!(me && current && myRoles.size && !learn && !playing && !loop);
+  const nudge = !!(me && current && myRoles.size && !learn && !playing && !loop && !room.role);   // not while in the room: that line is the room's
   hud.hidden = !(learn || loop || playing || !hushed || room.role || nudge);
 
   score.textContent = learn ? `${cleared.size} of ${items.length} clear · best ${load(bestKey(), 0)}` : '';
@@ -982,10 +982,11 @@ function render() {
   $('playChip').firstChild.textContent = playing ? 'Stop reading aloud' : 'Read aloud';
   $('hushChip').firstChild.textContent = hushed ? 'Sound off' : 'Sound on';
   on($('leadChip'), room.role === 'lead'); on($('followChip'), room.role === 'follow');
+  $('leadChip').hidden = !!(me && current && current.role === 'cast');   // cast follow; an owner, director or crew leads
   // What Together is, and who is in the room now.
   const here = (room.who || []).map(w => `${companyNames[w.email] || w.email}${w.leading ? ' (leading)' : ''}`);
   $('roomNote').textContent = me && current
-    ? `One person leads; everyone in ${current.name} who presses Follow goes where they go.${room.up ? here.length ? ` Here now: ${here.join(', ')}.` : ' Nobody else here yet.' : ''}`
+    ? `${current.role === 'cast' ? 'Press Follow and your script goes where the leader goes.' : `One person leads; everyone in ${current.name} who presses Follow goes where they go.`}${room.up ? here.length ? ` Here now: ${here.join(', ')}.` : ' Nobody else here yet.' : ''}`
     : 'Pick a room word, the same on every device that should move together. One leads, the others follow.';
   for (const chip of $('cues').querySelectorAll('.chip')) {
     const { cue, kind } = chip.dataset;
