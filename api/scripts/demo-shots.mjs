@@ -36,7 +36,7 @@ const mcpFor = (token) => async (name, args) => {
 };
 
 const ann = await signIn(EMAIL('ann'));   // director
-await ann.call('PUT', '/me', { name: 'Ann Fixture' });
+await ann.call('PUT', '/me', { name: 'Ann Reyes' });
 const { production } = await ann.call('POST', '/productions', { name: 'Demo Earnest' });
 await ann.call('PUT', `/productions/${production.id}/script`, { title: 'The Importance of Being Earnest', text: SAMPLE });
 const castInvite = await ann.call('POST', `/productions/${production.id}/invites`, { role: 'cast' });
@@ -44,10 +44,10 @@ const crewInvite = await ann.call('POST', `/productions/${production.id}/invites
 const castToken = new URL(castInvite.url).searchParams.get('invite');
 
 const bob = await signIn(EMAIL('bob'));   // cast, part way through
-await bob.call('PUT', '/me', { name: 'Bob Fixture' });
+await bob.call('PUT', '/me', { name: 'Bob Okafor' });
 await bob.call('POST', `/invites/${castToken}/accept`, {});
 const cy = await signIn(EMAIL('cy'));     // crew
-await cy.call('PUT', '/me', { name: 'Cy Fixture' });
+await cy.call('PUT', '/me', { name: 'Cy Nakamura' });
 await cy.call('POST', `/invites/${new URL(crewInvite.url).searchParams.get('invite')}/accept`, {});
 
 const annMcp = mcpFor((await ann.call('POST', '/tokens', { label: 'director-ai' })).token);

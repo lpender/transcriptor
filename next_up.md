@@ -1,8 +1,19 @@
 # Next Up — transcriptor
 
 ## Now
+<!-- autodev until 2026-10-01 13:56 -->
 
 ## Queue
+- [ ] (EPIC) product-landing-and-first-run — Lee, 2026-10-01, on the /demo:
+  "I have no clue what this is supposed to be. Is this supposed to be clear
+  to an actor / director?" and "The landing page is really weird. This
+  should look like a ProductHunt app." Design round first
+  (`docs/design/first-run.md`): (a) the landing as a product page — what it
+  is, who for, one screenshot, one call to action, the price; (b) the first
+  screen after joining, per role: cast ("You play Lane. 14 lines." + Start),
+  director (company + invite), crew (sound + cues); (c) Company in
+  sentences, theatre words (no "owner", no "standing"), one typeface per
+  list. Then split into one-fire items below this line.
 - [ ] crew-show-drawn-twice — the Show section draws "Sound files" and
   "Scenes" twice for crew (seen in `task demo:shots` 10-crew-show.png,
   2026-10-01). Verify: sign in as crew, open Show at 390: one block each.
@@ -37,6 +48,8 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] demo-fixture-names — 2026-10-01: demo seeds now Ann Reyes, Bob Okafor,
+  Cy Nakamura (Lee: "What is a fixture?"). Verified: grep in demo-shots.mjs.
 - [x] scenes-editor-labels (2026-09-30) — scene selects say "music: X" / "room tone: Y" so a filled row still names its kind. Verified: 390 shot tmp/scenes-labels-390.png.
 - [x] sound-plain-words (2026-09-30) — sound rows read "1:23 · levelled" (dB in the title); long names shrink instead of pushing Delete off the row; wide chips are flex so key badges stay right when text wraps. Verified: 390 shot tmp/sound-plain-390.png.
 - [x] loop-row-phone (2026-09-30) — loop row restacked ("loop [n] sentences, back [n]" + faded "0 = straight through"); wide chips no longer wrap. Verified: 390 shot tmp/loop-row-390.png.
