@@ -42,7 +42,7 @@ MR. MCMARTIN: Eight thousand years.</pre>
   <p>Signed in, your script lives under a <em>production</em>. A production owns the script, the voices, the sound, the members and the bill. The Company section lists your productions as cards (the name, what you do there, who is with you) and opens on your first job for the role: cast get <em>Learn Lane's lines</em>, a director <em>Invite the cast</em>, crew <em>Open Show</em>. The company itself reads as sentences: "Bob plays Lane. 9 of 14 sentences clear, 1 weak."</p>
   <p>Members hold one role each (a part is a character; a role is what you may do):</p>
   <ul>
-    <li><strong>Owner</strong> — pays, and can do everything. Usually the producer or the director.</li>
+    <li><strong>Owner</strong> — runs the production and pays for it; can do everything. Usually the director who set it up.</li>
     <li><strong>Director</strong> — everything but the bill: the script, voices, sound, invites, and who is off book.</li>
     <li><strong>Cast</strong> — reads, learns lines, keeps notes. Cannot change the script or the cues.</li>
     <li><strong>Crew</strong> — the stage manager's part: runs the sound and the cues, leads the room, does not learn lines.</li>
@@ -66,7 +66,7 @@ MR. MCMARTIN: Eight thousand years.</pre>
   <p>In the rehearsal room, one device leads and the others follow: every move the leader makes, everyone's script makes too. An owner, director or crew member can lead; cast follow. A device that drops out lands on the right line when it comes back.</p>
 
   <h2>Your AI</h2>
-  <p>Tablework speaks <a href="https://modelcontextprotocol.io/">MCP</a>, so your own AI can load a script, set parts, make invites and lay out cues. In the app, under Account, press <em>Connect your AI</em>: you get a personal token, shown once, and the line to paste into Claude Code:</p>
+  <p>Tablework speaks <a href="https://modelcontextprotocol.io/">MCP</a>, so your own AI can load a script, set parts, make invites and lay out cues. In the app, under Company (Account when signed out), press <em>Connect your AI</em>: you get a personal token, shown once, and the line to paste into Claude Code:</p>
   <pre>claude mcp add --transport http tablework https://api.tablework.com/mcp --header "Authorization: Bearer …"</pre>
   <p>In claude.ai, add a custom connector at that address with the token as the bearer. Give your AI the play as a PDF or a photo of the sides and ask it to load it: it converts the pages into the one-speech-per-line shape and calls <code>add_script</code>. It can also set your name (<code>set_name</code>), choose parts, change roles, remove members, make invites and ask who is off book. Revoke a token any time under Account.</p>
 
