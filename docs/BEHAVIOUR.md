@@ -256,3 +256,11 @@ reader pasted their own.
 - **Controls.** Every control is a button in the bar or the More sheet (Back, Play, Learn, Keys, Start from the top,
   Drill weak, Edit, Next) with its keyboard shortcut printed under it. Nothing
   is reachable by key alone.
+
+Start here (`docs/design/first-run.md`): the first thing in Company is the
+role's first job in a sentence and one button that does it. Cast: "You're in
+X. You play Lane, 14 lines." and "Learn Lane's lines" (sets the part, closes
+the sheet, starts learn mode); with no part, "Which part do you play?" and
+a button to the Parts section. Parts flow both ways: a Mine chip sends the
+device's parts to the production, and a device with none takes the parts a
+director set.

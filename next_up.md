@@ -2,14 +2,10 @@
 
 ## Now
 <!-- autodev until 2026-10-01 13:56 -->
-- [ ] start-here-cast — owner: loop, 2026-10-01 — `drawStart` for cast: "You're in X. You play Lane,
-  14 lines." + "Learn Lane's lines" (sets part, closes sheet, learn mode);
-  no part → the part chips. Sheet opens on it after an invite is accepted.
-  Verify: join as cast via invite at 390, one press lands in learn mode.
+- [ ] start-here-director-crew — owner: loop, 2026-10-01 — `drawStart` for owner/director (invite the
+  cast / paste your script) and crew (open Show). Verify: sign in as each.
 
 ## Queue
-- [ ] start-here-director-crew — `drawStart` for owner/director (invite the
-  cast / paste your script) and crew (open Show). Verify: sign in as each.
 - [ ] company-in-sentences — roster rows as sentences in theatre words
   (plays / directs / pays the bill / runs sound and cues; standing words),
   serif, controls after the sentence. Verify: 05-company.png redone reads
@@ -48,6 +44,10 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] start-here-cast — 2026-10-01: "You're in Demo Earnest. You play Lane,
+  5 lines." + "Learn Lane's lines" lands in learn mode in one press (sheet
+  closed, 5 items); parts adopted from the production, Mine chips push them
+  up. Verified at 390 as Bob (tmp/start-cast-390.png), 0 console errors.
 - [x] landing-product-page — 2026-10-01: product page above the paste box
   (pitch, primary Try a sample scene, learn-mode preview, three tiles, price,
   "Paste your script"); paste hint got its own id (`#pasteHint`), the empty
