@@ -1641,13 +1641,14 @@ async function drawCompany() {
   companyNames = Object.fromEntries(members.map(m => [m.email, m.name || m.email]));
   // Each member's standing, in words: best clean run against their parts, what they still owe.
   // Your own standing comes from this device: cast do not read the progress table.
-  const own = () => { const its = lines.filter(p => !isCue(p) && myRoles.has(speaker(p))).flatMap(p => sentences(words(p))); return { best: +load(bestKey(), 0), total: its.length, weak: its.filter(missCount).length }; };
+  const own = () => { const its = lines.filter(p => !isCue(p) && myRoles.has(speaker(p))).flatMap(p => sentences(words(p))); const weak = its.filter(missCount); return { best: +load(bestKey(), 0), total: its.length, weak: weak.length, shaky: weak.slice(0, 3) }; };
   const standing = m => {
     if (!m.parts.length) return '';   // no part, nothing owed, whatever an old run said
     const p = progress[m.email] || (m.user_id === me.id && myRoles.size ? own() : null);
     if (!p || !p.total || !p.best) return 'Not started.';
     const days = p.updatedAt ? Math.floor((Date.now() - new Date(p.updatedAt)) / 864e5) : 0;
-    return `${p.best === p.total ? 'Off book' : `${p.best} of ${p.total} sentences clear`}${p.weak ? `, ${p.weak} weak` : ''}.${days > 6 ? ` Quiet ${days} days.` : ''}`;
+    const quoted = p.shaky?.length ? ` (${p.shaky.map(t => `“${t}”`).join(', ')}${p.weak > p.shaky.length ? ', …' : ''})` : '';
+    return `${p.best === p.total ? 'Off book' : `${p.best} of ${p.total} sentences clear`}${p.weak ? `, ${p.weak} weak${quoted}` : ''}.${days > 6 ? ` Quiet ${days} days.` : ''}`;
   };
   const mine = members.find(m => m.user_id === me.id);
   if (mine?.parts.length && !myRoles.size) { myRoles = new Set(mine.parts); save('roles', JSON.stringify([...myRoles])); buildRoles(speakers()); }   // the director cast you

@@ -202,7 +202,7 @@ reader pasted their own.
   "Start a production" when it does not (the new production then says to
   paste a script or ask your AI). The word "production" appears only once
   there is more than one member. The roster is one sentence per member, in
-  theatre words: "Bob plays Lane. 9 of 14 sentences clear, 1 weak." / "Ann
+  theatre words: "Bob plays Lane. 9 of 14 sentences clear, 1 weak (“I didn't think it polite to listen, sir.”)" (the weakest three quoted) / "Ann
   pays the bill." / "Cy runs the sound and the cues." / "… directs." / "…
   has no part yet."; standing ("Not started.", "Off book.", "Quiet N
   days.") is shown to an owner or director. Then the seat count and monthly

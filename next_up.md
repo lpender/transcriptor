@@ -38,6 +38,10 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] weak-sentences-in-roster — 2026-10-01 (loop): the director's roster
+  quotes each member's weakest sentences, as who_is_off_book does ("1 weak
+  (“I didn't think it polite to listen, sir.”)"); own standing too.
+  Verified with peek.mjs as Ann; 61 tests green.
 - Persona round 8 (2026-10-01) — first-time director at 1280
   (`WIDTH=1280 node api/scripts/walk-director.mjs`): every step answered;
   the name nudge rendered at headline size (fixed: a note).

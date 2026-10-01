@@ -33,7 +33,9 @@ route('GET', '/productions/:id/progress', async (req, env, { id }) => {
   return json({
     progress: rows.results.map((r) => ({
       email: r.email, name: r.name, role: r.role, parts: JSON.parse(r.parts) as string[],
-      best: r.best ?? 0, total: r.total ?? 0, weak: r.misses ? Object.keys(JSON.parse(r.misses) as object).length : 0, updatedAt: r.updated_at,
+      best: r.best ?? 0, total: r.total ?? 0, weak: r.misses ? Object.keys(JSON.parse(r.misses) as object).length : 0,
+      shaky: r.misses ? Object.keys(JSON.parse(r.misses) as object).slice(0, 3) : [],   // the weakest few, quoted in the app
+      updatedAt: r.updated_at,
     })),
   });
 });
