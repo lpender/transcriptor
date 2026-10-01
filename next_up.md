@@ -2,10 +2,6 @@
 
 ## Now
 <!-- autodev until 2026-10-01 13:56 -->
-- [ ] company-in-sentences — owner: loop, 2026-10-01 — roster rows as sentences in theatre words
-  (plays / directs / pays the bill / runs sound and cues; standing words),
-  serif, controls after the sentence. Verify: 05-company.png redone reads
-  as prose at 390.
 
 ## Queue
 - [ ] your-productions-home — Lee, 2026-10-01: "It should obviously have a
@@ -50,6 +46,10 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] company-in-sentences — 2026-10-01: one sentence per member ("Bob
+  plays Lane. 9 of 14 sentences clear, 1 weak."), serif, controls after;
+  service worker off on localhost. Verified at 390 as Ann
+  (tmp/company-sentences-390.png).
 - [x] start-here-director-crew — 2026-10-01: director with script → "Invite
   the cast" (link made, scrolled to); without → "Paste the script" (sheet
   closes, box focused); crew → "Open Show" (section opens). Verified at 390

@@ -7,7 +7,9 @@
   the API (sign-in, billing) lands on a stale copy and new functions are
   "not defined". `task serve` runs `tools/serve.py`, which adds
   `Cache-Control: no-store`; a browser that already holds a cached copy
-  needs one reload first. Unregistering the service worker is not enough.
+  needs one reload first. The service worker did the same one load behind
+  (it serves its cache, then installs the new build), so index.html does
+  not register it on localhost.
 - The Workers runtime refuses a non-handler export from the entry module
   (`Incorrect type for map entry 'VERSION'`): `api/src/index.ts` exports only
   the default handler; everything testable lives in `router.ts`.

@@ -125,7 +125,9 @@
   }
   .sheet-in h2:first-child { margin-top: 4px; }
   .row { display: flex; gap: 8px; align-items: center; padding: 3px 0; }
-  #company .row { flex-wrap: wrap; }   /* name, standing and controls stack on a phone rather than shred */
+  #company .row { flex-wrap: wrap; }   /* the sentence and its controls stack on a phone rather than shred */
+  #company .row .who { font: inherit; letter-spacing: 0; flex: 1 1 14em; }   /* one typeface for the list: the roster is prose */
+  #company .tools { display: flex; gap: 6px; align-items: center; margin-left: auto; }
   .row .who { flex: 1 1 9em; min-width: 0; overflow-wrap: anywhere; font: 500 15px/1.2 ui-monospace, Menlo, monospace; letter-spacing: .04em; }
   #roles .row, #cues .row { padding: 3px 8px; margin: 0 -8px; border-radius: 8px; }
   #roles .row:nth-child(odd), #cues .row:nth-child(odd) { background: rgba(255, 255, 255, .035); }
@@ -1612,29 +1614,31 @@ async function drawCompany() {
   company.append(drawStart(role, mine, members.length));
   // Who is off book: an owner or director sees each member's best clean run
   // against the size of their parts, and how many sentences they still owe.
+  // Each member's standing, in words: best clean run against their parts, what they still owe.
   const standing = m => {
     const p = progress[m.email];
-    if (!p || !p.total) return m.parts.length ? ' · not started' : m.role === 'cast' ? ' · no parts yet' : '';
+    if (!p || !p.total) return m.parts.length ? 'Not started.' : '';
     const days = p.updatedAt ? Math.floor((Date.now() - new Date(p.updatedAt)) / 864e5) : 0;
-    return ` · ${p.best === p.total ? 'off book' : `${p.best} of ${p.total} clear`}${p.weak ? `, ${p.weak} weak` : ''}${days > 6 ? `, quiet ${days} days` : ''}`;
+    return `${p.best === p.total ? 'Off book' : `${p.best} of ${p.total} sentences clear`}${p.weak ? `, ${p.weak} weak` : ''}.${days > 6 ? ` Quiet ${days} days.` : ''}`;
   };
+  // What each member does, in theatre words: a part if they have one, else the role.
+  const job = m => m.parts.length ? `plays ${listOf(m.parts)}` : { owner: 'pays the bill', director: 'directs', crew: 'runs the sound and the cues', cast: 'has no part yet' }[m.role];
   if (productions.length > 1) {
     const pick = el('select', { onchange: () => { save('production', pick.value); current = productions.find(p => p.id === pick.value); drawCompany(); } });
     for (const p of productions) pick.append(el('option', { value: p.id, textContent: p.name, selected: p.id === current.id }));
     company.append(el('label', { className: 'loop' }, 'production ', pick));
   } else company.append(el('h3', { textContent: group ? current.name : `${current.name} — your script`, title: shares(role) ? 'Rename' : '', style: shares(role) ? 'cursor:pointer' : '', onclick: shares(role) ? renameProduction : null }));
   for (const m of members) {
-    const who = el('span', { className: 'who', textContent: (m.name || m.email) + (m.user_id === me.id ? ' (you)' : '') });
-    const tail = (m.parts.length ? ' · ' + m.parts.join(', ') : '') + standing(m);
+    const name = (m.name || m.email) + (m.user_id === me.id ? ' (you)' : '');
+    const who = el('span', { className: 'who', textContent: `${name} ${job(m)}. ${standing(m)}`.trim() });
     const others = shares(role) && m.user_id !== me.id;   // an owner or director shapes the others' rows
-    const what = el('span', {});
+    const tools = el('span', { className: 'tools' });
     if (others) {
       const pick = el('select', { title: 'Role', onchange: async () => { const r = await api(`/productions/${current.id}/members/${m.user_id}`, { role: pick.value }, 'PUT'); if (r.status !== 200) accountNote.textContent = r.message || 'Could not change the role.'; drawCompany(); } });
       for (const r of ['owner', 'director', 'cast', 'crew']) if (r !== 'owner' || role === 'owner') pick.append(el('option', { value: r, textContent: r, selected: r === m.role }));
-      what.append(pick, tail);
-    } else what.textContent = m.role + tail;
-    const gone = others ? el('button', { className: 'chip', textContent: '×', title: `Remove ${m.name || m.email}`, onclick: async () => { const r = await api(`/productions/${current.id}/members/${m.user_id}`, undefined, 'DELETE'); if (r.status !== 200) accountNote.textContent = r.message || 'Could not remove.'; drawCompany(); } }) : '';
-    company.append(el('div', { className: 'row', title: m.email }, who, what, gone));
+      tools.append(pick, el('button', { className: 'chip', textContent: '×', title: `Remove ${m.name || m.email}`, onclick: async () => { const r = await api(`/productions/${current.id}/members/${m.user_id}`, undefined, 'DELETE'); if (r.status !== 200) accountNote.textContent = r.message || 'Could not remove.'; drawCompany(); } }));
+    }
+    company.append(el('div', { className: 'row', title: m.email }, who, tools));
   }
   if (role !== 'owner') company.append(el('div', { className: 'row' }, el('button', { className: 'chip', textContent: 'Leave this production', onclick: async () => { if (!confirm(`Leave ${current.name}? Your notes and progress there go with you.`)) return; const r = await api(`/productions/${current.id}/members/${me.id}`, undefined, 'DELETE'); if (r.status !== 200) return accountNote.textContent = r.message || 'Could not leave.'; const was = current.name; await loadCompany(); accountNote.textContent = `You left ${was}.`; } })));
   if (shares(role)) {
@@ -1856,7 +1860,8 @@ $('fetchBtn').onclick = async () => {
 };
 
 // Install the worker that keeps the script and every clip on the device.
-if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+// Not on localhost: in dev it serves the previous build one load behind (QUIRKS).
+if ('serviceWorker' in navigator && location.protocol !== 'file:' && !['localhost', '127.0.0.1'].includes(location.hostname)) {
   navigator.serviceWorker.register('sw.js').catch(e => console.warn('No offline cache:', e));
 }
 
