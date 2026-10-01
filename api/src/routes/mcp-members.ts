@@ -27,7 +27,7 @@ tool<{ production: string }>({
 
 tool<{ production: string; email?: string; parts: string[] }>({
   name: 'set_parts',
-  description: 'Set which characters a member is learning, by the speaker names as they appear in the script (case does not matter). Omit email to set your own; an owner or director may set anyone\'s. Unknown names are refused with the list of speakers.' + DATA_NOTE,
+  description: 'Set which characters a member is learning, by the speaker names as they appear in the script (case does not matter). Omit email to set your own; an owner or director may set anyone\'s but crew\'s (crew do not learn lines). Unknown names are refused with the list of speakers.' + DATA_NOTE,
   inputSchema: { type: 'object', properties: { production: { type: 'string' }, email: { type: 'string' }, parts: { type: 'array', items: { type: 'string' } } }, required: ['production', 'parts'] },
   run: async ({ production, email, parts: asked }, { user, env }) => {
     const role = await need(env.DB, user.id, production);
@@ -43,6 +43,7 @@ tool<{ production: string; email?: string; parts: string[] }>({
       if (!can(role, 'share')) throw new Error(`Your role (${role}) may only set your own parts.`);
       const m = (await members(env.DB, production)).find((x) => x.email === email.toLowerCase());
       if (!m) throw new Error('No member with that email.');
+      if (m.role === 'crew' && parts.length) throw new Error(`${m.name || m.email} is crew: crew run the sound and the cues and do not learn lines. Change the role first (set_role).`);
       target = m.user_id;
     }
     await setParts(env.DB, production, target, parts);

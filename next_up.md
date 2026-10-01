@@ -38,6 +38,10 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 6 (2026-10-01) — a director's AI over MCP: set_parts let a
+  crew member hold a part (fixed: refused with the reason and set_role);
+  add_script answered raw codes "invalid_title" / "empty_script" (fixed: in
+  words); invite, get_script and who_is_off_book read fine.
 - [x] own-standing-and-off-book-count — 2026-10-01 (loop, north star): cast
   see their own standing from the device ("You play Lane, 5 lines. 3 of 14
   sentences clear."), not a permanent "Not started"; a director's start line

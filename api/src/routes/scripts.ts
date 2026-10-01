@@ -40,7 +40,8 @@ tool<{ production: string; title: string; text: string }>({
   run: async ({ production, title, text }, { user, env }) => {
     await need(env, user.id, production, 'script');
     const v = validate(title, text);
-    if (!v.ok) throw new Error(v.error === 'bad_lines' ? `Lines that are not "NAME: speech" or ***:\n${v.errors!.map((e) => `  ${e.line}: ${e.text}`).join('\n')}` : v.error);
+    if (!v.ok) throw new Error(v.error === 'bad_lines' ? `Lines that are not "NAME: speech" or ***:\n${v.errors!.map((e) => `  ${e.line}: ${e.text}`).join('\n')}`
+      : { invalid_title: 'Give the script a title (the play\'s name, up to 200 characters).', empty_script: 'The script is empty: send the speeches as "NAME: what they say", one per line.', too_long: 'The script is too long for one load; send it in acts.' }[v.error] ?? v.error);
     const script = await setScript(env.DB, production, user.id, v.title, v.text);
     return { saved: { id: script.id, title: script.title }, speakers: v.parsed.speakers, scenes: v.parsed.scenes.length, lines: v.parsed.lines };
   },

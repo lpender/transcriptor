@@ -28,6 +28,9 @@ describe('members over MCP', () => {
     expect((await b('set_parts', { production: production.id, email: 'ann13@example.com', parts: ['LUCKY'] })).isError).toBe(true);
     expect((await a('set_parts', { production: production.id, email: 'bob13@example.com', parts: ['VLADIMIR', 'POZZO'] })).isError).toBe(false);
     expect((await a('set_parts', { production: production.id, email: 'nobody@example.com', parts: [] })).text).toContain('No member');
+    await env.DB.prepare("UPDATE members SET role = 'crew' WHERE user_id = ?").bind(bob.user.id).run();
+    expect((await a('set_parts', { production: production.id, email: 'bob13@example.com', parts: ['VLADIMIR'] })).text).toContain('is crew');
+    await env.DB.prepare("UPDATE members SET role = 'cast' WHERE user_id = ?").bind(bob.user.id).run();
     const listed = (await a('list_members', { production: production.id })).json().members as { email: string; parts: string[] }[];
     expect(listed.find((m) => m.email === 'bob13@example.com')?.parts).toEqual(['VLADIMIR', 'POZZO']);
     expect((await b('invite', { production: production.id, role: 'cast' })).isError).toBe(true);

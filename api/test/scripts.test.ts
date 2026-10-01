@@ -53,6 +53,7 @@ describe('scripts over HTTP and MCP', () => {
       const { result } = await r.json() as { result: { content: { text: string }[]; isError?: boolean } };
       return { text: result.content[0].text, isError: !!result.isError };
     };
+    expect((await mcp('add_script', { production: production.id, title: 'Lear', text: '' })).text).toContain('The script is empty');
     const err = await mcp('add_script', { production: production.id, title: 'Lear', text: 'LEAR: Howl.\nStorm.' });
     expect(err.isError).toBe(true);
     expect(err.text).toContain('2: Storm.');
