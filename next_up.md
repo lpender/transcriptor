@@ -6,6 +6,11 @@
 ## Queue
 
 ## Gated
+- [ ] hear-me-on-device — ACTION (on-device): open the live app on your
+  iPhone (Safari) and an Android phone (Chrome), pick a part, press "Hear me
+  say it", allow the microphone, say a line: the last words should count as
+  the press. Headless browsers have no microphone, so the loop cannot check
+  this. Lee, 2026-10-01: "does it work?" — unverified on phones.
 - [ ] stripe-keys — ACTION: a Stripe account in test mode, two prices ($1/mo,
   $10/yr), then `cd api && npx wrangler secret put STRIPE_SECRET_KEY`,
   `STRIPE_WEBHOOK_SECRET`, and the price ids in `wrangler.toml` vars. Nothing
