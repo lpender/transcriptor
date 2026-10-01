@@ -76,6 +76,7 @@ describe('members over MCP', () => {
     await bob.call('PUT', `/productions/${production.id}/me/progress`, { best: 3, total: 5, misses: { 'x': 1 } });
     s = (await a('who_is_off_book', { production: production.id })).json().summary as string;
     expect(s).toContain('bob28@example.com (VLADIMIR): 3 of 5 sentences clear, 1 weak ("x").');
+    expect(s.split('\n')[0]).toBe('0 of 1 off book.');
     await bob.call('PUT', `/productions/${production.id}/me/progress`, { best: 5, total: 5, misses: {} });
     s = (await a('who_is_off_book', { production: production.id })).json().summary as string;
     expect(s).toContain('bob28@example.com (VLADIMIR): off book.');

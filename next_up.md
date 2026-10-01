@@ -38,6 +38,10 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 22 (2026-10-01) — the director's AI asks who is off book:
+  no one-line picture and a bare "Last worked 2026-09-10" for an actor
+  three weeks quiet. Fixed: the summary opens "0 of 1 off book, 1 quiet
+  for a week." and rows say "Quiet 21 days." past a week. Tested.
 - [x] director-start-line-worries — 2026-10-01 (loop): the director's Start
   here line adds "N not started" and "N quiet for a week" beside off book,
   the two things a director asks first. Verified with peek.mjs as Ann

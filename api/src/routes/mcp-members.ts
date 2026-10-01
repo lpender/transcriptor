@@ -135,10 +135,17 @@ tool<{ production: string }>({
       const quoted = weak ? ` (${shaky.slice(0, 3).map((t) => `"${t}"`).join(', ')}${weak > 3 ? ', …' : ''})` : '';
       if (!parts.length) return `${who}: no parts chosen yet (set_parts).`;
       if (!r.total) return `${who} (${parts.join(', ')}): not started.`;
-      const when = r.updated_at ? ` Last worked ${r.updated_at.slice(0, 10)}.` : '';
+      const days = r.updated_at ? Math.floor((Date.now() - new Date(r.updated_at).getTime()) / 864e5) : 0;
+      const when = r.updated_at ? (days > 6 ? ` Quiet ${days} days.` : ` Last worked ${r.updated_at.slice(0, 10)}.`) : '';
       if (r.best! >= r.total) return `${who} (${parts.join(', ')}): off book${weak ? `, ${weak} sentence${weak > 1 ? 's' : ''} still shaky${quoted}` : ''}.${when}`;
       return `${who} (${parts.join(', ')}): ${r.best} of ${r.total} sentences clear${weak ? `, ${weak} weak${quoted}` : ''}.${when}`;
     });
-    return { summary: lines.join('\n'), members: rows.length };
+    // One line up top, the director's whole picture.
+    const learners = rows.filter((r) => r.role !== 'crew' && (r.role === 'cast' || r.parts !== '[]'));
+    const offBook = learners.filter((r) => r.total && r.best! >= r.total).length;
+    const notStarted = learners.filter((r) => !r.best).length;
+    const quiet = learners.filter((r) => r.best && r.updated_at && Date.now() - new Date(r.updated_at).getTime() > 7 * 864e5).length;
+    const picture = everyone && learners.length ? `${offBook} of ${learners.length} off book${notStarted ? `, ${notStarted} not started` : ''}${quiet ? `, ${quiet} quiet for a week` : ''}.` : '';
+    return { summary: [picture, ...lines].filter(Boolean).join('\n'), members: rows.length };
   },
 });
