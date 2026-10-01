@@ -38,6 +38,11 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 9 (2026-10-01) — an actor back the next day on the same
+  phone (`api/scripts/walk-return.mjs`): signed in still, script and place
+  kept, Company says "1 of 5 sentences clear, 1 weak (“…”)" and Practice
+  offers "Drill 1 weak line"; the only stumble was the start button still
+  saying "Learn" on day two (fixed: "Keep learning Lane's lines").
 - [x] weak-sentences-in-roster — 2026-10-01 (loop): the director's roster
   quotes each member's weakest sentences, as who_is_off_book does ("1 weak
   (“I didn't think it polite to listen, sir.”)"); own standing too.

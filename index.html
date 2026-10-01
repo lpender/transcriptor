@@ -1607,7 +1607,7 @@ function drawStart(role, m, count, progressWords) {
       el('button', { className: 'chip wide', textContent: 'Choose your part', onclick: () => openSec('parts') }));
     else box.append(
       el('p', { textContent: `You're in ${current.name}. You play ${listOf(parts)}${n ? `, ${n} ${n === 1 ? 'line' : 'lines'}` : ''}. ${m.standing || ''}`.trim() }),
-      el('button', { className: 'chip wide', textContent: `Learn ${listOf(parts)}'s lines`, onclick: () => {
+      el('button', { className: 'chip wide', textContent: `${+load(bestKey(), 0) ? 'Keep learning' : 'Learn'} ${listOf(parts)}'s lines`, onclick: () => {
         myRoles = new Set(parts); save('roles', JSON.stringify([...myRoles])); buildRoles(speakers());
         sheet.close(); startLearn(); render();
       } }));
