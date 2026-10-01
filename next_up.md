@@ -8,6 +8,14 @@
   as prose at 390.
 
 ## Queue
+- [ ] your-productions-home — Lee, 2026-10-01: "It should obviously have a
+  thing with like 'my scripts'". Signed in, Company opens on **Your
+  productions**: one card per production (name, what you do there — "You
+  play Lane", "You direct" — who else is in it, standing), tap to open; a
+  "Start a new production" button (name + paste); the current one marked.
+  Replaces the hidden `<select>`. Spec in `docs/design/first-run.md`
+  §Your productions. Verify: a director in two productions and an actor in
+  one each see their list at 390 and can switch.
 - [ ] crew-show-drawn-twice — the Show section draws "Sound files" and
   "Scenes" twice for crew (seen in `task demo:shots` 10-crew-show.png,
   2026-10-01). Verify: sign in as crew, open Show at 390: one block each.
