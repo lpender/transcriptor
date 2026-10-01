@@ -2,6 +2,10 @@
 
 ## Build / tooling
 
+- Never chain `task test | grep … && git commit`: grep exits 0 on a line
+  that says "failed" too, and a red main was pushed that way on
+  2026-10-01 (a duplicate `const` in a test). Gate first, read the result,
+  then commit.
 - A browser heuristically caches `index.html` from `python3 -m http.server`
   (Last-Modified, no Cache-Control), so after an edit a redirect back from
   the API (sign-in, billing) lands on a stale copy and new functions are
