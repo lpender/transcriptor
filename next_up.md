@@ -2,9 +2,7 @@
 
 ## Now
 <!-- autodev until 2026-10-01 13:56 -->
-
-## Queue
-- [ ] your-productions-home — Lee, 2026-10-01: "It should obviously have a
+- [ ] your-productions-home — owner: loop, 2026-10-01 — Lee, 2026-10-01: "It should obviously have a
   thing with like 'my scripts'". Signed in, Company opens on **Your
   productions**: one card per production (name, what you do there — "You
   play Lane", "You direct" — who else is in it, standing), tap to open; a
@@ -12,6 +10,8 @@
   Replaces the hidden `<select>`. Spec in `docs/design/first-run.md`
   §Your productions. Verify: a director in two productions and an actor in
   one each see their list at 390 and can switch.
+
+## Queue
 - [ ] crew-show-drawn-twice — the Show section draws "Sound files" and
   "Scenes" twice for crew (seen in `task demo:shots` 10-crew-show.png,
   2026-10-01). Verify: sign in as crew, open Show at 390: one block each.
