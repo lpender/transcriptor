@@ -38,6 +38,9 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 13 (2026-10-01) — how.html read against the app: "Owner —
+  pays" (fixed: runs the production and pays) and "under Account, press
+  Connect your AI" (fixed: under Company when signed in). Rest matches.
 - [x] idle-actor-nudge — 2026-10-01 (loop, north star): a signed-in actor
   with a part and nothing running sees "Lane and Merriman: 2 of 7 clear ·
   More, then Keep learning" in the HUD instead of a blank screen. Verified
