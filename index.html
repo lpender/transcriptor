@@ -158,12 +158,35 @@
   /* ---- pasting a script ---- */
   #edit { max-width: 40em; margin: 0 auto; padding: 24px 20px 40px; font: 400 15px/1.55 ui-monospace, Menlo, monospace; color: var(--faded); }
   #edit p { color: var(--cue); }
-  #welcome { margin: 10vh 0 28px; }
-  #welcome h1 { font: 500 2.2em/1.1 Georgia, 'Times New Roman', serif; color: var(--paper); margin: 0 0 8px; letter-spacing: .01em; }
-  #welcome .tag { color: var(--cue); font-size: 1.05em; margin: 0 0 18px; }
+  /* ---- the landing: what this is, for whom, at what price (docs/design/first-run.md) ---- */
+  #welcome { margin: 6vh 0 36px; display: grid; gap: 32px; }
+  #welcome h1 { font: 500 2.6em/1.05 Georgia, 'Times New Roman', serif; color: var(--paper); margin: 0 0 10px; letter-spacing: .01em; }
+  #welcome .pitch { font: 500 1.35em/1.25 Georgia, 'Times New Roman', serif; color: var(--paper); margin: 0 0 8px; text-wrap: balance; }
+  #welcome .tag { color: var(--cue); font-size: 1.05em; margin: 0 0 18px; max-width: 36em; }
   #welcome .tag a { color: var(--cue); }
   #welcome .row { flex-wrap: wrap; }
   #welcome button { min-height: var(--tap); padding: 0 18px; border-radius: 10px; border: 1px solid #5E5540; background: #262218; color: var(--paper); font: 500 15px ui-monospace, Menlo, monospace; }
+  #welcome button.primary { background: var(--ribbon); border-color: var(--ribbon); color: #fff; }
+  .preview { margin: 0; display: grid; gap: 10px; }
+  .pv { background: #0B0A08; border: 1px solid var(--edge); border-radius: 14px; padding: 14px 16px 12px; font: 400 17px/1.5 Georgia, 'Iowan Old Style', serif; color: var(--paper); }
+  .pvhud { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font: 500 12px ui-monospace, Menlo, monospace; color: var(--cue); margin-bottom: 14px; }
+  .pvhud span { color: var(--faded); font-weight: 400; }
+  .pv p { margin: 0 0 10px; padding-left: 12px; border-left: 3px solid transparent; }
+  .pv .pvcue { color: #8C8371; }
+  .pv .pvmine { border-left-color: var(--ribbon); }
+  .pvhide { color: #3A362C; letter-spacing: .12em; }
+  .pvbar { display: flex; gap: 8px; margin-top: 12px; font: 500 13px ui-monospace, Menlo, monospace; }
+  .pvbar span { flex: 0 0 auto; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--edge); color: var(--paper); }
+  .pvbar .pvnext { flex: 1; text-align: center; background: #262218; border-color: #5E5540; }
+  .preview figcaption { color: var(--cue); font-size: .95em; }
+  .tiles { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(14em, 1fr)); }
+  .tile { border-top: 1px solid var(--edge); padding-top: 12px; }
+  .tile h2 { margin: 0 0 6px; font: 500 1.15em/1.2 Georgia, 'Times New Roman', serif; color: var(--paper); }
+  .tile p { margin: 0; color: var(--cue); font-size: .95em; }
+  #welcome .price { color: var(--cue); margin: 0; border-top: 1px solid var(--edge); padding-top: 16px; }
+  #welcome .price b { color: var(--paper); font-weight: 500; }
+  #welcome .pasteHead { margin: 8px 0 -20px; font: 500 1.15em/1.2 Georgia, 'Times New Roman', serif; color: var(--paper); border-top: 1px solid var(--edge); padding-top: 20px; }
+  @media (min-width: 66em) { #edit:has(#welcome:not([hidden])) { max-width: 52em; } }
   .dim { color: var(--cue); font-size: .85em; }
   .sec { border-top: 1px solid var(--edge); padding: 2px 0 8px; }
   .sec > summary { list-style: none; cursor: pointer; font: 500 12px/2.4 ui-monospace, Menlo, monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--cue); display: flex; justify-content: space-between; align-items: center; }
@@ -191,6 +214,7 @@
     font: 400 14px/1.5 ui-monospace, Menlo, monospace;
   }
   #edit .row { gap: 10px; margin-top: 12px; }
+  #diag:empty { display: none; }
   #diag { margin: 18px 0 0; padding: 10px 12px; border: 1px solid var(--edge); border-radius: 10px;
           color: var(--faded); font: 400 12px/1.6 ui-monospace, Menlo, monospace; white-space: pre-wrap; }
   #saveBtn, #fetchBtn, #start { margin-top: 0; min-height: var(--tap); padding: 0 20px; border-radius: 10px; border: 1px solid #5E5540; background: #262218; color: var(--paper); font: 500 15px ui-monospace, Menlo, monospace; }
@@ -199,16 +223,35 @@
 <body>
 <div id="edit">
   <div id="welcome" hidden>
-    <h1>Tablework</h1>
-    <p class="tag">Run lines with your company. One script, one set of voices, everyone's place in it.</p>
-    <div class="row">
-      <button id="pasteBtn">Paste a script</button>
-      <button id="signinBtn">Sign in</button>
-      <button id="sampleBtn">Try a sample</button>
+    <header class="hero">
+      <h1>Tablework</h1>
+      <p class="pitch">Learn your lines with your whole cast.</p>
+      <p class="tag">One script, one set of voices, the stage manager's cues, and the director sees who is off book.</p>
+      <div class="row">
+        <button id="sampleBtn" class="primary">Try a sample scene</button>
+        <button id="pasteBtn">Paste your script</button>
+        <button id="signinBtn">Sign in</button>
+      </div>
+      <p class="tag"><a href="how.html">How it works</a> · free to try, no account</p>
+    </header>
+    <figure class="preview" aria-label="Learn mode: your lines hidden, revealed a sentence at a time">
+      <div class="pv">
+        <div class="pvhud"><b>3 of 14 clear · best 3</b><span>Say the next sentence, then press</span></div>
+        <p class="pvcue">ALGERNON: And, speaking of the science of Life, have you got the cucumber sandwiches cut for Lady Bracknell?</p>
+        <p class="pvmine">LANE: Yes, sir. <span class="pvhide">▆▆▆ ▆▆▆▆▆▆▆ ▆▆▆ ▆ ▆▆▆▆.</span></p>
+        <div class="pvbar"><span>↑</span><span class="pvnext">Next</span><span>More</span></div>
+      </div>
+      <figcaption>Your lines hide. Say them, press, they appear. A miss takes you back two, and the weak ones get drilled.</figcaption>
+    </figure>
+    <div class="tiles">
+      <div class="tile"><h2>Actors</h2><p>Run your lines against the company's voices, alone or in the room. Misses are remembered and drilled. Works on your own for free.</p></div>
+      <div class="tile"><h2>Directors</h2><p>Load the script once, invite the cast with one link, and see who is off book and where each actor is weak.</p></div>
+      <div class="tile"><h2>Stage managers</h2><p>Music and room tone per scene, cues pressed through like lines, and everyone follows the leader's place.</p></div>
     </div>
-    <p class="tag"><a href="how.html">How it works</a></p>
+    <p class="price">A production is <b>$1 a seat a month</b>, or $10 a year, with 14 days free. Rendered voices are priced before you pay; the device's own voices cost nothing.</p>
+    <h2 class="pasteHead">Paste your script</h2>
   </div>
-  <p>Paste a script — one speech per line, each starting with the character's name and a colon. Your place, your parts and your score are kept in this browser.</p>
+  <p id="pasteHint">Paste a script — one speech per line, each starting with the character's name and a colon. Your place, your parts and your score are kept in this browser.</p>
   <textarea id="src" spellcheck="false"></textarea>
   <div class="row">
     <button id="start">Start reading</button>
@@ -1251,7 +1294,7 @@ else if (!SHOW_HOST) {
 }
 // An empty box means script.js never arrived — say so, rather than looking broken.
 else {
-  edit.querySelector('p').textContent = 'The script did not load. Press "Fetch the script", or paste one below.';
+  $('pasteHint').textContent = 'The script did not load. Press "Fetch the script", or paste one below.';
   diagnose();
 }
 // A short public-domain scene to try the app on (Wilde, The Importance of Being Earnest, 1895).
@@ -1353,11 +1396,11 @@ function dropScript() {
   for (const k of ['fromProduction', 'production', 'script', 'pasted']) localStorage.removeItem(k);
   src.value = '';
   stopPlay(); stopLearn(); hud.hidden = bar.hidden = true; read.hidden = true; read.replaceChildren(); lines = []; edit.hidden = false;
-  edit.querySelector('p').textContent = 'You are no longer in that production, so its script has left this device. Paste a script, or open an invite.';
+  $('pasteHint').textContent = 'You are no longer in that production, so its script has left this device. Paste a script, or open an invite.';
 }
 async function pullScript() {
   $('saveBtn').hidden = !(current && shares(current.role));
-  if (current) edit.querySelector('p').textContent = `Paste a script — one speech per line, each starting with the character's name and a colon. Save it and everyone in ${current.name} reads it.`;
+  if (current) $('pasteHint').textContent = `Paste a script — one speech per line, each starting with the character's name and a colon. Save it and everyone in ${current.name} reads it.`;
   if (!current) return;
   const r = await api(`/productions/${current.id}/script`);
   haveScript = !!(r.status === 200 && r.script);
@@ -1503,7 +1546,7 @@ async function renderVoices(note) {
 async function pushScript() {
   const r = await api(`/productions/${current.id}/script`, { title: current.name, text: src.value }, 'PUT');
   if (r.status === 200) { haveScript = true; $('start').click(); drawVoices(); }   // saved: read it, and the voices have lines to price
-  edit.querySelector('p').textContent = r.status === 200 ? `Saved to ${current.name}: ${r.lines} lines, ${Object.keys(r.speakers).join(', ')}.`
+  $('pasteHint').textContent = r.status === 200 ? `Saved to ${current.name}: ${r.lines} lines, ${Object.keys(r.speakers).join(', ')}.`
     : r.error === 'bad_lines' ? `Not saved. These lines are not "NAME: speech" or ***: ${r.errors.map(e => e.line).join(', ')}.`
     : `Not saved (${r.error || r.status}).`;
   return r;

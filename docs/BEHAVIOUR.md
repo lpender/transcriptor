@@ -89,8 +89,11 @@ hundred", "**You** are" answering "Who is."
 
 The show's own host (lpender.github.io, or `?show=1`) opens on the bundled
 script with its cues, as the cast is used to. Anywhere else, a first visit
-(no saved script, no account) gets a welcome: Paste a script, Sign in, or
-Try a sample (a public-domain scene); `cues.js` is not applied there, a
+(no saved script, no account) gets the product page (`docs/design/first-run.md`):
+the pitch, Try a sample scene (primary; a public-domain Wilde scene), Paste
+your script, Sign in, a learn-mode preview built from the sample, three
+tiles (actors, directors, stage managers), the price in words, then the
+paste box under "Paste your script". `cues.js` is not applied there, a
 production's own cues are.
 
 State lives in `localStorage` (script, current line, key-word mode, role, best

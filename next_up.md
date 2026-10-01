@@ -4,11 +4,6 @@
 <!-- autodev until 2026-10-01 13:56 -->
 
 ## Queue
-- [ ] landing-product-page — `docs/design/first-run.md` §Landing: pitch,
-  primary "Try a sample scene", live learn-mode preview from the sample,
-  three tiles, price line; paste box below titled "Paste your script".
-  Verify: signed out at 390 and 1280, a stranger can say what it is, who
-  it is for, what it costs, in one screen; sample still starts.
 - [ ] start-here-cast — `drawStart` for cast: "You're in X. You play Lane,
   14 lines." + "Learn Lane's lines" (sets part, closes sheet, learn mode);
   no part → the part chips. Sheet opens on it after an invite is accepted.
@@ -53,6 +48,11 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] landing-product-page — 2026-10-01: product page above the paste box
+  (pitch, primary Try a sample scene, learn-mode preview, three tiles, price,
+  "Paste your script"); paste hint got its own id (`#pasteHint`), the empty
+  diagnostics box hides. Verified: tmp/landing-390.png, tmp/landing-1280.png,
+  sample starts (10 lines), 0 console errors besides the API being down.
 - [x] (EPIC) product-landing-and-first-run — 2026-10-01 design round done:
   `docs/design/first-run.md`; split into the four items above.
 - [x] demo-fixture-names — 2026-10-01: demo seeds now Ann Reyes, Bob Okafor,
