@@ -38,6 +38,12 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] director-sees-uncast — 2026-10-01 (loop): the director's Start here
+  line adds "1 cast without a part yet" so casting gaps are seen before
+  anyone wonders why a line is not learned. Verified with peek.mjs.
+- 2026-10-01 17:11 — gate timing checked: vitest 10 s, tsc 2.4 s; the
+  hour-long gaps earlier were session latency, not the gate. Production
+  deploy dry-run passes (domain strings still tablework.com until bought).
 - Persona round 14 (2026-10-01) — a director whose first contact is their
   AI: whoami returned no productions and no tool could make one, so
   "load this PDF into Tablework" dead-ended (fixed: `create_production`
