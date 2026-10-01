@@ -1541,7 +1541,11 @@ async function drawVoices() {
   if (!q.quote) return;
   const { toRender, cached, characters, priceCents, ownKey } = q.quote;
   const price = priceCents ? `$${(priceCents / 100).toFixed(2)}` : 'nothing';
-  const note = el('p', { className: 'seats', textContent: toRender ? `${toRender.toLocaleString()} of ${characters.toLocaleString()} characters still to render${cached ? ` (${cached.toLocaleString()} already done)` : ''} · ${ownKey ? 'on your own key' : price}` : 'Every line is rendered.' });
+  // The quote in words: how much is left, in voices and dollars; the exact character count sits in the title.
+  const share = toRender / characters, left = share > .95 ? 'Nothing rendered yet' : share > .6 ? 'Most of the script still to render' : share > .4 ? 'About half the script still to render' : share > .15 ? 'About a third of the script still to render' : 'A few lines still to render';
+  const cost = ownKey ? 'on your own ElevenLabs key, no charge' : `${price} to finish`;
+  const note = el('p', { className: 'seats', title: `${toRender.toLocaleString()} of ${characters.toLocaleString()} characters${cached ? `, ${cached.toLocaleString()} already rendered` : ''}`,
+    textContent: toRender ? `${left}. Rendering ${speakers.length} ${speakers.length === 1 ? 'voice' : 'voices'} for this script: ${cost}.` : 'Every line is rendered.' });
   voicesBox.append(note);
   if (toRender) voicesBox.append(el('div', { className: 'row' }, el('button', { className: 'chip wide', textContent: `Render the voices for ${price}`, onclick: () => renderVoices(note) })));
 }

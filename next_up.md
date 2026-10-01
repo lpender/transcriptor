@@ -4,11 +4,6 @@
 <!-- autodev until 2026-10-01 13:56 -->
 
 ## Queue
-- [ ] voices-quote-in-words — Persona round 1 (2026-10-01, director at 390):
-  "707 of 707 characters still to render · $1.00" is billing jargon. Say
-  "Nothing rendered yet. Rendering 2 voices for this script: $1.00." and,
-  once some are done, "About a third left to render: $0.40." Keep the exact
-  count in the title attribute. `drawVoices`.
 
 ## Gated
 - [ ] hear-me-on-device — ACTION (on-device): open the live app on your
@@ -43,6 +38,9 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] voices-quote-in-words — 2026-10-01: "Nothing rendered yet. Rendering
+  2 voices for this script: $1.00 to finish." (share-of-script words; exact
+  counts in the title). Verified with peek.mjs as Ann.
 - Persona round 1 (2026-10-01, this window) — as director, cast and crew at
   390 on the fresh demo seed: production name three times on one screen
   (fixed: roster heading is "The company"); owner read "pays the bill"
