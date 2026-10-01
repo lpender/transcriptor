@@ -75,7 +75,7 @@ describe('members over MCP', () => {
     expect(s).not.toContain('ann28');   // an owner without parts is directing, not owing lines
     await bob.call('PUT', `/productions/${production.id}/me/progress`, { best: 3, total: 5, misses: { 'x': 1 } });
     s = (await a('who_is_off_book', { production: production.id })).json().summary as string;
-    expect(s).toContain('bob28@example.com (VLADIMIR): 3 of 5 sentences clear, 1 weak.');
+    expect(s).toContain('bob28@example.com (VLADIMIR): 3 of 5 sentences clear, 1 weak ("x").');
     await bob.call('PUT', `/productions/${production.id}/me/progress`, { best: 5, total: 5, misses: {} });
     s = (await a('who_is_off_book', { production: production.id })).json().summary as string;
     expect(s).toContain('bob28@example.com (VLADIMIR): off book.');

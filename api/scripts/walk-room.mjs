@@ -8,7 +8,7 @@ const cache = join(homedir(), 'Library/Caches/ms-playwright'); const rev = readd
 const browser = await chromium.launch({ executablePath: join(cache, rev, 'chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing') });
 const errors = [];
 const open = async (email) => {
-  const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, colorScheme: 'dark' })).newPage();
+  const page = await (await browser.newContext({ viewport: { width: +(process.env.WIDTH || 390), height: +(process.env.HEIGHT || 844) }, deviceScaleFactor: 2, colorScheme: 'dark' })).newPage();
   page.on('console', m => m.type() === 'error' && errors.push(`${email}: ${m.text()}`));
   const { link } = await (await fetch('http://localhost:8787/auth/link', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email }) })).json();
   await page.goto(link); await page.waitForURL('http://localhost:8799/**'); await page.waitForTimeout(1800);

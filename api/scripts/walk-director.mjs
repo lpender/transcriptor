@@ -3,7 +3,7 @@ import { chromium } from 'playwright';
 import { existsSync, readdirSync } from 'node:fs'; import { homedir } from 'node:os'; import { join } from 'node:path';
 const cache = join(homedir(), 'Library/Caches/ms-playwright'); const rev = readdirSync(cache).filter(d => /^chromium-\d+$/.test(d)).sort().pop();
 const browser = await chromium.launch({ executablePath: join(cache, rev, 'chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing') });
-const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, colorScheme: 'dark' })).newPage();
+const page = await (await browser.newContext({ viewport: { width: +(process.env.WIDTH || 390), height: +(process.env.HEIGHT || 844) }, deviceScaleFactor: 2, colorScheme: 'dark' })).newPage();
 page.on('dialog', d => d.accept('My First Play'));
 const errors = []; page.on('console', m => m.type() === 'error' && errors.push(m.text()));
 const email = `dir.${Date.now().toString(36)}@example.com`;

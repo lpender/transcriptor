@@ -39,6 +39,11 @@
 
 ## Runtime
 
+- `PUT /productions/:id/me/progress` takes whole numbers only
+  (`isCount`): the device's miss decay is in halves, so `queueProgress`
+  sends `Math.ceil`. Sending the raw half got a silent 400 and no progress
+  synced (2026-10-01).
+
 - A 101 WebSocket response must be returned as-is: `new Response(res.body, …)`
   drops the `webSocket` and wrangler answers 500 "did not return status 101".
   `cors()` passes 101s through untouched.

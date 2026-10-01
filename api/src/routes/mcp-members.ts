@@ -118,7 +118,7 @@ tool<{ name: string }>({
 // Who is off book: the director's question, answered in words per member.
 tool<{ production: string }>({
   name: 'who_is_off_book',
-  description: 'How far each member is through their lines: best clean run against the sentences in their parts, how many sentences they still miss, when they last worked. In words, ready to relay. An owner or director sees everyone; cast see only themselves.' + DATA_NOTE,
+  description: 'How far each member is through their lines: best clean run against the sentences in their parts, which sentences they still miss (the weakest three quoted), when they last worked. In words, ready to relay. An owner or director sees everyone; cast see only themselves.' + DATA_NOTE,
   inputSchema: { type: 'object', properties: { production: { type: 'string' } }, required: ['production'] },
   run: async ({ production }, { user, env }) => {
     const role = await need(env.DB, user.id, production);
@@ -129,12 +129,15 @@ tool<{ production: string }>({
     // Crew never learn; an owner or director without parts is directing, not owing lines.
     const lines = rows.filter((r) => r.role !== 'crew' && (r.role === 'cast' || r.parts !== '[]')).map((r) => {
       const who = r.name || r.email, parts = JSON.parse(r.parts) as string[];
-      const weak = r.misses ? Object.keys(JSON.parse(r.misses) as object).length : 0;
+      const shaky = r.misses ? Object.keys(JSON.parse(r.misses) as object) : [];
+      const weak = shaky.length;
+      // The weakest few, quoted, so the director knows where to drill.
+      const quoted = weak ? ` (${shaky.slice(0, 3).map((t) => `"${t}"`).join(', ')}${weak > 3 ? ', …' : ''})` : '';
       if (!parts.length) return `${who}: no parts chosen yet (set_parts).`;
       if (!r.total) return `${who} (${parts.join(', ')}): not started.`;
       const when = r.updated_at ? ` Last worked ${r.updated_at.slice(0, 10)}.` : '';
-      if (r.best! >= r.total) return `${who} (${parts.join(', ')}): off book${weak ? `, ${weak} sentence${weak > 1 ? 's' : ''} still shaky` : ''}.${when}`;
-      return `${who} (${parts.join(', ')}): ${r.best} of ${r.total} sentences clear${weak ? `, ${weak} weak` : ''}.${when}`;
+      if (r.best! >= r.total) return `${who} (${parts.join(', ')}): off book${weak ? `, ${weak} sentence${weak > 1 ? 's' : ''} still shaky${quoted}` : ''}.${when}`;
+      return `${who} (${parts.join(', ')}): ${r.best} of ${r.total} sentences clear${weak ? `, ${weak} weak${quoted}` : ''}.${when}`;
     });
     return { summary: lines.join('\n'), members: rows.length };
   },

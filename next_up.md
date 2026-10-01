@@ -38,6 +38,15 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 8 (2026-10-01) — first-time director at 1280
+  (`WIDTH=1280 node api/scripts/walk-director.mjs`): every step answered;
+  the name nudge rendered at headline size (fixed: a note).
+- [x] weak-sentences-named — 2026-10-01 (loop, north star "where each actor
+  is weak"): misses go up as the sentences themselves, and who_is_off_book
+  quotes the weakest three: `1 weak ("I didn't think it polite to listen,
+  sir.")`. Also caught: the morning's half-miss decay sent 0.5 counts the
+  API refused (400), so no progress had synced since 11:30 — counts are
+  whole again. Verified with walk-cast.mjs then MCP as Ann; 61 tests green.
 - [x] role-chips-not-select — 2026-10-01: "change" unfolds role chips inline,
   one press sets the role and folds back; a move to crew drops the member's
   parts; standing hidden when there is no part. Verified with peek.mjs as
