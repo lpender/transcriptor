@@ -6,6 +6,15 @@
 ## Queue
 
 ## Gated
+- [ ] show-script-in-public-repo — DECISION (yours, legal): the show's
+  `script.js`, `cues.js` and `clips/` have been in this public repo and on
+  GitHub Pages since September, which the hard rule "the show's script is
+  never in git, never shared beyond its production" forbids. The loop will
+  not rip them out mid-run (the cast rehearses from that page). Options:
+  (a) move the show into a production under your account (the API path now
+  exists: add_script, sound upload) and delete the files from git history
+  once the run ends; (b) keep until closing night and do (a) then; (c) make
+  the repo private now (Pages still serves). Say which; the loop builds it.
 - [ ] hear-me-on-device — ACTION (on-device): open the live app on your
   iPhone (Safari) and an Android phone (Chrome), pick a part, press "Hear me
   say it", allow the microphone, say a line: the last words should count as
@@ -33,11 +42,16 @@
   locally only.
 - [ ] buy-domain — ACTION: tablework.com is NOT free (registered 2004, GoDaddy, expires 2027-04-29; the 2026-09-30 note saying otherwise was wrong). Free on 2026-09-30: tablework.co (recommended), tablework.io, tablework.live, tablework.studio, tablework.dev, gettablework.com, tableworkapp.com. Buy one, then tell the loop: it swaps the domain strings in `api/wrangler.toml` `[env.production]`, `docs/ARCHITECTURE.md` and `how.html`, and runs `task deploy:check`.
 - [ ] render-three-silent-lines — ACTION: Run `ELEVEN_LABS_API_KEY=... python3 tts.py` for the 3 lines the
-  2026-09-19 "Mr." re-split left silent ("Or if he wasn't, he said he could be
-  reached!", "Mr. Sebatacheck, please …", "Mr. McMartin, in admissions …"),
+  2026-09-19 "Mr." re-split left silent (the three unrendered entries in
+  `clips.js`; `python3 tts.py` lists them),
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- 2026-10-01 sweep after round 24: the show's lines were quoted in
+  next_up.md (reworded to point at clips.js) and how.html (fixed earlier);
+  `tts.py` and BEHAVIOUR name a character only. The bigger finding went to
+  Gated: the show's script.js, cues.js and clips/ are tracked in the public
+  repo.
 - Persona round 24 (2026-10-01) — how.html at 390: reads clean, no sideways
   scroll, but the script example quoted three lines of the show's own
   (copyrighted) script on a public page. Replaced with the public-domain
