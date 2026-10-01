@@ -2,14 +2,12 @@
 
 ## Now
 <!-- autodev until 2026-10-01 13:56 -->
-- [ ] start-here-director-crew — owner: loop, 2026-10-01 — `drawStart` for owner/director (invite the
-  cast / paste your script) and crew (open Show). Verify: sign in as each.
-
-## Queue
-- [ ] company-in-sentences — roster rows as sentences in theatre words
+- [ ] company-in-sentences — owner: loop, 2026-10-01 — roster rows as sentences in theatre words
   (plays / directs / pays the bill / runs sound and cues; standing words),
   serif, controls after the sentence. Verify: 05-company.png redone reads
   as prose at 390.
+
+## Queue
 - [ ] crew-show-drawn-twice — the Show section draws "Sound files" and
   "Scenes" twice for crew (seen in `task demo:shots` 10-crew-show.png,
   2026-10-01). Verify: sign in as crew, open Show at 390: one block each.
@@ -44,6 +42,11 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] start-here-director-crew — 2026-10-01: director with script → "Invite
+  the cast" (link made, scrolled to); without → "Paste the script" (sheet
+  closes, box focused); crew → "Open Show" (section opens). Verified at 390
+  as Ann, Dan (Empty Stage) and Cy; 0 console errors. Dev server now
+  no-store (`tools/serve.py`, QUIRKS).
 - [x] start-here-cast — 2026-10-01: "You're in Demo Earnest. You play Lane,
   5 lines." + "Learn Lane's lines" lands in learn mode in one press (sheet
   closed, 5 items); parts adopted from the production, Mine chips push them

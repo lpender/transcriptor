@@ -3,7 +3,7 @@ version: '3'
 tasks:
   serve:
     desc: Serve the static app on :8799
-    cmds: [python3 -m http.server 8799]
+    cmds: [python3 tools/serve.py 8799]
 
   dev:
     desc: Run the API Worker locally on :8787 (local D1, no login needed)
@@ -39,11 +39,11 @@ tasks:
     cmds:
       - mkdir -p tmp
       - cd api && (nohup npx wrangler dev --port 8787 > ../tmp/wrangler-dev.log 2>&1 </dev/null &)
-      - (nohup python3 -m http.server 8799 > tmp/http.log 2>&1 </dev/null &)
+      - (nohup python3 tools/serve.py 8799 > tmp/http.log 2>&1 </dev/null &)
       - sleep 8
       - node api/scripts/demo-shots.mjs
       - pkill -f "wrangler dev --port 8787" || true
-      - pkill -f "http.server 8799" || true
+      - pkill -f "serve.py 8799" || true
 
   deploy:
     desc: Deploy the API Worker to production (Lee only — needs `wrangler login`; see docs/ARCHITECTURE.md)

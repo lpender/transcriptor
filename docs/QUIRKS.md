@@ -2,6 +2,12 @@
 
 ## Build / tooling
 
+- A browser heuristically caches `index.html` from `python3 -m http.server`
+  (Last-Modified, no Cache-Control), so after an edit a redirect back from
+  the API (sign-in, billing) lands on a stale copy and new functions are
+  "not defined". `task serve` runs `tools/serve.py`, which adds
+  `Cache-Control: no-store`; a browser that already holds a cached copy
+  needs one reload first. Unregistering the service worker is not enough.
 - The Workers runtime refuses a non-handler export from the entry module
   (`Incorrect type for map entry 'VERSION'`): `api/src/index.ts` exports only
   the default handler; everything testable lives in `router.ts`.

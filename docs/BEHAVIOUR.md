@@ -261,6 +261,10 @@ Start here (`docs/design/first-run.md`): the first thing in Company is the
 role's first job in a sentence and one button that does it. Cast: "You're in
 X. You play Lane, 14 lines." and "Learn Lane's lines" (sets the part, closes
 the sheet, starts learn mode); with no part, "Which part do you play?" and
-a button to the Parts section. Parts flow both ways: a Mine chip sends the
+a button to the Parts section. Owner or director: "X: 3 in the company,
+script loaded." and "Invite the cast" (makes the cast link and scrolls to
+it); with no script, "X has no script yet …" and "Paste the script" (closes
+the sheet, opens the paste box). Crew: "You're on crew for X. The sound and
+the cues are under Show." and "Open Show". Parts flow both ways: a Mine chip sends the
 device's parts to the production, and a device with none takes the parts a
 director set.
