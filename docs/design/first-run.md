@@ -41,7 +41,7 @@ Landing:
 First screen per role:
 4. **Keep the roster, reword it.** Cheapest; still no next step.
 5. **A "Start here" block at the top of Company**, written for the role:
-   cast: "You're in Demo Earnest. You play Lane, 14 lines." + *Learn
+   cast: "You're in The Importance of Being Earnest. You play Lane, 14 lines." + *Learn
    Lane's lines*; cast without a part: "Which part do you play?" + the part
    chips; director: "3 in the company. Script loaded." + *Invite the cast*;
    crew: "You're on crew. Sound and cues are under Show." + *Open Show*.

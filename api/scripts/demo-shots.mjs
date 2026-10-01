@@ -37,7 +37,7 @@ const mcpFor = (token) => async (name, args) => {
 
 const ann = await signIn(EMAIL('ann'));   // director
 await ann.call('PUT', '/me', { name: 'Ann Reyes' });
-const { production } = await ann.call('POST', '/productions', { name: 'Demo Earnest' });
+const { production } = await ann.call('POST', '/productions', { name: 'The Importance of Being Earnest' });
 await ann.call('PUT', `/productions/${production.id}/script`, { title: 'The Importance of Being Earnest', text: SAMPLE });
 const castInvite = await ann.call('POST', `/productions/${production.id}/invites`, { role: 'cast' });
 const crewInvite = await ann.call('POST', `/productions/${production.id}/invites`, { role: 'crew' });
