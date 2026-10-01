@@ -57,7 +57,9 @@ describe('scripts over HTTP and MCP', () => {
     const err = await mcp('add_script', { production: production.id, title: 'Lear', text: 'LEAR: Howl.\nStorm.' });
     expect(err.isError).toBe(true);
     expect(err.text).toContain('2: Storm.');
+    await env.DB.prepare("INSERT INTO progress (user_id, production_id, best, total, misses, updated_at) VALUES (?, ?, 4, 4, '{}', '2026-10-01T00:00:00Z')").bind(ann.user.id, production.id).run();
     const ok = await mcp('add_script', { production: production.id, title: 'Lear', text: 'LEAR: Howl, howl.\nFOOL: Nuncle.' });
+    expect((await env.DB.prepare('SELECT best, total FROM progress WHERE production_id = ?').bind(production.id).first<{ best: number; total: number }>())).toEqual({ best: 0, total: 0 });   // a new cut restarts standings
     expect(JSON.parse(ok.text)).toMatchObject({ speakers: { LEAR: 1, FOOL: 1 }, lines: 2 });
     const back = JSON.parse((await mcp('get_script', { production: production.id })).text) as { text: string };
     expect(back.text).toBe('LEAR: Howl, howl.\nFOOL: Nuncle.');

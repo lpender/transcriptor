@@ -38,6 +38,11 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 10 (2026-10-01) — a director's AI replaces the script over
+  MCP: bad lines refused with the line quoted; the new cut saved with
+  speakers and scenes; recasting worked; but who_is_off_book still said
+  "1 of 5" against the old cut (fixed: a new cut restarts standings, keeps
+  misses; LOG).
 - Persona round 9 (2026-10-01) — an actor back the next day on the same
   phone (`api/scripts/walk-return.mjs`): signed in still, script and place
   kept, Company says "1 of 5 sentences clear, 1 weak (“…”)" and Practice

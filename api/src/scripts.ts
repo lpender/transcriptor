@@ -21,6 +21,8 @@ export async function setScript(db: D1Database, productionId: string, by: string
   await db.batch([
     db.prepare('UPDATE scripts SET replaced_at = ? WHERE production_id = ? AND replaced_at IS NULL').bind(s.created_at, productionId),
     db.prepare('INSERT INTO scripts (id, production_id, title, text, created_by, created_at) VALUES (?, ?, ?, ?, ?, ?)').bind(s.id, productionId, title, text, by, s.created_at),
+    // A new cut owes a new clean run: standings restart, misses keep (they are keyed by the sentence).
+    db.prepare('UPDATE progress SET best = 0, total = 0 WHERE production_id = ?').bind(productionId),
   ]);
   return s;
 }
