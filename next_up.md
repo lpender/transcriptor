@@ -38,6 +38,12 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 3 (2026-10-01) — first-time director from the landing
+  (`api/scripts/walk-director.mjs`): the sign-in box had no sentence (fixed:
+  why sign in, no password); signed in with no production, one bare button
+  (fixed: a sentence first); after keeping, the roster showed the email
+  because no name was given (fixed: start block asks for a name). Sign-in,
+  keep, invite all answered; 0 console errors.
 - Persona round 2 (2026-10-01) — cast pressing "Learn Lane's lines" landed on
   Algernon's cue with the hint "Keep going" (fixed: first run says
   "Algernon speaks. Press Next; your line comes hidden"); landing words and

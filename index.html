@@ -206,6 +206,7 @@
   #company .prod[aria-pressed="true"] { border-color: var(--ribbon); }
   #company .start { display: grid; gap: 8px; margin: 8px 0 14px; }
   #company .start p { margin: 0; font-size: 1.05em; }
+  #signedOut .seats { color: var(--cue); font-size: .9em; margin: 4px 0 8px; }
   #company .start .chip.wide { background: var(--ribbon); border-color: var(--ribbon); color: #fff; }
   #voices .row, #ai .row, #company .row { padding: 3px 8px; margin: 0 -8px; border-radius: 8px; justify-content: space-between; }
   #voices .row:nth-of-type(odd), #ai .row:nth-of-type(odd), #company .row:nth-child(odd) { background: rgba(255, 255, 255, .035); }
@@ -354,6 +355,7 @@
     <details class="sec" data-sec="account" open>
       <summary>Account</summary>
     <div id="signedOut">
+      <p class="seats">Sign in to keep your script, invite your cast and see who is off book. No password: a link comes by email.</p>
       <label class="loop" title="A link is sent there; opening it signs you in on this device">email <input id="email" type="email" autocapitalize="off" autocomplete="email" spellcheck="false"></label>
       <div class="row">
         <button class="chip wide" id="signinChip">Send me a sign-in link</button>
@@ -1586,6 +1588,7 @@ const openSec = k => { const d = document.querySelector(`details[data-sec="${k}"
 // first job in a sentence, and one button that does it.
 function drawStart(role, m, count) {
   const box = el('div', { className: 'start' });
+  if (!me.name) box.append(el('p', { className: 'seats', textContent: 'Give your name above, so the company sees a name and not your email.' }));
   if (role === 'cast') {
     const parts = m.parts.length ? m.parts : [...myRoles];
     const n = lines.filter(p => !isCue(p) && parts.includes(speaker(p))).length;
@@ -1613,7 +1616,9 @@ async function drawCompany() {
   const gen = ++drawGen;
   company.replaceChildren();
   if (!current) {
-    company.append(el('div', { className: 'row' }, el('button', { className: 'chip wide', textContent: src.value.trim() ? 'Keep this script under your account' : 'Start a production', onclick: createProduction })));
+    company.append(
+      el('p', { textContent: src.value.trim() ? 'You are signed in. Keep this script under your account and you can invite a cast to it.' : 'You are signed in. Start a production, then paste its script or ask your AI to load it.' }),
+      el('div', { className: 'row' }, el('button', { className: 'chip wide', textContent: src.value.trim() ? 'Keep this script under your account' : 'Start a production', onclick: createProduction })));
     return;
   }
   const detail = await api(`/productions/${current.id}`);
