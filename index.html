@@ -1683,7 +1683,10 @@ async function drawCompany() {
   const offBook = learners.filter(m => { const p = progress[m.email]; return p && p.total && p.best >= p.total; }).length;
   const uncast = members.filter(m => m.role === 'cast' && !m.parts.length).length;
   const owners = members.filter(m => m.role === 'owner').length;
-  company.append(drawStart(role, mine, members.length, (learners.length ? `${offBook} of ${learners.length} off book` : 'script loaded') + (uncast ? `, ${uncast} cast without a part yet` : ''), bill.status === 200 && bill.state === 'readonly'));
+  // Who has not begun, and who has gone quiet for a week: the director's two worries.
+  const notStarted = learners.filter(m => { const p = progress[m.email]; return !p || !p.best; }).length;
+  const quiet = learners.filter(m => { const p = progress[m.email]; return p?.best && p.updatedAt && Date.now() - new Date(p.updatedAt) > 7 * 864e5; }).length;
+  company.append(drawStart(role, mine, members.length, (learners.length ? `${offBook} of ${learners.length} off book` : 'script loaded') + (notStarted ? `, ${notStarted} not started` : '') + (quiet ? `, ${quiet} quiet for a week` : '') + (uncast ? `, ${uncast} cast without a part yet` : ''), bill.status === 200 && bill.state === 'readonly'));
   company.append(el('h3', { textContent: group ? 'The company' : 'Just you so far', title: shares(role) ? 'Rename the production' : '', style: shares(role) ? 'cursor:pointer' : '', onclick: shares(role) ? renameProduction : null }));
   for (const m of members) {
     const name = (m.name || m.email) + (m.user_id === me.id ? ' (you)' : '');

@@ -38,6 +38,10 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] director-start-line-worries — 2026-10-01 (loop): the director's Start
+  here line adds "N not started" and "N quiet for a week" beside off book,
+  the two things a director asks first. Verified with peek.mjs as Ann
+  before and after aging Bob's progress.
 - Persona round 21 (2026-10-01) — cast and director on a production whose
   trial lapsed: cast saw nothing and would learn with progress silently
   not kept; the director's "Not paid" line sat far below. Fixed: the Start
