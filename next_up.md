@@ -38,6 +38,10 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 20 (2026-10-01) — the full demo recipe on the latest build
+  read as a stranger: director, cast and crew screens all read as sentences
+  with one job each; only stumble was the upload chips standing taller than
+  the chips beside them (fixed: level). Shots in tmp/demo.
 - Persona round 19 (2026-10-01) — an actor with two parts drills weak lines
   (`api/scripts/walk-drill.mjs`): clearing the one weak line read "Off book
   — a clean run of the whole part" (wrong, it was a drill) and the score
