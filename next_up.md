@@ -2,12 +2,12 @@
 
 ## Now
 <!-- autodev until 2026-10-01 13:56 -->
-
-## Queue
-- [ ] start-here-cast — `drawStart` for cast: "You're in X. You play Lane,
+- [ ] start-here-cast — owner: loop, 2026-10-01 — `drawStart` for cast: "You're in X. You play Lane,
   14 lines." + "Learn Lane's lines" (sets part, closes sheet, learn mode);
   no part → the part chips. Sheet opens on it after an invite is accepted.
   Verify: join as cast via invite at 390, one press lands in learn mode.
+
+## Queue
 - [ ] start-here-director-crew — `drawStart` for owner/director (invite the
   cast / paste your script) and crew (open Show). Verify: sign in as each.
 - [ ] company-in-sentences — roster rows as sentences in theatre words
