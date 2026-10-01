@@ -1714,7 +1714,10 @@ async function invite(role) {
   const r = await api(`/productions/${current.id}/invites`, { role });
   const out = $('inviteOut');
   if (r.status !== 201) return out.textContent = 'Could not make a link.';
+  const words = `Join ${current.name} on Tablework as ${role}: ${r.url}`;
   out.replaceChildren(el('span', { textContent: `Send this to the ${role} (works for 14 days): ` }), el('input', { value: r.url, readOnly: true, onclick: e => e.target.select() }));
+  // A phone shares straight into the group chat; elsewhere the link is on the clipboard.
+  if (navigator.share) out.append(el('div', { className: 'row' }, el('button', { className: 'chip wide', textContent: 'Share the link', onclick: () => navigator.share({ title: current.name, text: words }).catch(() => {}) })));
   try { await navigator.clipboard.writeText(r.url); out.append(' Copied.'); } catch {}
 }
 // Progress goes up to the production a beat after each graded sentence, so a

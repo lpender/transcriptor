@@ -38,6 +38,11 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] share-invite-link — 2026-10-01 (loop): where the browser can share
+  (phones), the invite link gets a "Share the link" button that opens the
+  system share sheet with "Join X on Tablework as cast: <url>"; elsewhere
+  the link is still copied. Verified the copy path with peek.mjs; the share
+  button needs a phone (headless Chromium has no navigator.share).
 - Persona round 6 (2026-10-01) — a director's AI over MCP: set_parts let a
   crew member hold a part (fixed: refused with the reason and set_role);
   add_script answered raw codes "invalid_title" / "empty_script" (fixed: in
