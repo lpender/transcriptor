@@ -38,6 +38,11 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 15 (2026-10-01) — a member of two productions switching
+  cards: the script followed into a production that has none (Earnest's
+  10 lines stayed on screen under "Empty Stage"). Fixed: switching to a
+  scriptless production clears the device's script and shows the paste box
+  with that production's name. Verified with peek.mjs as Dan.
 - [x] director-sees-uncast — 2026-10-01 (loop): the director's Start here
   line adds "1 cast without a part yet" so casting gaps are seen before
   anyone wonders why a line is not learned. Verified with peek.mjs.

@@ -1423,11 +1423,15 @@ async function loadCompany() {
 // device had, keeping the place when it is the same text. A director's paste
 // box can push a script the other way.
 // A production's script is private to it: when this device is no longer a member, the copy goes.
-function dropScript() {
-  for (const k of ['fromProduction', 'production', 'script', 'pasted']) localStorage.removeItem(k);
+function clearScript(message) {
+  for (const k of ['fromProduction', 'script', 'pasted']) localStorage.removeItem(k);
   src.value = '';
   stopPlay(); stopLearn(); hud.hidden = bar.hidden = true; read.hidden = true; read.replaceChildren(); lines = []; edit.hidden = false;
-  $('pasteHint').textContent = 'You are no longer in that production, so its script has left this device. Paste a script, or open an invite.';
+  $('pasteHint').textContent = message;
+}
+function dropScript() {
+  localStorage.removeItem('production');
+  clearScript('You are no longer in that production, so its script has left this device. Paste a script, or open an invite.');
 }
 async function pullScript() {
   $('saveBtn').hidden = !(current && shares(current.role));
@@ -1435,6 +1439,8 @@ async function pullScript() {
   if (!current) return;
   const r = await api(`/productions/${current.id}/script`);
   haveScript = !!(r.status === 200 && r.script);
+  // Another production's script does not follow you into one that has none.
+  if (!haveScript && load('fromProduction', '') && load('fromProduction', '') !== current.id) clearScript(`${current.name} has no script yet. Paste it here, one speech per line, or ask your AI to load it.`);
   if (haveScript && r.script.text !== src.value) { src.value = r.script.text; $('start').click(); drawCompany(); }   // the start block counts your lines
   if (haveScript) save('fromProduction', current.id);   // the production's script, not this device's to keep
   // The company's rendered voices, in clips.js's shape, over whatever this device had.

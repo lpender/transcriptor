@@ -262,7 +262,7 @@ reader pasted their own.
 Your productions (`docs/design/first-run.md`): signed in, Company opens on
 one card per production you are in: the name, then "You play Lane · 4 in
 the company" / "You direct · just you so far" / "You run the sound · …";
-the open one is outlined, a tap opens another (the device's script follows),
+the open one is outlined, a tap opens another (the device's script follows; a production with no script shows an empty paste box, never the last production's lines),
 and "Start a new production" asks a name and opens on the paste box without
 carrying the current script across.
 
