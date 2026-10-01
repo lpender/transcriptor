@@ -38,6 +38,12 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 19 (2026-10-01) — an actor with two parts drills weak lines
+  (`api/scripts/walk-drill.mjs`): clearing the one weak line read "Off book
+  — a clean run of the whole part" (wrong, it was a drill) and the score
+  mixed the whole-part best into the drill. Fixed: "drilling 1 weak line ·
+  1 clear" and "Drilled once — again to clear them for good" / "Weak lines
+  cleared — now a clean run of the whole part".
 - [x] scenes-past-the-breaks — 2026-10-01 (loop, from round 18): scenes map
   onto the script's *** breaks in order and extra ones were dropped
   silently. Now the Scenes section says how many the script has and how

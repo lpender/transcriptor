@@ -956,7 +956,7 @@ function render() {
   const nudge = !!(me && current && myRoles.size && !learn && !playing && !loop && !room.role);   // not while in the room: that line is the room's
   hud.hidden = !(learn || loop || playing || !hushed || room.role || nudge);
 
-  score.textContent = learn ? `${cleared.size} of ${items.length} clear · best ${load(bestKey(), 0)}` : '';
+  score.textContent = !learn ? '' : drilling ? `drilling ${items.length} weak ${items.length === 1 ? 'line' : 'lines'} · ${cleared.size} clear` : `${cleared.size} of ${items.length} clear · best ${load(bestKey(), 0)}`;
   // What to do now, most pressing first: your line beats everything else.
   hint.textContent = quizzing() ? (shown ? 'Got it, or missed?' : `Say it, then reveal${atLine().length > 1 ? ` (${atLine().indexOf(item()) + 1} of ${atLine().length})` : ''}`)
     : playing && muted.has(speaker(cur())) ? `${speaker(cur())} is silenced`
@@ -969,7 +969,7 @@ function render() {
         blocked ? '♫ Touch the page to start the sound' : !hushed && window.CUES?.[cueAt] ? `♫ ${window.CUES[cueAt].name}${sounding()}` : '',
         nudge ? `${listOf([...myRoles])}: ${+load(bestKey(), 0) ? `${load(bestKey(), 0)} of ${lines.filter(p => !isCue(p) && myRoles.has(speaker(p))).flatMap(p => sentences(words(p))).length} clear` : 'not started'} · More, then Keep learning` : '',
       ].filter(Boolean).join(' · ')
-    : drilling && !weak ? 'Weak lines cleared'
+    : drilling ? (items.length && cleared.size === items.length ? (weak ? 'Drilled once — again to clear them for good' : 'Weak lines cleared — now a clean run of the whole part') : 'Keep going')
     : items.length && cleared.size === items.length ? 'Off book — a clean run of the whole part'   // the north star, said out loud
     : cleared.size || isCue(cur()) ? 'Keep going'
     : `${titleCase(speaker(cur()))} speaks. Say your next line, then press Next`;   // the first run: the press means "I said it"
