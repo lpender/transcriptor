@@ -38,6 +38,10 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 5 (2026-10-01) — stage manager at 390
+  (`api/scripts/walk-crew.mjs`, two generated WAVs): Open Show, two uploads
+  levelled and timed, a scene with music and room tone saved and back
+  after reload, 0 console errors. Only stumble: "Saved 1 scenes." (fixed).
 - Persona round 4 (2026-10-01) — cast learning on a phone
   (`api/scripts/walk-cast.mjs`): the first-run hint promised "your line
   comes hidden" but the press reveals it (fixed: "Say your next line, then

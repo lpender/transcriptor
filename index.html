@@ -1500,7 +1500,7 @@ async function drawSoundPanel() {
       const r = await api(`/productions/${current.id}/cues`, cues, 'PUT');
       if (r.status !== 200) return note.textContent = r.message || `Not saved (${r.status}).`;
       await pullCues();   // redraws the panel; then say so on the fresh one
-      soundPanel.querySelector('.seats').textContent = `Saved ${r.cues} scenes.`;
+      soundPanel.querySelector('.seats').textContent = `Saved ${r.cues} ${r.cues === 1 ? 'scene' : 'scenes'}.`;
     } })),
     note,
   );
