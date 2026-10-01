@@ -4,7 +4,7 @@
 //   DELETE /tokens/:id        → revoke
 import { currentUser, resolveSession, revokeSession } from '../auth';
 import { now, plus, sha256, token as mint } from '../ids';
-import { myProductions } from '../productions';
+import { createProduction, myProductions } from '../productions';
 import { error, json, route } from '../router';
 import { rpc, tool, DATA_NOTE } from '../mcp';
 
@@ -62,7 +62,17 @@ tool({
         : p.members === 1 ? 'Script loaded; invite the cast (invite).' : 'Script loaded; who_is_off_book tells you where everyone is.';
       return { ...p, next };
     }));
-    return { user: { email: user.email, name: user.name }, productions: withNext };
+    return { user: { email: user.email, name: user.name }, productions: withNext, next: withNext.length ? undefined : 'No productions yet: create_production, then add_script.' };
+  },
+});
+tool<{ name: string }>({
+  name: 'create_production',
+  description: 'Start a new production (a play in rehearsal) owned by the signed-in user; then add_script and invite. The name is what the company sees, e.g. the play\'s title.' + DATA_NOTE,
+  inputSchema: { type: 'object', properties: { name: { type: 'string' } }, required: ['name'] },
+  run: async ({ name }, { user, env }) => {
+    if (typeof name !== 'string' || !name.trim() || name.length > 120) throw new Error('Give the production a name, up to 120 characters.');
+    const production = await createProduction(env.DB, user, name.trim());
+    return { production: { id: production.id, name: production.name }, next: 'Load the script with add_script, then invite the cast with invite.' };
   },
 });
 tool({

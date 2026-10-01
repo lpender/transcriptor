@@ -61,6 +61,7 @@ Tools (all scoped to the caller; production named by id or exact name):
 |---|---|---|
 | `whoami` | – | user email and name, productions [{id, name, role, parts, members, next}] — `next` is the role's next step in words |
 | `list_productions` | – | same list (alias kept for discoverability) |
+| `create_production` | name | start a production owned by the caller; `next` says add_script then invite |
 | `create_production` | name | production |
 | `add_script` | production, title, text | speakers [{name, lines}], scenes, warnings; error with the offending line numbers |
 | `get_script` | production | title, text (the format above), speakers |

@@ -38,6 +38,11 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 14 (2026-10-01) — a director whose first contact is their
+  AI: whoami returned no productions and no tool could make one, so
+  "load this PDF into Tablework" dead-ended (fixed: `create_production`
+  tool; whoami says "No productions yet: create_production, then
+  add_script"). Tested; docs updated.
 - [x] whoami-next-step — 2026-10-01 (loop): whoami carries each production's
   next step in words ("No script yet: load it with add_script", "Learn LANE;
   who_is_off_book shows your standing", "Script loaded; invite the cast"),
