@@ -38,6 +38,11 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 2 (2026-10-01) — cast pressing "Learn Lane's lines" landed on
+  Algernon's cue with the hint "Keep going" (fixed: first run says
+  "Algernon speaks. Press Next; your line comes hidden"); landing words and
+  the director sheet at 1280 read clean; sections Company, Parts, Practice
+  all open for cast is long but each is theirs. No new items.
 - [x] voices-quote-in-words — 2026-10-01: "Nothing rendered yet. Rendering
   2 voices for this script: $1.00 to finish." (share-of-script words; exact
   counts in the title). Verified with peek.mjs as Ann.

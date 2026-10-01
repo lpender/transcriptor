@@ -413,6 +413,8 @@ let muted = new Set(JSON.parse(load('muted', '[]')));
 let covered = new Set(JSON.parse(load('covered', '[]')));
 const speaker = p => p.dataset.text.split(':')[0];
 const speakers = () => [...new Set(lines.filter(p => !isCue(p)).map(speaker))];
+const titleCase = s => s.replace(/\S+/g, w => w[0] + w.slice(1).toLowerCase());   // LANE → Lane, for prose
+const listOf = parts => parts.map(titleCase).join(' and ');
 const said = p => p.querySelector('.said');  // where a line's words are drawn; the note sits beside
 const isCue = p => 'cue' in p.dataset;  // a stop of the show's own, not a speech
 // A line you are learning: one of your parts, or every part when none is chosen.
@@ -959,7 +961,8 @@ function render() {
       ].filter(Boolean).join(' · ')
     : drilling && !weak ? 'Weak lines cleared'
     : items.length && cleared.size === items.length ? 'Off book — a clean run of the whole part'   // the north star, said out loud
-    : 'Keep going';
+    : cleared.size || isCue(cur()) ? 'Keep going'
+    : `${titleCase(speaker(cur()))} speaks. Press Next; your line comes hidden`;   // the first run: say what the cue line is for
 
   for (const chip of roles.querySelectorAll('.chip')) {
     const name = chip.dataset.role;
@@ -1578,8 +1581,6 @@ let drawGen = 0;  // two draws in flight (sign-in landing and whoami both call) 
 // Your parts are the production's business too: a director sets them over MCP,
 // a device's Mine chips send them up, and a device with none takes the production's.
 const pushParts = () => me && current && api(`/productions/${current.id}/members/${me.id}/parts`, { parts: [...myRoles] }, 'PUT');
-const titleCase = s => s.replace(/\S+/g, w => w[0] + w.slice(1).toLowerCase());
-const listOf = parts => parts.map(titleCase).join(' and ');
 const openSec = k => { const d = document.querySelector(`details[data-sec="${k}"]`); d.open = true; d.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 // Start here (docs/design/first-run.md): the first thing in Company is the role's
 // first job in a sentence, and one button that does it.
