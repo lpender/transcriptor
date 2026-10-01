@@ -1873,9 +1873,11 @@ $('fetchBtn').onclick = async () => {
 };
 
 // Install the worker that keeps the script and every clip on the device.
-// Not on localhost: in dev it serves the previous build one load behind (QUIRKS).
-if ('serviceWorker' in navigator && location.protocol !== 'file:' && !['localhost', '127.0.0.1'].includes(location.hostname)) {
-  navigator.serviceWorker.register('sw.js').catch(e => console.warn('No offline cache:', e));
+// Not on localhost: in dev it serves the previous build one load behind (QUIRKS),
+// so there any worker a previous build installed is removed instead.
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  if (['localhost', '127.0.0.1'].includes(location.hostname)) navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
+  else navigator.serviceWorker.register('sw.js').catch(e => console.warn('No offline cache:', e));
 }
 
 document.querySelectorAll('[data-key]').forEach(b => {
