@@ -38,6 +38,10 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 11 (2026-10-01) — a cast member's device after the director
+  replaced the script over MCP: the new cut arrived (4 lines), the recast
+  parts came down ("You play Lane and Merriman, 3 lines"), standing
+  restarted ("Not started."), 0 console errors. No stumbles.
 - Persona round 10 (2026-10-01) — a director's AI replaces the script over
   MCP: bad lines refused with the line quoted; the new cut saved with
   speakers and scenes; recasting worked; but who_is_off_book still said
