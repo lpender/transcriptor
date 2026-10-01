@@ -434,7 +434,7 @@ const missCount = t => stats[key(t)]?.missed || 0;
 const record = (t, ok) => {
   const s = stats[key(t)] ||= { seen: 0, missed: 0 };
   s.seen++;
-  s.missed = ok ? Math.max(0, s.missed - 1) : s.missed + 1;  // two clean runs clear one miss
+  s.missed = ok ? Math.max(0, s.missed - .5) : s.missed + 1;  // two clean runs clear one miss; one right after the miss does not
   save('stats', JSON.stringify(stats));
   queueProgress();
 };
@@ -951,7 +951,7 @@ function render() {
 
   score.textContent = learn ? `${cleared.size} of ${items.length} clear · best ${load(bestKey(), 0)}` : '';
   // What to do now, most pressing first: your line beats everything else.
-  hint.textContent = quizzing() ? (shown ? 'Right, or say you missed it' : `Say it, then reveal${atLine().length > 1 ? ` (${atLine().indexOf(item()) + 1} of ${atLine().length})` : ''}`)
+  hint.textContent = quizzing() ? (shown ? 'Got it, or missed?' : `Say it, then reveal${atLine().length > 1 ? ` (${atLine().indexOf(item()) + 1} of ${atLine().length})` : ''}`)
     : playing && muted.has(speaker(cur())) ? `${speaker(cur())} is silenced`
     : loop ? `Looping ${loop[1] - loop[0] + 1} lines — Esc to stop`
     : playing ? (clipOf(cur()) ? 'Reading aloud' : "Reading with this device's voices")
@@ -964,7 +964,7 @@ function render() {
     : drilling && !weak ? 'Weak lines cleared'
     : items.length && cleared.size === items.length ? 'Off book — a clean run of the whole part'   // the north star, said out loud
     : cleared.size || isCue(cur()) ? 'Keep going'
-    : `${titleCase(speaker(cur()))} speaks. Press Next; your line comes hidden`;   // the first run: say what the cue line is for
+    : `${titleCase(speaker(cur()))} speaks. Say your next line, then press Next`;   // the first run: the press means "I said it"
 
   for (const chip of roles.querySelectorAll('.chip')) {
     const name = chip.dataset.role;

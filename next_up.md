@@ -38,6 +38,13 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 4 (2026-10-01) — cast learning on a phone
+  (`api/scripts/walk-cast.mjs`): the first-run hint promised "your line
+  comes hidden" but the press reveals it (fixed: "Say your next line, then
+  press Next"); hint "Right, or say you missed it" did not match the buttons
+  Got it / Missed (fixed: "Got it, or missed?"); a missed line then one Got
+  it left "No weak lines yet" though the comment promised two clean runs
+  clear a miss (fixed: half a miss per clean run).
 - Persona round 3 (2026-10-01) — first-time director from the landing
   (`api/scripts/walk-director.mjs`): the sign-in box had no sentence (fixed:
   why sign in, no password); signed in with no production, one bare button
