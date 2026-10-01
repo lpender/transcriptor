@@ -3,6 +3,7 @@
 import { can } from '../access';
 import { tool, DATA_NOTE } from '../mcp';
 import { roleOf, writable, READONLY_MESSAGE } from '../productions';
+import { currentScript } from '../scripts';
 import { getCues, listSound, setCues } from './sound';
 
 const need = async (db: D1Database, userId: string, productionId: unknown, cap: 'read' | 'cues') => {
@@ -33,6 +34,10 @@ tool<{ production: string; cues: { name: string; music?: string; bed?: string; h
     await need(env.DB, user.id, production, 'cues');
     const r = await setCues(env.DB, production, cues);
     if (!r.ok) throw new Error(r.message);
-    return r;
+    // Scenes map onto the script's *** breaks in order; extra ones have nowhere to play.
+    const script = await currentScript(env.DB, production);
+    const breaks = script ? script.text.split('\n').filter((l) => l.trim() === '***').length + 1 : 0;
+    const scenes = cues.filter((c) => !c.hold).length;
+    return script && scenes > breaks ? { ...r, note: `The script has ${breaks} scene${breaks === 1 ? '' : 's'} (${breaks - 1} *** break${breaks === 2 ? '' : 's'}); ${scenes - breaks} of these scenes will not play until the script has a *** before each.` } : r;
   },
 });

@@ -32,5 +32,7 @@ describe('cues over MCP', () => {
     expect((await a('set_cues', { production: production.id, cues: [{ name: 'Before the show', music: 'celli', bed: 'office fans', hold: true }, { name: 'Reception', bed: 'Office fans' }] })).json()).toEqual({ ok: true, cues: 2 });
     const after = (await b('list_sound', { production: production.id })).json() as { cues: { name: string; music: string | null; bed: string | null; hold: boolean }[] };
     expect(after.cues).toEqual([{ name: 'Before the show', music: 'Celli', bed: 'Office fans', hold: true }, { name: 'Reception', music: null, bed: 'Office fans', hold: false }]);
+    await ann.call('PUT', `/productions/${production.id}/script`, { title: 'B', text: 'A: One.\n***\nB: Two.' });
+    expect((await a('set_cues', { production: production.id, cues: [{ name: 'One' }, { name: 'Two' }, { name: 'Three' }] })).json().note).toContain('1 of these scenes will not play');
   });
 });

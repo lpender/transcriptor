@@ -38,6 +38,10 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] scenes-past-the-breaks — 2026-10-01 (loop, from round 18): scenes map
+  onto the script's *** breaks in order and extra ones were dropped
+  silently. Now the Scenes section says how many the script has and how
+  many will not play, and set_cues answers with the same note. Tested.
 - Persona round 18 (2026-10-01) — the stage manager's AI sets cues with
   holds and crew leads through them: both devices stop at "Before the
   show" and move together; the hold line wore a ♫ with no music attached
