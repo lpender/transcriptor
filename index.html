@@ -1665,7 +1665,7 @@ async function drawCompany() {
   // Who is off book: an owner or director sees each member's best clean run
   // against the size of their parts, and how many sentences they still owe.
   // What each member does, in theatre words: a part if they have one, else the role.
-  const job = m => m.parts.length ? `plays ${listOf(m.parts)}` : { owner: 'runs the production', director: 'directs', crew: 'runs the sound and the cues', cast: 'has no part yet' }[m.role];
+  const job = m => m.parts.length ? `plays ${listOf(m.parts)}${m.role === 'owner' ? ' and runs the production' : m.role === 'director' ? ' and directs' : ''}` : { owner: 'runs the production', director: 'directs', crew: 'runs the sound and the cues', cast: 'has no part yet' }[m.role];
   // Your productions (docs/design/first-run.md): one card each, the open one marked, and the way to a new one.
   const yours = p => `${p.parts.length ? `You play ${listOf(p.parts)}` : { owner: 'You run the production', director: 'You direct', crew: 'You run the sound', cast: 'You are cast' }[p.role]} · ${p.members === 1 ? 'just you so far' : `${p.members} in the company`}`;
   const list = el('div', { className: 'prods' }, el('h3', { textContent: 'Your productions' }));
@@ -1693,7 +1693,7 @@ async function drawCompany() {
     }
     company.append(el('div', { className: 'row', title: m.email }, who, tools));
   }
-  if (role !== 'owner') company.append(el('div', { className: 'row' }, el('button', { className: 'chip', textContent: 'Leave this production', onclick: async () => { if (!confirm(`Leave ${current.name}? Your notes and progress there go with you.`)) return; const r = await api(`/productions/${current.id}/members/${me.id}`, undefined, 'DELETE'); if (r.status !== 200) return accountNote.textContent = r.message || 'Could not leave.'; const was = current.name; await loadCompany(); accountNote.textContent = `You left ${was}.`; } })));
+  if (role !== 'owner' || owners > 1) company.append(el('div', { className: 'row' }, el('button', { className: 'chip', textContent: 'Leave this production', onclick: async () => { if (!confirm(`Leave ${current.name}? Your notes and progress there go with you.`)) return; const r = await api(`/productions/${current.id}/members/${me.id}`, undefined, 'DELETE'); if (r.status !== 200) return accountNote.textContent = r.message || 'Could not leave.'; const was = current.name; await loadCompany(); accountNote.textContent = `You left ${was}.`; } })));
   if (shares(role)) {
     company.append(el('p', { className: 'seats', textContent: `${seats(members.length)}. Each member you invite is $1 a month.` }));
     // How it is paid for, in words, and the one thing to press (docs/design/billing.md).

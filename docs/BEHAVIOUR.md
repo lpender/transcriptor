@@ -209,7 +209,7 @@ reader pasted their own.
   price; for an owner or director each other member's row ends with
   "change" (unfolds owner / director / cast / crew chips; owner offered only
   to an owner; a move to crew drops their parts) and a × to remove them,
-  and anyone but an owner has "Leave this production" (the server keeps the
+  and anyone but the only owner has "Leave this production" (an owner who has named a second owner may leave) (the server keeps the
   last owner either way). A script pulled from a production is marked as its
   own; when this device is no longer a member (left or removed) the copy is
   dropped on the next load and the paste box says so. It makes invite links

@@ -38,6 +38,10 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] owner-handover-in-app — 2026-10-01 (loop): an owner can make another
+  member owner from the role chips and then "Leave this production" appears
+  for them too; a member with a part who also directs or owns reads "plays
+  Lane and runs the production". Verified with peek.mjs as Ann.
 - Persona round 16 (2026-10-01) — a director tries to remove or demote the
   only owner: both refused with "Name another owner first." (correct), but
   the controls were offered at all. Fixed: the only owner's row carries no
