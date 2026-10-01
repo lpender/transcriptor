@@ -124,4 +124,4 @@ const settle = (page, ms = 600) => page.waitForTimeout(ms);
   await ctx.close();
 }
 await browser.close();
-console.log(`wrote ${readdirSync(OUT).length} files to ${OUT}/ (production ${production.id}, fixtures *.${stamp}@example.com)`);
+console.log(`wrote ${readdirSync(OUT).length} files to ${OUT}/ (production ${production.id}, accounts *.${stamp}@example.com)`);

@@ -9,7 +9,11 @@
   `Cache-Control: no-store`; a browser that already holds a cached copy
   needs one reload first. The service worker did the same one load behind
   (it serves its cache, then installs the new build), so index.html does
-  not register it on localhost.
+  not register it on localhost, and removes one it finds. The Playwright
+  MCP browser keeps a profile across sessions and still came back
+  controlled by an old worker; verify UI with a fresh context instead:
+  `node api/scripts/peek.mjs <email|-> tmp/x.png [js]` (signs in on the
+  local API, opens the sheet, screenshots at 390, prints the expression).
 - The Workers runtime refuses a non-handler export from the entry module
   (`Incorrect type for map entry 'VERSION'`): `api/src/index.ts` exports only
   the default handler; everything testable lives in `router.ts`.

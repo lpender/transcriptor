@@ -118,6 +118,7 @@
   #sheet::backdrop { background: #000A; }
   @keyframes rise { from { transform: translateY(14px); opacity: 0; } }
   @media (prefers-reduced-motion: reduce) { #sheet { animation: none; } }
+  #sheet:focus { outline: none; }
   .sheet-in { padding: 14px 16px calc(18px + env(safe-area-inset-bottom)); }
   .sheet-in h2 {
     margin: 18px 0 8px; font: 500 12px/1 ui-monospace, Menlo, monospace;
@@ -285,7 +286,7 @@
   <button id="menuBtn" title="Everything else">More</button>
 </div>
 
-<dialog id="sheet">
+<dialog id="sheet" tabindex="-1">
   <div class="sheet-in">
     <details class="sec" data-sec="parts" open>
       <summary>Parts</summary>
@@ -1322,7 +1323,7 @@ ALGERNON: Why is it that at a bachelor's establishment the servants invariably d
 LANE: I attribute it to the superior quality of the wine, sir.`;
 $('pasteBtn').onclick = () => { $('welcome').hidden = true; src.focus(); };
 $('sampleBtn').onclick = () => { $('welcome').hidden = true; src.value = SAMPLE; $('start').click(); };
-$('signinBtn').onclick = () => { sheet.showModal(); $('email').focus(); };
+$('signinBtn').onclick = () => { openSheet(); $('email').focus(); };
 
 joinRoom();
 
@@ -1371,8 +1372,8 @@ $('signoutChip').onclick = async () => { await api('/auth/logout', {}); me = nul
   if (q.has('signin') || q.has('joined') || q.has('billing')) {
     if (q.has('signin')) accountNote.textContent = q.get('signin') === 'expired' ? 'That link has expired. Ask for another.' : q.get('invite') === 'readonly' ? 'That production is not paid for, so nobody can join it right now.' : '';
     history.replaceState(null, '', location.pathname);
-    if (q.get('signin') !== 'expired') whoami().then(() => sheet.showModal());
-    else sheet.showModal();
+    if (q.get('signin') !== 'expired') whoami().then(() => openSheet());
+    else openSheet();
   }
 }
 whoami();
@@ -1629,16 +1630,16 @@ async function drawCompany() {
     return `${p.best === p.total ? 'Off book' : `${p.best} of ${p.total} sentences clear`}${p.weak ? `, ${p.weak} weak` : ''}.${days > 6 ? ` Quiet ${days} days.` : ''}`;
   };
   // What each member does, in theatre words: a part if they have one, else the role.
-  const job = m => m.parts.length ? `plays ${listOf(m.parts)}` : { owner: 'pays the bill', director: 'directs', crew: 'runs the sound and the cues', cast: 'has no part yet' }[m.role];
+  const job = m => m.parts.length ? `plays ${listOf(m.parts)}` : { owner: 'runs the production', director: 'directs', crew: 'runs the sound and the cues', cast: 'has no part yet' }[m.role];
   // Your productions (docs/design/first-run.md): one card each, the open one marked, and the way to a new one.
-  const yours = p => `${p.parts.length ? `You play ${listOf(p.parts)}` : { owner: 'You pay the bill', director: 'You direct', crew: 'You run the sound', cast: 'You are cast' }[p.role]} · ${p.members === 1 ? 'just you so far' : `${p.members} in the company`}`;
+  const yours = p => `${p.parts.length ? `You play ${listOf(p.parts)}` : { owner: 'You run the production', director: 'You direct', crew: 'You run the sound', cast: 'You are cast' }[p.role]} · ${p.members === 1 ? 'just you so far' : `${p.members} in the company`}`;
   const list = el('div', { className: 'prods' }, el('h3', { textContent: 'Your productions' }));
   for (const p of productions) list.append(el('button', { className: 'prod', ariaPressed: p.id === current.id ? 'true' : 'false', onclick: () => { if (p.id === current.id) return; save('production', p.id); loadCompany(); } },
     el('b', { textContent: p.name }), el('span', { textContent: yours(p) })));
   list.append(el('button', { className: 'chip wide', textContent: 'Start a new production', onclick: createProduction }));
   company.append(list);
   company.append(drawStart(role, mine, members.length));
-  company.append(el('h3', { textContent: group ? current.name : `${current.name} — your script`, title: shares(role) ? 'Rename' : '', style: shares(role) ? 'cursor:pointer' : '', onclick: shares(role) ? renameProduction : null }));
+  company.append(el('h3', { textContent: group ? 'The company' : 'Just you so far', title: shares(role) ? 'Rename the production' : '', style: shares(role) ? 'cursor:pointer' : '', onclick: shares(role) ? renameProduction : null }));
   for (const m of members) {
     const name = (m.name || m.email) + (m.user_id === me.id ? ' (you)' : '');
     const who = el('span', { className: 'who', textContent: `${name} ${job(m)}. ${standing(m)}`.trim() });
@@ -1764,7 +1765,7 @@ async function landInvite(token) {
 }
 {
   const q = new URLSearchParams(location.search);
-  if (q.has('invite')) { history.replaceState(null, '', location.pathname); whoami().then(async () => { sheet.showModal(); await landInvite(q.get('invite')); }); }
+  if (q.has('invite')) { history.replaceState(null, '', location.pathname); whoami().then(async () => { openSheet(); await landInvite(q.get('invite')); }); }
 }
 
 // One handler for keyboard shortcuts and the phone button bar. Returns false for unused keys.
@@ -1886,7 +1887,7 @@ document.querySelectorAll('[data-key]').forEach(b => {
   // closes the sheet so the thing it started is what you see; toggles keep it open.
   b.onclick = () => { b.blur(); act(b.dataset.key); if ('lpwteh'.includes(b.dataset.key)) sheet.close(); };
 });
-$('menuBtn').onclick = () => { $('menuBtn').blur(); render(); sheet.showModal(); };
+$('menuBtn').onclick = () => { $('menuBtn').blur(); render(); openSheet(); };
 // The sheet's sections fold; which are open is remembered. Signed in, the
 // company is the first thing a director wants, so its section goes to the top.
 for (const d of document.querySelectorAll('details.sec')) {
@@ -1901,6 +1902,8 @@ function arrangeSheet() {
   else if (!me && first === acc) $('closeSheet').before(acc);   // signed out it goes last again
 }
 $('closeSheet').onclick = () => sheet.close();
+// Open on the sheet itself, not its first summary: a programmatic open otherwise paints a focus ring.
+function openSheet() { sheet.showModal(); sheet.focus(); }
 // An installed copy has no address bar to refresh from. This asks the worker for a
 // new version and reloads; it never throws the saved copy away, or a reload on a
 // train would leave you with nothing to read.
