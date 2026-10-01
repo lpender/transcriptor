@@ -1,7 +1,6 @@
 # Next Up — transcriptor
 
 ## Now
-<!-- autodev until 2026-10-01 13:56 -->
 
 ## Queue
 
