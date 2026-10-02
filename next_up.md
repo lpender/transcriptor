@@ -47,6 +47,14 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 39 (2026-10-01) — the director pricing a render, nothing spent
+  (no key is set locally). The quote is honest and matches how.html: 707
+  characters of the sample, none cached, $1.00 at the one-dollar minimum, shown
+  in the line and on the button. Two fixes: the line said "Rendering 2 voices
+  for this script", which reads like two takes rather than a voice per
+  character; and when the server refused (503, rendering not switched on) the
+  live "Render the voices for $1.00" button stayed under the refusal, inviting
+  another press at a price. It now disables and says why.
 - Persona round 38 (2026-10-01) — notes, say-it-as, and a removed actor. The
   removal path still works after round 33 (a real 200 with an empty list clears
   the script and says why; a failed call no longer does). Notes and say-it-as

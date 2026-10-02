@@ -1663,13 +1663,21 @@ async function drawVoices() {
   const share = toRender / characters, left = share > .95 ? 'Nothing rendered yet' : share > .6 ? 'Most of the script still to render' : share > .4 ? 'About half the script still to render' : share > .15 ? 'About a third of the script still to render' : 'A few lines still to render';
   const cost = ownKey ? 'on your own ElevenLabs key, no charge' : `${price} to finish`;
   const note = el('p', { className: 'seats', title: `${toRender.toLocaleString()} of ${characters.toLocaleString()} characters${cached ? `, ${cached.toLocaleString()} already rendered` : ''}`,
-    textContent: toRender ? `${left}. Rendering ${speakers.length} ${speakers.length === 1 ? 'voice' : 'voices'} for this script: ${cost}.` : 'Every line is rendered.' });
+    textContent: toRender ? `${left}. A voice for each of the ${speakers.length} ${speakers.length === 1 ? 'character' : 'characters'}: ${cost}.` : 'Every line is rendered.' });
   voicesBox.append(note);
-  if (toRender) voicesBox.append(el('div', { className: 'row' }, el('button', { className: 'chip wide', textContent: `Render the voices for ${price}`, onclick: () => renderVoices(note) })));
+  if (toRender) {
+    const go = el('button', { className: 'chip wide', textContent: `Render the voices for ${price}`, onclick: () => renderVoices(note, go) });
+    voicesBox.append(el('div', { className: 'row' }, go));
+  }
 }
-async function renderVoices(note) {
+async function renderVoices(note, go) {
   const started = await api(`/productions/${current.id}/render`, {});
-  if (started.status !== 201) return note.textContent = started.message || `Could not start (${started.status}).`;
+  if (started.status !== 201) {
+    note.textContent = started.message || `Could not start (${started.status}).`;
+    // Nothing to press twice: a refusal that leaves a live money button invites it.
+    if (go) { go.disabled = true; go.textContent = started.status === 503 ? 'Rendering is not switched on yet' : 'Rendering could not start'; }
+    return;
+  }
   let r = started.render;
   while (r.state === 'running') {
     note.textContent = `Rendering… ${r.done} of ${r.total}`;
