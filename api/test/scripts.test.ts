@@ -18,6 +18,11 @@ describe('parseScript', () => {
     expect(p.errors).toEqual([]);
     expect(printScript(p.scenes)).toBe('NELSON: No.\nRECEPTIONIST: Highlights for Children.\n***\nMR. MCMARTIN: Eight thousand years.\nNELSON: Eight hundred.');
   });
+  it('drops an acting note between the name and the colon', () => {
+    const p = parseScript('ALGERNON (languidly): How are you?\nALGERNON: Fine.');
+    expect(p.speakers).toEqual({ ALGERNON: 2 });
+    expect(p.scenes[0][0]).toEqual({ speaker: 'ALGERNON', text: 'How are you?' });
+  });
   it('reports what is not a speech, with line numbers', () => {
     const p = parseScript('NELSON: Fine.\n(He sits.)\nlowercase: no\nACT ONE\n***\n***\nNELSON: Ok');
     expect(p.errors).toEqual([{ line: 2, text: '(He sits.)' }, { line: 3, text: 'lowercase: no' }, { line: 4, text: 'ACT ONE' }]);

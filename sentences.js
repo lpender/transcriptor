@@ -36,7 +36,9 @@ const sentences = text => cut(text, /[^.!?…,;:—–]+[.!?…,;:—–]*[\s]*/
 // Blank lines are ignored. Anything else is an error with its line number, so
 // a stage direction read as a speech is caught before it is saved. Speakers
 // are counted so "STAGE DIRECTION: 41 lines" is visible at a glance.
-const SPEECH = /^([A-Z][A-Z0-9 .'&-]{0,40}?):\s+(.+)$/;
+// A parenthetical between the name and the colon ("ALGERNON (languidly):") is an
+// acting note, not part of the character's name: dropped, so the speech is ALGERNON's.
+const SPEECH = /^([A-Z][A-Z0-9 .'&-]{0,40}?)(?:\s*\([^)]*\))?:\s+(.+)$/;
 function parseScript(text) {
   const scenes = [[]], speakers = {}, errors = [];
   String(text).split(/\r?\n/).forEach((raw, k) => {

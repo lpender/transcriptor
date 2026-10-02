@@ -420,7 +420,7 @@ let myRoles = new Set(JSON.parse(load('roles', '[]')));
 let muted = new Set(JSON.parse(load('muted', '[]')));
 // Parts blocked out on the page, so you recite them instead of reading them.
 let covered = new Set(JSON.parse(load('covered', '[]')));
-const speaker = p => p.dataset.text.split(':')[0];
+const speaker = p => p.dataset.text.split(':')[0].replace(/\s*\([^)]*\)\s*$/, '');   // "ALGERNON (languidly):" is ALGERNON with an acting note
 const speakers = () => [...new Set(lines.filter(p => !isCue(p) && p.dataset.text.includes(':')).map(speaker))];   // a line without a colon is a heading or a direction, not a part
 const titleCase = s => s.replace(/\S+/g, w => w[0] + w.slice(1).toLowerCase());   // LANE → Lane, for prose
 const listOf = parts => parts.map(titleCase).join(' and ');
