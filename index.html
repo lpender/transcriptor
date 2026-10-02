@@ -343,6 +343,9 @@
       <button class="chip wide" data-key="w" id="drillBtn">Drill weak lines<span class="key">W</span></button>
     </div>
     <div class="row">
+      <button class="chip wide" data-key="f" id="initialsChip">First letters as a hint<span class="key">F</span></button>
+    </div>
+    <div class="row">
       <button class="chip wide" data-key="k" id="keysChip">Bold the key words<span class="key">K</span></button>
     </div>
     </details>
@@ -456,6 +459,10 @@ const weakLine = p => sentences(words(p)).some(missCount);
 // hang the line on. Frequency comes from the script itself, so "years" in a script
 // about waiting counts as common.
 let keywords = load('keywords') === 'true', freq = {};
+// A middle rung between a blocked-out line and an open one: the first letter of
+// each word, the oldest paper trick for getting off book.
+let initials = load('initials') === 'true';
+const firstLetters = t => t.replace(/[\p{L}\p{N}][\p{L}\p{N}'’-]*/gu, w => w[0]);
 const STOP = new Set('a an the and or but so if then than that this these those i you he she it we they me him her them my your his its our their is am are was were be been being do does did done have has had will would can could shall should may might must no not of to in on at for with from by as up out about into over after before there here what which who whom when where why how all any both each few more most other some such own same too very just now oh well yeah yes mr mrs ms dr think thinks know got get gonna going want maybe really thing things way lot said say tell told something someone anything nothing everything im ive ill id youre youve youll thats theres whats hes shes theyre lets dont doesnt didnt cant wont isnt arent wasnt couldnt wouldnt okay ok back'.split(' '));
 const keyWords = text => {
   const list = text.match(/[\p{L}\p{N}'-]+/gu) || [];
@@ -886,7 +893,7 @@ function paint() {
     // A sentence you keep missing is marked on its own, not across the whole line.
     // The weak mark is a warning on what is still coming, never on one you just cleared.
     const cls = done ? (it === now && shown ? 'now' : '') : 'hide' + (missCount(it.text) ? ' weak' : '');
-    html += `<span class="${cls}">${done ? mark(it.text) : '▒▒▒▒▒'}</span>`;
+    html += `<span class="${cls}">${done ? mark(it.text) : initials ? esc(firstLetters(it.text)) : '▒▒▒▒▒'}</span>`;
     if (!done) { said(p).innerHTML = html; return center(); }
     rest = rest.slice(at + it.text.length);
   }
@@ -1001,9 +1008,10 @@ function render() {
   for (const row of $('cues').children) row.classList.toggle('cur', [...row.querySelectorAll('.chip')].some(c => +c.dataset.cue === cueAt));
   $('learnChip').firstChild.textContent = learn ? 'Stop learning' : 'Learn my lines';
   $('keysChip').firstChild.textContent = keywords ? 'Hide the key words' : 'Bold the key words';
+  $('initialsChip').firstChild.textContent = initials ? 'Block the line out again' : 'First letters as a hint';
   drillBtn.firstChild.textContent = weak ? `Drill ${weak} weak line${weak > 1 ? 's' : ''}` : 'No weak lines yet';
   drillBtn.disabled = !weak;
-  on($('playChip'), playing); on($('learnChip'), learn); on($('keysChip'), keywords); on($('hushChip'), !hushed);
+  on($('playChip'), playing); on($('learnChip'), learn); on($('keysChip'), keywords); on($('initialsChip'), initials); on($('hushChip'), !hushed);
 }
 
 function startLearn(weakOnly) {
@@ -1884,6 +1892,7 @@ function act(k) {
   else if (k === 't') { stopPlay(); loop = null; markLoop(null); jump(0); sheet.close(); }
   else if (k === 'm' || k === 'r') live(k === 'm' ? 'music' : 'bed');
   else if (k === 'h') { ears = !ears; ears ? listen() : rec?.abort(); }
+  else if (k === 'f') { initials = !initials; save('initials', initials); if (learn) paint(); render(); }
   else if (k === 'k') { keywords = !keywords; save('keywords', keywords); lines.forEach(p => p !== cur() && plain(p)); learn ? paint() : plain(cur()); }
   else if (k === 'w') learn && drilling ? startLearn() : startLearn(true);
   else return false;

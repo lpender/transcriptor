@@ -47,6 +47,11 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 31 (2026-10-01) — the actor one pass from off book. The only
+  rungs were blocked-out or open; F now shows the first letter of each word
+  ("H a y,"), kept per device, with the blocks still the default. Verified at
+  390 in the browser, chip wording flips, no console errors. Decision and the
+  rejected alternatives in docs/decisions/LOG.md.
 - Persona round 30 / assumption check (2026-10-01) — the director comparing
   products. ADR 001's "all are one actor, one phone" is wrong as of today:
   ActOnCue Stage, Off Book! LineSync and OnBook Live all sell to a company;
