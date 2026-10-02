@@ -56,7 +56,7 @@ route('POST', '/productions/:id/billing/portal', async (req, env, { id }) => {
   const g = await gate(env.DB, req, id, 'billing');
   if (g instanceof Response) return g;
   const s = stripe(env.STRIPE_SECRET_KEY);
-  if (!s) return error('billing_off', 503);
+  if (!s) return error('billing_off', 503, 'Billing is not switched on here yet.');
   const b = (await billingOf(env.DB, id))!;
   if (!b.stripe_customer_id) return error('no_billing', 404, 'Nothing to manage yet.');
   try { return json({ url: (await s.createPortal(b.stripe_customer_id, `${env.APP_ORIGIN}/?billing=managed`)).url }); }

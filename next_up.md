@@ -47,6 +47,13 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 40 (2026-10-01) — the owner paying for the production, with a
+  dummy key so nothing could be charged. Billing is already guarded where it
+  counts (no keys = no pay buttons at all, `off: true`), but when the keys
+  exist and Stripe cannot be reached, both priced buttons stayed live under
+  "Billing is not reachable right now. Nothing was charged." — the same shape
+  as round 39's render button. They disable now. The portal's refusal also had
+  no words, only a 503.
 - Persona round 39 (2026-10-01) — the director pricing a render, nothing spent
   (no key is set locally). The quote is honest and matches how.html: 707
   characters of the sample, none cached, $1.00 at the one-dollar minimum, shown

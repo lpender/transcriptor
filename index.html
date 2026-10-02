@@ -1807,7 +1807,12 @@ async function drawCompany() {
     // How it is paid for, in words, and the one thing to press (docs/design/billing.md).
     if (bill.status === 200 && !bill.off) {
       const line = el('p', { className: 'seats', textContent: bill.words });
-      const go = async (path, body) => { const r = await api(`/productions/${current.id}/billing/${path}`, body); r.url ? location.assign(r.url) : line.textContent = r.message || `Could not open billing (${r.status}).`; };
+      const go = async (path, body, btn) => {
+        const r = await api(`/productions/${current.id}/billing/${path}`, body);
+        if (r.url) return location.assign(r.url);
+        line.textContent = r.message || `Could not open billing (${r.status}).`;
+        for (const b of row.children) { b.disabled = true; }   // nothing to press twice when payment cannot open
+      };
       const row = el('div', { className: 'row' });
       if (bill.subscribed) row.append(el('button', { className: 'chip wide', textContent: 'Manage billing', onclick: () => go('portal', {}) }));
       else if (role === 'owner') row.append(
