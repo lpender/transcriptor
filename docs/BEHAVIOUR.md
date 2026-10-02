@@ -147,6 +147,9 @@ reader pasted their own.
   the two before it, hidden again to say over. The score is how far you get; the best run
   is kept per role. Tapping back to an earlier line, or jumping to a scene,
   restarts from there: every line from it onward is hidden and owed again.
+  A best run carries the fingerprint of the script it was made on: when the
+  text changes under it, the count starts again and the block says so, while
+  the weak sentences, keyed by their text, survive the re-cut.
   F swaps the blocks for the first letter of each word ("H a y, m d E?"), the
   paper trick, for a line that is nearly there; the setting is kept per device.
 - **Hearing you.** H turns on the microphone while learning (Chrome and

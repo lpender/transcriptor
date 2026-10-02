@@ -47,6 +47,14 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 36 (2026-10-01) — new pages mid-rehearsal. Two faults: taking
+  a part with Mine left Company's Start here still saying "Choose your part"
+  until some unrelated redraw; and after the director replaced the script, an
+  actor who had been off book on the old cut still read "Off book", and the
+  director's standing still said so, about pages nobody had learned. Company
+  redraws when a part is taken, and a clean run now carries the fingerprint of
+  the cut it was made on: a changed script starts the count again and says why,
+  an unchanged one keeps it (both checked).
 - Persona round 35 (2026-10-01) — the room on show night, two devices on a
   seeded production. Leading and following work: the leader steps, the
   follower lands on the same line, nobody drops, no console errors. But the

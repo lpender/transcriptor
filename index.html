@@ -437,9 +437,16 @@ const cur = () => lines[i];
 const has = (p, c) => p.classList.contains(c);
 const mine = p => has(p, 'mine');
 const bestKey = () => 'best:' + [...myRoles].sort().join('+');
+// A clean run belongs to the cut it was made on. New pages are new lines to
+// learn, and a director asking who is off book means off book on THIS script,
+// so the count starts again when the text changes under it.
+const cutKey = () => 'cut:' + [...myRoles].sort().join('+');
+const newCut = () => !!(scriptId && load(cutKey()) && load(cutKey()) !== scriptId && +load(bestKey(), 0));
+const bestRun = () => newCut() ? 0 : +load(bestKey(), 0);
+const keepBest = n => { save(bestKey(), n); if (scriptId) save(cutKey(), scriptId); };
 // This device's own standing: best clean run against the sentences of its parts,
 // and the ones still missed. Read by Company (a member's row) and by Parts (no account).
-const own = () => { const its = lines.filter(p => !isCue(p) && myRoles.has(speaker(p))).flatMap(p => sentences(words(p))); const weak = its.filter(missCount); return { best: +load(bestKey(), 0), total: its.length, weak: weak.length, shaky: weak.slice(0, 3) }; };
+const own = () => { const its = lines.filter(p => !isCue(p) && myRoles.has(speaker(p))).flatMap(p => sentences(words(p))); const weak = its.filter(missCount); return { best: bestRun(), total: its.length, weak: weak.length, shaky: weak.slice(0, 3) }; };
 
 // How often each sentence has been missed, kept across visits so the weak ones can be drilled.
 const stats = JSON.parse(load('stats', '{}'));
@@ -914,7 +921,7 @@ function grade(ok) {
   shown = false;
   if (ok) {
     cleared.add(id(now));
-    if (cleared.size > +load(bestKey(), 0)) save(bestKey(), cleared.size);
+    if (cleared.size > bestRun()) keepBest(cleared.size);
   } else {
     // A miss costs the two sentences before it, which you have to get again.
     for (const back of items.slice(Math.max(0, n - 2), n)) cleared.delete(id(back));
@@ -969,7 +976,7 @@ function render() {
   const nudge = !!(me && current && myRoles.size && !learn && !playing && !loop && !room.role);   // not while in the room: that line is the room's
   hud.hidden = !(learn || loop || playing || !hushed || room.role || nudge);
 
-  score.textContent = !learn ? '' : drilling ? `drilling ${items.length} weak ${items.length === 1 ? 'line' : 'lines'} · ${cleared.size} clear` : `${cleared.size} of ${items.length} clear · best ${load(bestKey(), 0)}`;
+  score.textContent = !learn ? '' : drilling ? `drilling ${items.length} weak ${items.length === 1 ? 'line' : 'lines'} · ${cleared.size} clear` : `${cleared.size} of ${items.length} clear · best ${bestRun()}`;
   // What to do now, most pressing first: your line beats everything else.
   hint.textContent = quizzing() ? (shown ? 'Got it, or missed?' : `Say it, then reveal${atLine().length > 1 ? ` (${atLine().indexOf(item()) + 1} of ${atLine().length})` : ''}`)
     : playing && muted.has(speaker(cur())) ? `${speaker(cur())} is silenced`
@@ -980,7 +987,7 @@ function render() {
           ? `${room.role === 'lead' ? 'Leading' : 'Following'} ${current?.name ?? ''}${room.up ? ` · ${(room.who || []).length} here${room.role === 'follow' && !(room.who || []).some(w => w.leading) ? ', nobody leading' : ''}` : ' · connecting…'}`
           : `${room.role === 'lead' ? 'Leading' : 'Following'} ${room.code}${room.up ? '' : room.role === 'lead' ? ' · connecting…' : ' · nothing heard'}`),
         blocked ? '♫ Touch the page to start the sound' : !hushed && window.CUES?.[cueAt] ? `♫ ${window.CUES[cueAt].name}${sounding()}` : '',
-        nudge ? `${listOf([...myRoles])}: ${+load(bestKey(), 0) ? `${load(bestKey(), 0)} of ${lines.filter(p => !isCue(p) && myRoles.has(speaker(p))).flatMap(p => sentences(words(p))).length} clear` : 'not started'} · More, then Keep learning` : '',
+        nudge ? `${listOf([...myRoles])}: ${bestRun() ? `${bestRun()} of ${lines.filter(p => !isCue(p) && myRoles.has(speaker(p))).flatMap(p => sentences(words(p))).length} clear` : 'not started'} · More, then Keep learning` : '',
       ].filter(Boolean).join(' · ')
     : drilling ? (items.length && cleared.size === items.length ? (weak ? 'Drilled once — again to clear them for good' : 'Weak lines cleared — now a clean run of the whole part') : 'Keep going')
     : items.length && cleared.size === items.length ? 'Off book — a clean run of the whole part'   // the north star, said out loud
@@ -1097,6 +1104,7 @@ function buildRoles(names) {
         pushParts();
         learn ? startLearn(drilling) : stopLearn();
         drawSolo(names);
+        if (me && current) drawCompany();   // Company's Start here still said "Choose your part" until some other redraw
       }));
     row.append(
       toggle(n, 'Show', `Show ${n}'s lines`, () => {
@@ -1130,7 +1138,8 @@ function drawSolo(names) {
   if (!parts.length) box.append(el('p', { textContent: `${names.length} ${names.length === 1 ? 'character' : 'characters'} in this script. Which do you play? Press Mine beside the name.` }));
   else {
     const { best, total, weak } = own();
-    const how = !best ? 'Your lines hide: say them, press, they appear.'
+    const how = newCut() ? 'The script changed since your last clean run, so the count starts again.'
+      : !best ? 'Your lines hide: say them, press, they appear.'
       : `Best run: ${best === total ? 'all ' + total : best + ' of ' + total} ${total === 1 ? 'sentence' : 'sentences'} clear${weak ? `, ${weak} weak` : ''}.`;
     box.append(
     el('p', { textContent: `You play ${listOf(parts)}, ${n} ${n === 1 ? 'line' : 'lines'}. ${how}` }),
@@ -1698,8 +1707,8 @@ function drawStart(role, m, count, progressWords, readonly) {
       el('p', { textContent: `You're in ${current.name}. Which part do you play?` }),
       el('button', { className: 'chip wide', textContent: 'Choose your part', onclick: () => openSec('parts') }));
     else box.append(
-      el('p', { textContent: `You're in ${current.name}. You play ${listOf(parts)}${n ? `, ${n} ${n === 1 ? 'line' : 'lines'}` : ''}. ${m.standing || ''}`.trim() }),
-      el('button', { className: 'chip wide', textContent: `${+load(bestKey(), 0) ? 'Keep learning' : 'Learn'} ${listOf(parts)}'s lines`, onclick: () => {
+      el('p', { textContent: `You're in ${current.name}. You play ${listOf(parts)}${n ? `, ${n} ${n === 1 ? 'line' : 'lines'}` : ''}. ${newCut() ? 'The script changed since your last clean run, so the count starts again.' : m.standing || ''}`.trim() }),
+      el('button', { className: 'chip wide', textContent: `${bestRun() ? 'Keep learning' : 'Learn'} ${listOf(parts)}'s lines`, onclick: () => {
         myRoles = new Set(parts); save('roles', JSON.stringify([...myRoles])); buildRoles(speakers());
         sheet.close(); startLearn(); render();
       } }));
@@ -1841,7 +1850,7 @@ function queueProgress() {
     // Misses go up as the sentences themselves, so a director can see which lines, not just how many.
     const seen = new Set(), misses = {};
     for (const it of items) { const n = missCount(it.text); if (n > 0 && !seen.has(key(it.text))) { seen.add(key(it.text)); misses[it.text.slice(0, 500)] = Math.ceil(n); } }
-    api(`/productions/${current.id}/me/progress`, { best: +load(bestKey(), 0), total: items.length, misses }, 'PUT');
+    api(`/productions/${current.id}/me/progress`, { best: bestRun(), total: items.length, misses }, 'PUT');
   }, 2000);
 }
 // Your own AI (PLATFORM §4): a personal token, shown once, that lets Claude or
