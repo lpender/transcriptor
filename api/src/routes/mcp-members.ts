@@ -53,7 +53,7 @@ tool<{ production: string; email?: string; parts: string[] }>({
 
 tool<{ production: string; role: string }>({
   name: 'invite',
-  description: 'Make an invite link for a role (director, cast or crew), good for 14 days and for any number of people. Give it to the person or paste it in the group chat.' + DATA_NOTE,
+  description: 'Make an invite link for a role (director, cast or crew), good for 14 days and for any number of people. Give it to the person or paste it in the group chat.',
   inputSchema: { type: 'object', properties: { production: { type: 'string' }, role: { type: 'string', enum: ['director', 'cast', 'crew'] } }, required: ['production', 'role'] },
   run: async ({ production, role }, { user, env }) => {
     const mine = await need(env.DB, user.id, production);
@@ -75,7 +75,7 @@ const memberByEmail = async (db: D1Database, production: string, email: unknown)
 
 tool<{ production: string; email: string; role: string }>({
   name: 'set_role',
-  description: 'Change a member\'s role: owner, director, cast or crew. Owners and directors may do this; only an owner can make an owner; the last owner cannot be demoted.' + DATA_NOTE,
+  description: 'Change a member\'s role: owner, director, cast or crew. Owners and directors may do this; only an owner can make an owner; the last owner cannot be demoted.',
   inputSchema: { type: 'object', properties: { production: { type: 'string' }, email: { type: 'string' }, role: { type: 'string', enum: ['owner', 'director', 'cast', 'crew'] } }, required: ['production', 'email', 'role'] },
   run: async ({ production, email, role }, { user, env }) => {
     const mine = await need(env.DB, user.id, production);
@@ -91,7 +91,7 @@ tool<{ production: string; email: string; role: string }>({
 
 tool<{ production: string; email?: string }>({
   name: 'remove_member',
-  description: 'Remove a member from the production, or leave it yourself (omit email). Owners and directors may remove others; the last owner cannot leave.' + DATA_NOTE,
+  description: 'Remove a member from the production, or leave it yourself (omit email). Owners and directors may remove others; the last owner cannot leave.',
   inputSchema: { type: 'object', properties: { production: { type: 'string' }, email: { type: 'string' } }, required: ['production'] },
   run: async ({ production, email }, { user, env }) => {
     const mine = await need(env.DB, user.id, production);
@@ -106,7 +106,7 @@ tool<{ production: string; email?: string }>({
 
 tool<{ name: string }>({
   name: 'set_name',
-  description: 'Set the signed-in person\'s name, as the company sees it (empty clears it).' + DATA_NOTE,
+  description: 'Set the signed-in person\'s name, as the company sees it (empty clears it).',
   inputSchema: { type: 'object', properties: { name: { type: 'string' } }, required: ['name'] },
   run: async ({ name }, { user, env }) => {
     if (typeof name !== 'string' || name.trim().length > 80) throw new Error('A name up to 80 characters.');

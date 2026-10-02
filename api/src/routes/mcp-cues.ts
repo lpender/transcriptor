@@ -22,13 +22,17 @@ tool<{ production: string }>({
     await need(env.DB, user.id, production, 'read');
     const files = await listSound(env.DB, production);
     const name = (id: string | null) => files.find((f) => f.id === id)?.name ?? null;
-    return { sound: files.map(({ id, name, kind, seconds, gain_db }) => ({ id, name, kind, seconds, gain_db })), cues: (await getCues(env.DB, production)).map((c) => ({ name: c.name, music: name(c.music_id), bed: name(c.bed_id), hold: !!c.hold })) };
+    const cues = (await getCues(env.DB, production)).map((c) => ({ name: c.name, music: name(c.music_id), bed: name(c.bed_id), hold: !!c.hold }));
+    // An empty answer is the usual first one, and an AI cannot upload a file: say where the person does it.
+    const next = !files.length ? `No sound yet. Audio files are uploaded by hand in the app's Sound section (${env.APP_ORIGIN}); then set_cues says which scene plays which.`
+      : !cues.length ? 'No cue list yet: set_cues, one entry per scene in order.' : undefined;
+    return { sound: files.map(({ id, name, kind, seconds, gain_db }) => ({ id, name, kind, seconds, gain_db })), cues, ...(next ? { next } : {}) };
   },
 });
 
 tool<{ production: string; cues: { name: string; music?: string; bed?: string; hold?: boolean }[] }>({
   name: 'set_cues',
-  description: 'Replace the cue list: one entry per scene in order, {name, music?, bed?, hold?}. music and bed name an uploaded file by id or by name (see list_sound). hold marks a stop of its own (before the show, an interval, the end) that is pressed through like a line. Scene names must be unique.' + DATA_NOTE,
+  description: 'Replace the cue list: one entry per scene in order, {name, music?, bed?, hold?}. music and bed name an uploaded file by id or by name (see list_sound). hold marks a stop of its own (before the show, an interval, the end) that is pressed through like a line. Scene names must be unique.',
   inputSchema: { type: 'object', properties: { production: { type: 'string' }, cues: { type: 'array', items: { type: 'object', properties: { name: { type: 'string' }, music: { type: 'string' }, bed: { type: 'string' }, hold: { type: 'boolean' } }, required: ['name'] } } }, required: ['production', 'cues'] },
   run: async ({ production, cues }, { user, env }) => {
     await need(env.DB, user.id, production, 'cues');

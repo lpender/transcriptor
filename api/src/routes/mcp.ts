@@ -67,7 +67,7 @@ tool({
 });
 tool<{ name: string }>({
   name: 'create_production',
-  description: 'Start a new production (a play in rehearsal) owned by the signed-in user; then add_script and invite. The name is what the company sees, e.g. the play\'s title.' + DATA_NOTE,
+  description: 'Start a new production (a play in rehearsal) owned by the signed-in user; then add_script and invite. The name is what the company sees, e.g. the play\'s title.',
   inputSchema: { type: 'object', properties: { name: { type: 'string' } }, required: ['name'] },
   run: async ({ name }, { user, env }) => {
     if (typeof name !== 'string' || !name.trim() || name.length > 120) throw new Error('Give the production a name, up to 120 characters.');
