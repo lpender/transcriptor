@@ -515,8 +515,12 @@ function noteOf(p) {
   if (canSay()) {
     sayBox = document.createElement('input');
     sayBox.className = 'say-in';
-    sayBox.placeholder = 'Say it as… (for the voice; empty = as written)';
+    // Whatever stands here is what the voice says INSTEAD of the line, and a
+    // render costs money, so one tricky word typed alone would buy a clip that
+    // says only that word. Focusing fills in the line to re-spell.
+    sayBox.placeholder = 'Say it as… (the whole line, re-spelled for the voice)';
     sayBox.value = sayAs[p.dataset.text] || '';
+    sayBox.onfocus = () => { if (!sayBox.value) sayBox.value = words(p).trim(); };
     wrap.append(sayBox);
   }
   wrap.onclick = e => e.stopPropagation();
@@ -530,7 +534,7 @@ function noteOf(p) {
       save('notes', JSON.stringify(notes));
       if (me && current && learns(current.role)) api(`/productions/${current.id}/me/notes`, { [p.dataset.text]: text }, 'PUT');   // yours, kept by the production too
       if (sayBox && (sayBox.value.trim() || '') !== (sayAs[p.dataset.text] || '')) {
-        const say = sayBox.value.trim();
+        const say = sayBox.value.trim() === words(p).trim() ? '' : sayBox.value.trim();   // as written is no re-spelling at all
         say ? sayAs[p.dataset.text] = say : delete sayAs[p.dataset.text];
         api(`/productions/${current.id}/sayas`, { [p.dataset.text]: say }, 'PUT').then(drawVoices);
       }
@@ -550,7 +554,7 @@ function drawNote(p) {
   const n = document.createElement('span');
   n.className = 'note';
   n.textContent = notes[p.dataset.text] || '';
-  if (sayAs[p.dataset.text]) n.append(Object.assign(document.createElement('i'), { className: 'say', textContent: '♪ ' + sayAs[p.dataset.text] }));
+  if (sayAs[p.dataset.text]) n.append(Object.assign(document.createElement('i'), { className: 'say', textContent: '♪ ' + (sayAs[p.dataset.text].length > 60 ? sayAs[p.dataset.text].slice(0, 60) + '…' : sayAs[p.dataset.text]) }));
   n.title = 'Edit this note';
   n.onclick = e => { e.stopPropagation(); noteOf(p); };
   return n;

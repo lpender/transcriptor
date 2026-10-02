@@ -80,6 +80,11 @@ product this is the production's `sayas` table, same shape, set over
 { "NELSON: That's what I said.": "That's what \"I\" said." }
 ```
 
+The value REPLACES the whole line in the voice, so the app's Say-it-as box
+fills in the line when it is focused: a director who typed only the tricky
+word would otherwise buy a clip that says only that word. A value equal to
+the line as written is stored as no re-spelling at all.
+
 The key must match the line in `script.js` exactly, including the speaker. The
 value replaces the spoken text only — the screen still shows the real line. Use
 it for the contrast a line turns on: "eight **thousand**" against "eight

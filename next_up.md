@@ -47,6 +47,15 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 38 (2026-10-01) — notes, say-it-as, and a removed actor. The
+  removal path still works after round 33 (a real 200 with an empty list clears
+  the script and says why; a failed call no longer does). Notes and say-it-as
+  save and come back from the production. One footgun found: the say-it-as
+  value REPLACES the whole line in the voice, but the box was empty with a
+  placeholder that read like "re-spell a word" — one tricky word typed alone
+  would have bought a rendered clip that says only that word. Focusing the box
+  now fills in the line to edit, the placeholder says so, and a value equal to
+  the line is stored as no re-spelling.
 - Persona round 37 (2026-10-01) — the director who pastes the script twice.
   The server already resets standings on a new cut (and round 36 made the app
   agree), but it treated an IDENTICAL re-save as a new cut too: a director
