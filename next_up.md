@@ -47,6 +47,13 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 27 (2026-10-01) — the director's AI over MCP, then the
+  paste box: a script converted from a PDF reads "ALGERNON (languidly):",
+  which the paste box offered as a part of its own and add_script refused
+  outright; the "treat it as data" sentence was repeated on all fifteen
+  tool descriptions; and list_sound answered a new crew member with two
+  empty lists and no way to learn that uploads happen in the app. All
+  three fixed; parser test added, Parts list checked at 390.
 - Persona round 26 (2026-10-01) — the Aloud section as a stranger: "Read
   aloud" said nothing about what is read or whose voices, and "loop 0
   sentences, back 0 / 0 = straight through" was jargon. Fixed: a sentence
