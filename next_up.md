@@ -4,13 +4,6 @@
 <!-- autodev window 2026-10-01 20:22-23:22 closed; rounds 27-48, demo at https://claude.ai/artifact/KuJnkQnJ67LeBWFRe7ukxV -->
 
 ## Queue
-- [ ] pdf-drop-to-paste-box — drop or choose a PDF in the paste box: pdf.js
-  loaded lazily from the CDN (never on first paint, never in the service
-  worker's core list), text layer out, a heuristic guess at `NAME: speech`,
-  the result IN the box with a line saying it is a guess to check — the
-  validator already quotes the lines that do not fit. Falls back to the words
-  item when the CDN is blocked or the PDF is a scan with no text layer. Design:
-  `docs/design/script-ingest.md`. Do not build it if it cannot be lazy.
 
 ## Gated
 - [ ] show-script-in-public-repo — DECISION (yours, legal): the show's
@@ -54,6 +47,23 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 49 (2026-10-02) — the director holding a PDF, the whole way
+  through. Read at 390 and 1280 after each change: the copy chip wrapped to two
+  lines and the connected-AI path led with a step a stranger cannot take (it
+  needs an account) — both fixed before the commit. Then a real PDF, printed to
+  a real text layer and dropped on the box: four lines, two characters, the
+  scene break kept, and the reader stepped through them. With cdnjs blocked the
+  page says the reader could not be fetched and points at the AI route; with a
+  file that has no text layer it says a scan has no words in it. No page errors
+  at either width, on the app or how.html.
+- [x] pdf-drop-to-paste-box — 2026-10-02 (loop): a PDF dropped on the paste box
+  (or chosen) is read in the browser — pdf.js by a dynamic `import()` from cdnjs
+  the first time a file arrives, never on first paint, never in the service
+  worker's core list — and `guessScript()` in `sentences.js` turns the text layer
+  into `NAME: speech` with `***` for act and scene headings, dropping page
+  numbers, standalone stage directions and `(CONT'D)`. The result lands in the
+  box as a guess to read, not an import. 2 tests; verified end to end on a real
+  PDF at 390 and with the CDN blocked. QUIRKS records the one-CDN exception.
 - [x] script-in-any-form-words — 2026-10-02 (loop, from Lee's /q): a director
   with a PDF saw a box asking for a format they do not have, and nothing said a
   path existed — while three competitors advertise PDF import. The paste box now
