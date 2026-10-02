@@ -30,6 +30,20 @@ describe('parseScript', () => {
   });
 });
 
+describe('saving the same script again', () => {
+  it('keeps the standings, and a different text clears them', async () => {
+    const ann = await signIn('ann37@example.com');
+    const { production } = await (await ann.call('POST', '/productions', { name: 'Earnest' })).json() as { production: { id: string } };
+    await ann.call('PUT', `/productions/${production.id}/script`, { title: 'Earnest', text: PLAY });
+    await ann.call('PUT', `/productions/${production.id}/me/progress`, { best: 4, total: 4, misses: {} });
+    const best = async () => ((await (await ann.call('GET', `/productions/${production.id}/progress`)).json() as { progress: { best: number }[] }).progress[0].best);
+    await ann.call('PUT', `/productions/${production.id}/script`, { title: 'Earnest', text: PLAY });
+    expect(await best()).toBe(4);
+    await ann.call('PUT', `/productions/${production.id}/script`, { title: 'Earnest', text: PLAY.replace('No.', 'No, never.') });
+    expect(await best()).toBe(0);
+  });
+});
+
 describe('scripts over HTTP and MCP', () => {
   it('saves for a director, refuses cast, replaces, and reads back', async () => {
     const ann = await signIn('ann11@example.com'), bob = await signIn('bob11@example.com');

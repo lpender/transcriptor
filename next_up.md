@@ -47,6 +47,12 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 37 (2026-10-01) — the director who pastes the script twice.
+  The server already resets standings on a new cut (and round 36 made the app
+  agree), but it treated an IDENTICAL re-save as a new cut too: a director
+  re-pasting the same text wiped the whole company's off-book standing. Saving
+  the same text now keeps the script row and the standings; a changed text
+  still clears them. Test added, and checked to fail without the fix.
 - Persona round 36 (2026-10-01) — new pages mid-rehearsal. Two faults: taking
   a part with Mine left Company's Start here still saying "Choose your part"
   until some unrelated redraw; and after the director replaced the script, an

@@ -17,6 +17,13 @@ export function validate(title: unknown, text: unknown): { ok: true; title: stri
 }
 
 export async function setScript(db: D1Database, productionId: string, by: string, title: string, text: string): Promise<Script> {
+  // The same text saved again is not a new cut: a director who pastes the script
+  // twice must not wipe the company's standings (a new cut resets them below).
+  const current = await currentScript(db, productionId);
+  if (current && current.text === text) {
+    if (current.title !== title) await db.prepare('UPDATE scripts SET title = ? WHERE id = ?').bind(title, current.id).run();
+    return { ...current, title };
+  }
   const s = { id: id(), title, text, created_at: now() };
   await db.batch([
     db.prepare('UPDATE scripts SET replaced_at = ? WHERE production_id = ? AND replaced_at IS NULL').bind(s.created_at, productionId),
