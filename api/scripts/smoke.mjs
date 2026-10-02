@@ -17,7 +17,9 @@ const errors = [];
 const open = async () => {
   const p = await ctx.newPage();
   p.on('pageerror', (e) => errors.push(e.message));
-  p.on('console', (m) => m.type() === 'error' && errors.push('console: ' + m.text()));
+  // The API is not part of this check and is often not running: a failed fetch to
+  // it is the environment, not the page. Script errors still fail.
+  p.on('console', (m) => m.type() === 'error' && !/Failed to load resource/.test(m.text()) && errors.push('console: ' + m.text()));
   await p.goto('http://localhost:8799/index.html');
   await p.waitForTimeout(1200);
   return p;

@@ -315,7 +315,7 @@
     <details class="sec" data-sec="show">
       <summary>Show</summary>
     <div class="row">
-      <button class="chip wide" data-key="s" id="hushChip">Sound on<span class="key">S</span></button>
+      <button class="chip wide" data-key="s" id="hushChip">Turn the sound off<span class="key">S</span></button>
     </div>
     <label class="loop" title="How loud the music plays">music <input id="vol:music" type="range" min="0" max="1" step="0.02"></label>
     <label class="loop" title="How loud the room tone plays">room <input id="vol:bed" type="range" min="0" max="1" step="0.02"></label>
@@ -1004,7 +1004,7 @@ function render() {
       : chip.dataset.state === 'Show' ? !covered.has(name) : !muted.has(name));
   }
   $('playChip').firstChild.textContent = playing ? 'Stop reading aloud' : 'Read aloud';
-  $('hushChip').firstChild.textContent = hushed ? 'Sound off' : 'Sound on';
+  $('hushChip').firstChild.textContent = hushed ? 'Turn the sound on' : 'Turn the sound off';
   on($('leadChip'), room.role === 'lead'); on($('followChip'), room.role === 'follow');
   $('leadChip').hidden = !!(me && current && current.role === 'cast');   // cast follow; an owner, director or crew leads
   // What Together is, and who is in the room now.

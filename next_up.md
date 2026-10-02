@@ -47,6 +47,14 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 43 (2026-10-01) — a sweep of the whole day's work through
+  `task demo:shots` (11 screens, a synthetic company, the MCP transcript):
+  every screen today's fifteen edits touched still reads right. Two things
+  fixed: the sound chip named a STATE ("Sound off") while every other chip in
+  the sheet names an action, so it read as a command to press; it is "Turn the
+  sound off"/"Turn the sound on" now. And the gate's new browser check failed
+  whenever the dev API was down — a failed fetch to the API is the environment,
+  not the page — so it ignores resource errors and still fails on script ones.
 - Persona round 42 (2026-10-01) — the ACTOR's AI over MCP (round 27 read the
   director's). Permissions answer honestly ("Your role (cast) may not invite",
   "…may not change the script") and a cast member sees only their own standing.
