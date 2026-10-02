@@ -47,6 +47,10 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Demo for the 2026-10-01 20:22–23:22 window (rounds 27–45): private Artifact
+  at https://claude.ai/artifact/KuJnkQnJ67LeBWFRe7ukxV — four flows on the
+  synthetic production, the decisions with the doc each lives in, and the nine
+  gated items with their exact commands.
 - Persona round 45 (2026-10-01) — the invited actor's first screen. The words
   and the focus were right ("Join <production> as cast. Give your email and a
   link is sent that signs you in on this device.", email focused), but the
