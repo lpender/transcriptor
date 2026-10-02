@@ -47,6 +47,22 @@ naive extraction. Each is handled in `convert.py`:
 Everything written to `script.js` is therefore already trimmed, repaired and in
 reading order. The app does no cleaning of its own.
 
+### A PDF dropped on the paste box (2026-10-02)
+
+Drop a PDF on the box, or use "Choose a PDF" under "My script is a PDF, a Word
+file, or paper". pdf.js is fetched from cdnjs by a dynamic `import()` the first
+time a file arrives — never on first paint, never in the service worker's core
+list, so the app is unchanged when the CDN is blocked. The text layer comes out
+page by page (`hasEOL` gives the line breaks), `guessScript()` in `sentences.js`
+turns it into `NAME: speech` lines with `***` for act and scene headings, and the
+result lands IN the box with "A guess from <file>: N lines, NAMES. Read it before
+you start". It is a head start, not an import: the validator still names every
+line that is not a speech. Two failures are told apart — the reader could not be
+fetched (network), and the file has no words in it (a scan or a photograph) —
+because the answer differs. Nothing is uploaded; the script never leaves the
+device on this path.
+
+
 ## Voicing
 
 One ElevenLabs voice per character (`VOICES` in `tts.py`); `MAN` is

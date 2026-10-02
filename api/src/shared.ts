@@ -8,3 +8,4 @@ export interface Parsed { scenes: Speech[][]; speakers: Record<string, number>; 
 export const parseScript = js.parseScript as unknown as (text: unknown) => Parsed;
 export const printScript = js.printScript as (scenes: Speech[][]) => string;
 export const sentences = js.sentences as (text: string) => string[];
+export const guessScript = js.guessScript as (text: string) => string;

@@ -282,6 +282,8 @@
   <details id="notText">
     <summary>My script is a PDF, a Word file, or paper</summary>
     <div class="ways">
+      <p><b>Try it here first</b>Drop a PDF on the box below, or <label class="chip" id="pdfPick">Choose a PDF<input type="file" accept="application/pdf" id="pdfIn" hidden></label>. The words come out in this browser — nothing is uploaded — and a guess at the script lands in the box for you to read. Scans and photographs have no words in them; those need the AI below.</p>
+      <p id="pdfNote" class="dim"></p>
       <p><b>Any AI, in a free chat</b>Give it the file and this, then paste the answer into the box below. You need no account with us for this.</p>
       <pre id="convertPrompt">Read the attached script and give me back only the dialogue.
 One speech per line, as NAME: what they say — the character's name in
@@ -1439,6 +1441,46 @@ ALGERNON: Oh! By the way, Lane, I see from your book that on Thursday night, whe
 LANE: Yes, sir; eight bottles and a pint.
 ALGERNON: Why is it that at a bachelor's establishment the servants invariably drink the champagne? I ask merely for information.
 LANE: I attribute it to the superior quality of the wine, sir.`;
+// A PDF in the paste box. pdf.js is fetched only when one is dropped — never on
+// first paint, never by the service worker — so the app still works with the CDN
+// blocked, and the script never leaves the device. What comes back is a GUESS the
+// director reads, not an import: the paste box still names every line that is wrong.
+const PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/6.3.289/';
+async function pdfText(file) {
+  const pdfjs = await import(PDFJS + 'pdf.min.mjs');
+  pdfjs.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.mjs';
+  const doc = await pdfjs.getDocument({ data: await file.arrayBuffer() }).promise;
+  let out = '';
+  for (let n = 1; n <= doc.numPages; n++) {
+    const { items } = await (await doc.getPage(n)).getTextContent();
+    out += items.map(i => i.str + (i.hasEOL ? '\n' : '')).join('') + '\n';
+  }
+  return out;
+}
+async function takePdf(file) {
+  if (!file || !/pdf$/i.test(file.type || file.name)) return;
+  $('pdfNote').textContent = `Reading ${file.name}…`;
+  try {
+    const text = await pdfText(file).catch(() => { throw new Error('reader'); });
+    const guess = guessScript(text);
+    const { lines, speakers, errors } = parseScript(guess);
+    if (!lines) throw new Error('no speeches found');
+    src.value = guess;
+    $('notText').open = false;
+    $('pdfNote').textContent = '';
+    $('pasteHint').textContent = `A guess from ${file.name}: ${lines} lines, ${Object.keys(speakers).join(', ')}${errors.length ? `, and ${errors.length} lines that are not speeches` : ''}. Read it before you start — character names and stage directions are where a PDF goes wrong.`;
+    src.focus();
+  } catch (e) {
+    // Two different failures, and telling them apart is the difference between
+    // "try the other path" and "your file is a photograph".
+    $('pdfNote').textContent = e.message === 'reader'
+      ? 'The PDF reader could not be fetched here \u2014 no signal, or this network blocks it. Give the file to an AI with the words below instead.'
+      : 'No words could be read out of that file. A scan or a photograph has none in it: give it to an AI with the words below instead.';
+  }
+}
+$('pdfIn').onchange = e => takePdf(e.target.files[0]);
+src.addEventListener('dragover', e => e.preventDefault());
+src.addEventListener('drop', e => { e.preventDefault(); takePdf(e.dataTransfer.files[0]); });
 $('copyPrompt').onclick = async () => {
   try { await navigator.clipboard.writeText($('convertPrompt').textContent); $('copyNote').textContent = 'Copied. Give it to your AI with the file.'; }
   catch { $('copyNote').textContent = 'Could not copy here — select the words above instead.'; }

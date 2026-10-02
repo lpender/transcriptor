@@ -97,3 +97,12 @@ the production's script from the device. An actor who lost signal backstage was
 shown the sign-in box with an empty reader. Every read that decides something is
 gone must check `status === 200` first, and the last known account, production
 list and script are kept so a reload with no signal still rehearses.
+
+## The only CDN in the app is pdf.js, and it is optional (2026-10-02)
+
+`index.html` has no dependencies and no build, with one exception: a PDF dropped
+on the paste box pulls pdf.js from cdnjs by `import()`. It is loaded ONLY in that
+handler, so first paint, the service worker's core list and every other path are
+unaffected, and a blocked CDN gives a sentence pointing at the AI route instead
+of a broken page. If pdf.js ever has to be there at load, that trade is off: the
+file goes in the repo or the feature goes.
