@@ -225,6 +225,16 @@
   #voices select { max-width: 60%; font: inherit; font-size: .85em; background: #100F0B; color: var(--paper); border: 1px solid var(--edge); border-radius: 6px; padding: 2px 4px; }
   #ai input, #inviteOut input { width: 100%; font: inherit; font-size: .85em; padding: 4px 6px; border-radius: 6px; border: 1px solid var(--edge); background: #100F0B; color: var(--paper); }
   #accountNote a { color: var(--paper); }
+  /* A director whose script is a PDF, a Word file or paper: the way in is their
+     own AI, so the prompt that converts it sits here ready to copy. */
+  #notText { margin: 10px 0 0; }
+  #notText > summary { cursor: pointer; list-style: none; color: var(--paper); font-size: .95em; text-decoration: underline; text-decoration-color: var(--edge); text-underline-offset: 3px; }
+  #notText > summary::-webkit-details-marker { display: none; }
+  #notText .ways { display: grid; gap: 14px; margin: 12px 0 0; padding: 14px 16px; border: 1px solid var(--edge); border-radius: 12px; background: #100F0B; }
+  #notText .ways p { margin: 0; color: var(--cue); font-size: .95em; }
+  #notText .ways b { color: var(--paper); font-weight: 500; display: block; }
+  #notText .chip { white-space: nowrap; }
+  #notText pre { margin: 0; padding: 10px 12px; border-radius: 8px; background: #0B0A08; border: 1px solid var(--edge); color: var(--paper); font: 400 12px/1.6 ui-monospace, Menlo, monospace; white-space: pre-wrap; }
   #src {
     width: 100%; height: 58vh; padding: 12px; border-radius: 10px;
     background: #100F0B; color: var(--paper); border: 1px solid var(--edge);
@@ -262,13 +272,30 @@
     </figure>
     <div class="tiles">
       <div class="tile"><h2>Actors</h2><p>Run your lines against the company's voices, alone or in the room. Misses are remembered and drilled. Works on your own for free.</p></div>
-      <div class="tile"><h2>Directors</h2><p>Load the script once, invite the cast with one link, and see who is off book and where each actor is weak. An actor joins with their email and a link — no password to make up.</p></div>
+      <div class="tile"><h2>Directors</h2><p>Load the script once, invite the cast with one link, and see who is off book and where each actor is weak. An actor joins with their email and a link — no password to make up. A PDF or a paper script comes in through your AI: give it the file and it loads the play.</p></div>
       <div class="tile"><h2>Stage managers</h2><p>Music and room tone per scene, cues pressed through like lines, and everyone follows the leader's place.</p></div>
     </div>
     <p class="price">A production is <b>$1 a seat a month</b>, or $10 a year, with 14 days free. Rendered voices are priced before you pay; the device's own voices cost nothing.</p>
     <h2 class="pasteHead">Paste your script</h2>
   </div>
   <p id="pasteHint">Paste a script — one speech per line, each starting with the character's name and a colon. Your place, your parts and your score are kept in this browser.</p>
+  <details id="notText">
+    <summary>My script is a PDF, a Word file, or paper</summary>
+    <div class="ways">
+      <p><b>Any AI, in a free chat</b>Give it the file and this, then paste the answer into the box below. You need no account with us for this.</p>
+      <pre id="convertPrompt">Read the attached script and give me back only the dialogue.
+One speech per line, as NAME: what they say — the character's name in
+capitals, a colon, then the whole speech on that one line.
+Leave out stage directions, act and scene headings, page numbers and
+anything else that is not spoken.
+Put a line with three asterisks (***) where each scene ends.
+Do not change a word of the dialogue.</pre>
+      <div class="row"><button id="copyPrompt" class="chip">Copy the words</button><span id="copyNote" class="dim"></span></div>
+      <p><b>Paper only</b>Photograph each page in good light, give the photos to the AI, and ask for the same thing. It reads them.</p>
+      <p><b>Once you have an account</b>Connect your AI under Company, "Your AI", and then attaching the script and saying “load this into Tablework” saves the play straight into your production — no pasting at all.</p>
+      <p>Whatever comes back, the box below checks it and names any line that is not a speech, so you can fix those few by hand.</p>
+    </div>
+  </details>
   <textarea id="src" spellcheck="false"></textarea>
   <div class="row">
     <button id="start">Start reading</button>
@@ -1412,6 +1439,10 @@ ALGERNON: Oh! By the way, Lane, I see from your book that on Thursday night, whe
 LANE: Yes, sir; eight bottles and a pint.
 ALGERNON: Why is it that at a bachelor's establishment the servants invariably drink the champagne? I ask merely for information.
 LANE: I attribute it to the superior quality of the wine, sir.`;
+$('copyPrompt').onclick = async () => {
+  try { await navigator.clipboard.writeText($('convertPrompt').textContent); $('copyNote').textContent = 'Copied. Give it to your AI with the file.'; }
+  catch { $('copyNote').textContent = 'Could not copy here — select the words above instead.'; }
+};
 $('pasteBtn').onclick = () => { $('welcome').hidden = true; src.focus(); };
 $('sampleBtn').onclick = () => { $('welcome').hidden = true; src.value = SAMPLE; $('start').click(); };
 $('signinBtn').onclick = () => { openSheet(); $('email').focus(); };

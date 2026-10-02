@@ -4,19 +4,13 @@
 <!-- autodev window 2026-10-01 20:22-23:22 closed; rounds 27-48, demo at https://claude.ai/artifact/KuJnkQnJ67LeBWFRe7ukxV -->
 
 ## Queue
-- [ ] (EPIC) script-in-any-form — most directors cannot "paste their script":
-  it is a PDF, a Word file, a scan, or paper. Today the only way in is the
-  `NAME: speech` paste box, which silently assumes someone already converted
-  the script. Lee's own path was an AI (`convert.py` plus a model reading the
-  PDF). Two halves: (a) THE PATH — decide whether the MCP server IS the answer
-  ("open Claude, attach the PDF, say load this into Tablework", which already
-  works via `add_script` and needs no upload, no parser, no OCR in our stack)
-  or whether the app needs its own file drop; weigh a paper-only script
-  (phone photo → AI) and a director with no AI subscription. (b) THE VALUE
-  PROP — the landing and how.html must say this out loud: right now nothing
-  tells a director holding a PDF that there is a way in at all, so the paste
-  box reads as "not for me". Design round first (`docs/design/script-ingest.md`),
-  three persona questions, then split.
+- [ ] pdf-drop-to-paste-box — drop or choose a PDF in the paste box: pdf.js
+  loaded lazily from the CDN (never on first paint, never in the service
+  worker's core list), text layer out, a heuristic guess at `NAME: speech`,
+  the result IN the box with a line saying it is a guess to check — the
+  validator already quotes the lines that do not fit. Falls back to the words
+  item when the CDN is blocked or the PDF is a scan with no text layer. Design:
+  `docs/design/script-ingest.md`. Do not build it if it cannot be lazy.
 
 ## Gated
 - [ ] show-script-in-public-repo — DECISION (yours, legal): the show's
@@ -60,6 +54,17 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- [x] script-in-any-form-words — 2026-10-02 (loop, from Lee's /q): a director
+  with a PDF saw a box asking for a format they do not have, and nothing said a
+  path existed — while three competitors advertise PDF import. The paste box now
+  carries "My script is a PDF, a Word file, or paper", opening the prompt that
+  converts it (copyable, free chat, no account needed), the paper path (photograph
+  the pages), and the connected-AI path once you have an account; the Directors
+  tile and a how.html section say it too. Design and the three questions in
+  `docs/design/script-ingest.md`. Verified at 390 and 1280: block opens, prompt
+  copies, no sideways scroll, no page errors. Read at 390 as the director: the
+  copy chip wrapped to two lines and the connected-AI path led with a step that
+  needs an account — both fixed before the commit.
 - Persona round 48 / window close (2026-10-01 23:22) — the live host carries
   the window's work (`transcriptor-155`): the app loads all 285 lines at 390
   and how.html reads clean at 1280, no sideways scroll, no page errors on
