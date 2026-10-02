@@ -47,6 +47,13 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 42 (2026-10-01) — the ACTOR's AI over MCP (round 27 read the
+  director's). Permissions answer honestly ("Your role (cast) may not invite",
+  "…may not change the script") and a cast member sees only their own standing.
+  But the answer ended with "members: 1", a row count meant for the director,
+  and gave the actor no next move. A cast caller now gets `next`: choose a part,
+  drill the shaky ones, or keep running the part — the director still gets the
+  picture line and the count. Tested.
 - Persona round 41 (2026-10-01) — the render pressed twice, faked at the
   network edge so nothing could be spent. Two money faults left from rounds 39
   and 40's class: the priced button stayed live WHILE a render ran (a second

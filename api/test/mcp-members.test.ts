@@ -81,4 +81,21 @@ describe('members over MCP', () => {
     s = (await a('who_is_off_book', { production: production.id })).json().summary as string;
     expect(s).toContain('bob28@example.com (VLADIMIR): off book.');
   });
+
+  it('tells an actor what to do next, and a director the row count', async () => {
+    const ann = await signIn('ann29@example.com'), bob = await signIn('bob29@example.com');
+    const { production } = await (await ann.call('POST', '/productions', { name: 'Godot' })).json() as { production: { id: string } };
+    const a = mcpFor((await (await ann.call('POST', '/tokens', { label: 'a' })).json() as { token: string }).token);
+    const b = mcpFor((await (await bob.call('POST', '/tokens', { label: 'b' })).json() as { token: string }).token);
+    await env.DB.prepare("INSERT INTO members VALUES (?, ?, 'cast', '[]', '2026-09-30T00:00:00Z')").bind(bob.user.id, production.id).run();
+    expect((await b('who_is_off_book', { production: production.id })).json().next).toBe('Choose your part with set_parts.');
+    await env.DB.prepare("UPDATE members SET parts = '[\"VLADIMIR\"]' WHERE user_id = ?").bind(bob.user.id).run();
+    await bob.call('PUT', `/productions/${production.id}/me/progress`, { best: 3, total: 5, misses: { x: 1 } });
+    expect((await b('who_is_off_book', { production: production.id })).json().next).toContain('Drill the shaky ones');
+    await bob.call('PUT', `/productions/${production.id}/me/progress`, { best: 5, total: 5, misses: {} });
+    expect((await b('who_is_off_book', { production: production.id })).json().next).toContain('Keep running the part');
+    const dir = (await a('who_is_off_book', { production: production.id })).json();
+    expect(dir.next).toBeUndefined();   // a director reads the picture, not an instruction for one actor
+    expect(dir.members).toBe(2);
+  });
 });

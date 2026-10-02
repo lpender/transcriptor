@@ -146,6 +146,11 @@ tool<{ production: string }>({
     const notStarted = learners.filter((r) => !r.best).length;
     const quiet = learners.filter((r) => r.best && r.updated_at && Date.now() - new Date(r.updated_at).getTime() > 7 * 864e5).length;
     const picture = everyone && learners.length ? `${offBook} of ${learners.length} off book${notStarted ? `, ${notStarted} not started` : ''}${quiet ? `, ${quiet} quiet for a week` : ''}.` : '';
-    return { summary: [picture, ...lines].filter(Boolean).join('\n'), members: rows.length };
+    // An actor asking about themselves wants the next move, not a row count.
+    const own = everyone ? null : rows.find((r) => r.email === user.email);
+    const next = own && (JSON.parse(own.parts) as string[]).length === 0 ? 'Choose your part with set_parts.'
+      : own && own.misses && Object.keys(JSON.parse(own.misses) as object).length ? 'Drill the shaky ones in the app: More, then Practice, then Drill weak lines.'
+      : own ? 'Keep running the part in the app: More, then Learn my lines.' : undefined;
+    return { summary: [picture, ...lines].filter(Boolean).join('\n'), ...(everyone ? { members: rows.length } : { next }) };
   },
 });
