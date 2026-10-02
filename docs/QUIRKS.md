@@ -76,3 +76,14 @@
   it before speaking. No SSML, no italics; emphasis by caps, quotes, ellipses.
 - The show's PDF font has no fi/fl ligatures; `convert.py` repairs six words.
 - **`pullCues` re-clicks Start reading.** Anything the Start handler resets (the `fromProduction` marker, for one) is reset again a beat after `pullScript` set it, because `pullCues` clicks Start when the cues differ. The Start handler therefore only clears device-ownership state when the text actually changed (`sameScript`). Found 2026-09-30 when a freshly set marker kept vanishing.
+
+## index.html paints before the file has finished running (2026-10-01)
+
+A saved script restores at roughly line 1320 — `if (src.value.trim())
+$('start').click();` — which runs `buildRoles` and everything it calls. Any
+`const` helper defined BELOW that line is still in its dead zone there, and the
+whole first paint throws: an empty reader, no parts, one console error. A fresh
+paste hides it (the user clicks long after the file has run), so only a reload
+with a saved script shows it. Helpers the first paint uses are function
+declarations (`el`) or live above the restore. `task test` now reloads the page
+in a real browser for exactly this.
