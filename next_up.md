@@ -47,6 +47,13 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 28 (2026-10-01) — the vision's "first five minutes", walked
+  signed out: pasting a script dropped a stranger in a plain reader with no
+  score, no hint that lines hide, and "Learn my lines" four taps down under
+  Practice. Parts now opens with the same one-sentence-one-button Start here
+  a signed-in member gets: how many characters, press Mine, then "You play
+  X, N lines" and a Learn button. Walked end to end at 390, no console
+  errors; a signed-in member still sees only Company's block.
 - Persona round 27 (2026-10-01) — the director's AI over MCP, then the
   paste box: a script converted from a PDF reads "ALGERNON (languidly):",
   which the paste box offered as a part of its own and add_script refused
