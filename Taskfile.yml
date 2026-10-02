@@ -28,11 +28,12 @@ tasks:
       - npx wrangler d1 execute tablework --local --file ../tmp/seed-clips.sql
 
   test:
-    desc: The gate — API unit tests, typecheck, and a syntax pass over index.html
+    desc: The gate — API unit tests, typecheck, a syntax pass over index.html, and a real-browser first paint
     cmds:
       - cd api && npx vitest run
       - cd api && npx tsc --noEmit
       - node -e "const h=require('fs').readFileSync('index.html','utf8');for(const b of h.match(/<script>([\s\S]*?)<\/script>/g)){try{new Function(b.replace(/<\/?script>/g,''))}catch(e){if(!/window|document|localStorage|await/.test(e.message)){console.error('index.html:',e.message);process.exit(1)}}}console.log('index.html syntax ok')"
+      - node api/scripts/smoke.mjs
 
   demo:shots:
     desc: Seed a synthetic production on the local API and screenshot the app at phone width for the /demo walkthrough (tmp/demo/)
