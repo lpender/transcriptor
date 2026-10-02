@@ -206,12 +206,12 @@
   #company .prod b { font-weight: 500; }
   #company .prod span { color: var(--cue); font-size: .9em; }
   #company .prod[aria-pressed="true"] { border-color: var(--ribbon); }
-  #company .start { display: grid; gap: 8px; margin: 8px 0 14px; }
-  #company .start p { margin: 0; font-size: 1.05em; }
+  #company .start, #soloStart.start { display: grid; gap: 8px; margin: 8px 0 14px; }
+  #company .start p, #soloStart.start p { margin: 0; font-size: 1.05em; }
   #roomNote, #aloudNote { color: var(--cue); font-size: .9em; margin: 4px 0 8px; }
   #signedOut .seats { color: var(--cue); font-size: .9em; margin: 4px 0 8px; }
   #company .start p.seats { font-size: .9em; color: var(--cue); }
-  #company .start .chip.wide { background: var(--ribbon); border-color: var(--ribbon); color: #fff; }
+  #company .start .chip.wide, #soloStart.start .chip.wide { background: var(--ribbon); border-color: var(--ribbon); color: #fff; }
   #voices .row, #ai .row, #company .row { padding: 3px 8px; margin: 0 -8px; border-radius: 8px; justify-content: space-between; }
   #voices .row:nth-of-type(odd), #ai .row:nth-of-type(odd), #company .row:nth-child(odd) { background: rgba(255, 255, 255, .035); }
   #voices .seats, #ai .seats, #company .seats, #joinNote { color: var(--cue); font-size: .9em; margin: 6px 0; }
@@ -296,6 +296,7 @@
   <div class="sheet-in">
     <details class="sec" data-sec="parts" open>
       <summary>Parts</summary>
+    <div id="soloStart"></div>
     <div id="roles"></div>
     </details>
 
@@ -1075,6 +1076,7 @@ function buildRoles(names) {
         save('roles', JSON.stringify([...myRoles]));
         pushParts();
         learn ? startLearn(drilling) : stopLearn();
+        drawSolo(names);
       }),
       toggle(n, 'Show', `Show ${n}'s lines`, () => {
         covered.has(n) ? covered.delete(n) : covered.add(n);
@@ -1087,6 +1089,24 @@ function buildRoles(names) {
       }));
     return row;
   }));
+  drawSolo(names);
+}
+
+// Signed in, drawStart names the role's first job. Signed out (or signed in with
+// no production) nothing did, so a pasted script left a stranger in a plain reader
+// with no hint that lines hide at all. Same shape: one sentence, one button.
+function drawSolo(names) {
+  const box = $('soloStart');
+  box.replaceChildren();
+  if (me && current) return;                       // drawStart says it better, with the company in it
+  if (!names.length) return;
+  const parts = [...myRoles].filter(n => names.includes(n));
+  const n = lines.filter(p => !isCue(p) && parts.includes(speaker(p))).length;
+  box.className = 'start';
+  if (!parts.length) box.append(el('p', { textContent: `${names.length} ${names.length === 1 ? 'character' : 'characters'} in this script. Which do you play? Press Mine beside the name.` }));
+  else box.append(
+    el('p', { textContent: `You play ${listOf(parts)}, ${n} ${n === 1 ? 'line' : 'lines'}. Your lines hide: say them, press, they appear.` }),
+    el('button', { className: 'chip wide', textContent: `${+load(bestKey(), 0) ? 'Keep learning' : 'Learn'} ${listOf(parts)}'s lines`, onclick: () => { sheet.close(); startLearn(); render(); } }));
 }
 
 // Two devices, one place. A leader sends every move to a public MQTT broker over a
