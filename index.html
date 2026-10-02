@@ -1407,14 +1407,19 @@ const accountNote = $('accountNote');
 function drawAccount() {
   $('signedOut').hidden = !!me;
   $('signedIn').hidden = !me;
-  if (me) { accountNote.textContent = `Signed in as ${me.email}`; $('myName').value = me.name || ''; $('welcome').hidden = true; }   // signed in, the welcome's "Sign in" is done
+  if (me) { accountNote.textContent = offline ? `No signal. Still signed in as ${me.email} on this device: lines, parts and score are kept here and go up when the signal is back.` : `Signed in as ${me.email}`; $('myName').value = me.name || ''; $('welcome').hidden = true; }   // signed in, the welcome's "Sign in" is done
   arrangeSheet();
   loadCompany();
   drawTokens();
 }
+// No signal is not a sign-out: the cookie is still good and the work is still
+// here. The last known account is kept so a backstage reload does not show an
+// actor the sign-in box with no way to use it.
+let offline = false;
 async function whoami() {
   const r = await api('/me');
-  me = r.user || null;
+  if (r.status === 0 && load('me')) { offline = true; try { me = JSON.parse(load('me')); } catch { me = null; } }
+  else { offline = false; me = r.user || null; me ? save('me', JSON.stringify(me)) : save('me', ''); }
   drawAccount();
 }
 async function sendLink() {
@@ -1433,7 +1438,7 @@ $('myName').onchange = async () => {
   const r = await api('/me', { name: $('myName').value }, 'PUT');
   if (r.status === 200) { me = r.user; loadCompany(); } else accountNote.textContent = r.message || 'Could not save your name.';
 };
-$('signoutChip').onclick = async () => { await api('/auth/logout', {}); me = null; accountNote.textContent = 'Signed out.'; drawAccount(); };
+$('signoutChip').onclick = async () => { await api('/auth/logout', {}); me = null; offline = false; save('me', ''); accountNote.textContent = 'Signed out.'; drawAccount(); };
 {
   const q = new URLSearchParams(location.search);
   if (q.has('billing')) accountNote.textContent = { ok: 'Thank you. Billing is set up.', cancel: 'Nothing was charged.', managed: '' }[q.get('billing')] || '';
@@ -1464,9 +1469,13 @@ const seats = n => `${n} ${n === 1 ? 'member' : 'members'} · $${n}/month`;
 function el(tag, props = {}, ...kids) { const e = Object.assign(document.createElement(tag), props); e.append(...kids); return e; }
 async function loadCompany() {
   if (!me) { company.replaceChildren(); current = null; $('room').parentElement.hidden = false; joinRoom(); return; }
-  productions = (await api('/productions')).productions || [];
+  // With no signal the list cannot be read. The last known one stands: an empty
+  // answer must never be mistaken for "you were removed", which deletes the script.
+  const list = await api('/productions');
+  if (list.status === 200) { productions = list.productions || []; save('productions', JSON.stringify(productions)); }
+  else { try { productions = JSON.parse(load('productions', '[]')); } catch { productions = []; } }
   const from = load('fromProduction', '');
-  if (from && !productions.some(p => p.id === from)) dropScript();   // left or removed: the script goes with the production
+  if (list.status === 200 && from && !productions.some(p => p.id === from)) dropScript();   // left or removed: the script goes with the production
   const want = load('production', '');
   current = productions.find(p => p.id === want) || productions[0] || null;
   if (current) save('production', current.id);
@@ -1496,6 +1505,7 @@ async function pullScript() {
   if (current) $('pasteHint').textContent = `Paste a script — one speech per line, each starting with the character's name and a colon. Save it and everyone in ${current.name} reads it.`;
   if (!current) return;
   const r = await api(`/productions/${current.id}/script`);
+  if (r.status === 0) return;   // no signal: this device keeps what it has, script, clips, cues and notes
   haveScript = !!(r.status === 200 && r.script);
   // Another production's script does not follow you into one that has none.
   if (!haveScript && load('fromProduction', '') && load('fromProduction', '') !== current.id) clearScript(`${current.name} has no script yet. Paste it here, one speech per line, or ask your AI to load it.`);
@@ -1697,12 +1707,12 @@ async function drawCompany() {
   company.replaceChildren();
   if (!current) {
     company.append(
-      el('p', { textContent: src.value.trim() ? 'You are signed in. Keep this script under your account and you can invite a cast to it.' : 'You are signed in. Start a production, then paste its script or ask your AI to load it.' }),
+      el('p', { textContent: offline ? 'No signal. Your productions come back with it; rehearsing on this device works meanwhile.' : src.value.trim() ? 'You are signed in. Keep this script under your account and you can invite a cast to it.' : 'You are signed in. Start a production, then paste its script or ask your AI to load it.' }),
       el('div', { className: 'row' }, el('button', { className: 'chip wide', textContent: src.value.trim() ? 'Keep this script under your account' : 'Start a production', onclick: createProduction })));
     return;
   }
   const detail = await api(`/productions/${current.id}`);
-  if (detail.status !== 200) return company.append(el('p', { textContent: 'Could not load it.' }));
+  if (detail.status !== 200) return company.append(el('p', { textContent: detail.status === 0 ? 'No signal, so the company cannot be read right now. Rehearsing works; it comes back with the signal.' : 'Could not load it.' }));
   const progress = shares(detail.role) ? Object.fromEntries((((await api(`/productions/${current.id}/progress`)).progress) || []).map(p => [p.email, p])) : {};
   const bill = await api(`/productions/${current.id}/billing`);   // read-gated: everyone may ask how the production stands
   if (gen !== drawGen) return;

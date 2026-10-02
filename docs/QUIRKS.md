@@ -87,3 +87,13 @@ paste hides it (the user clicks long after the file has run), so only a reload
 with a saved script shows it. Helpers the first paint uses are function
 declarations (`el`) or live above the restore. `task test` now reloads the page
 in a real browser for exactly this.
+
+## A failed fetch is not an empty answer (2026-10-01)
+
+`api()` returns `{ status: 0 }` when the network is gone, and the app read that
+like any other answer: `/me` with no user meant signed out, an empty
+`/productions` meant "you were removed", which calls `dropScript()` and DELETES
+the production's script from the device. An actor who lost signal backstage was
+shown the sign-in box with an empty reader. Every read that decides something is
+gone must check `status === 200` first, and the last known account, production
+list and script are kept so a reload with no signal still rehearses.

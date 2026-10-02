@@ -47,6 +47,14 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 33 (2026-10-01) — the actor backstage with no signal, with the
+  API unreachable. Three faults, all fixed: a failed /me showed the sign-in box
+  though the session was fine; a failed /productions looked like "you were
+  removed" and DELETED the production's script from the device; and the company
+  box told a member with a production to start one. The last known account,
+  production list and script now stand until a real 200 says otherwise, with
+  plain no-signal wording in Account and Company. Walked offline and back
+  online: script, parts and score intact both ways. Quirk recorded.
 - Persona round 32 (2026-10-01) — the stage manager on a seeded production.
   Start here, Show and Together read right, but the sheet opened on Parts
   offering "Mine" beside every character — an invitation to learn lines to
