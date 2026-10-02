@@ -47,6 +47,12 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 47 (2026-10-01) — the director pasting a script into a
+  production, with the common first mistake (a heading and a stage direction
+  left in). The paste box names the offending lines; the server's refusal named
+  only numbers — "These lines are not "NAME: speech" or ***: 1, 2." — so the
+  director had to count lines to find them. It quotes them now, the same way
+  the hint above it does. A clean paste still saves: "10 lines, ALGERNON, LANE."
 - Persona round 46 (2026-10-01) — the paste box's buttons. Beside "Start
   reading" sat "Fetch the script", which goes and gets the bundled script.js —
   a file that exists only on the show's own host. Everywhere else it was a

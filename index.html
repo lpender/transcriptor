@@ -1701,7 +1701,7 @@ async function pushScript() {
   const r = await api(`/productions/${current.id}/script`, { title: current.name, text: src.value }, 'PUT');
   if (r.status === 200) { haveScript = true; $('start').click(); drawVoices(); }   // saved: read it, and the voices have lines to price
   $('pasteHint').textContent = r.status === 200 ? `Saved to ${current.name}: ${r.lines} lines, ${Object.keys(r.speakers).join(', ')}.`
-    : r.error === 'bad_lines' ? `Not saved. These lines are not "NAME: speech" or ***: ${r.errors.map(e => e.line).join(', ')}.`
+    : r.error === 'bad_lines' ? `Not saved. ${r.errors.length} ${r.errors.length === 1 ? 'line is' : 'lines are'} not "NAME: speech" or ***: ${r.errors.slice(0, 3).map(e => `“${e.text.slice(0, 40)}” (line ${e.line})`).join(', ')}${r.errors.length > 3 ? ', …' : ''}. Headings and stage directions can go.`
     : `Not saved (${r.error || r.status}).`;
   return r;
 }
