@@ -1,7 +1,7 @@
 # Next Up — transcriptor
 
 ## Now
-<!-- autodev until 2026-10-01 23:22 -->
+<!-- autodev window 2026-10-01 20:22-23:22 closed; rounds 27-48, demo at https://claude.ai/artifact/KuJnkQnJ67LeBWFRe7ukxV -->
 
 ## Queue
 
@@ -47,6 +47,11 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 48 / window close (2026-10-01 23:22) — the live host carries
+  the window's work (`transcriptor-155`): the app loads all 285 lines at 390
+  and how.html reads clean at 1280, no sideways scroll, no page errors on
+  either. Window: 31 commits, rounds 27-48, queue empty, nine gated items left
+  for Lee. The loop stops here.
 - Persona round 47 (2026-10-01) — the director pasting a script into a
   production, with the common first mistake (a heading and a stage direction
   left in). The paste box names the offending lines; the server's refusal named
