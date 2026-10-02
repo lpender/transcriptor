@@ -1437,7 +1437,10 @@ whoami();
 const company = $('company');
 productions = []; current = null; let companyNames = {};
 const seats = n => `${n} ${n === 1 ? 'member' : 'members'} · $${n}/month`;
-const el = (tag, props = {}, ...kids) => { const e = Object.assign(document.createElement(tag), props); e.append(...kids); return e; };
+// A function declaration, not a const: the first paint (a saved script restored on
+// load) calls buildRoles before this line is reached, and a const is still in its
+// dead zone there.
+function el(tag, props = {}, ...kids) { const e = Object.assign(document.createElement(tag), props); e.append(...kids); return e; }
 async function loadCompany() {
   if (!me) { company.replaceChildren(); current = null; $('room').parentElement.hidden = false; joinRoom(); return; }
   productions = (await api('/productions')).productions || [];
