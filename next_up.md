@@ -47,6 +47,14 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 30 / assumption check (2026-10-01) — the director comparing
+  products. ADR 001's "all are one actor, one phone" is wrong as of today:
+  ActOnCue Stage, Off Book! LineSync and OnBook Live all sell to a company;
+  coldRead is $6.99-$10.99, not $12. ADR 001 amended, VISION reworded, $1 a
+  seat (ADR 003) unaffected and still under every subscription found. The
+  one thing a comparing director could not answer from the landing — "do my
+  actors have to make accounts?" — is answered in the Directors tile. Both
+  widths checked, no sideways scroll, no console errors.
 - Persona round 29 (2026-10-01) — the stranger who comes back. Found a
   page-breaking regression from round 28: on RELOAD the saved script paints
   before el() is defined, so the whole first paint threw and the reader came
