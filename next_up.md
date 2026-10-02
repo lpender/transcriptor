@@ -47,6 +47,13 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 34 (2026-10-01) — the train, checked on the live host, the only
+  place the service worker runs: offline cold load serves the whole app from
+  cache (267 entries, 257 clips), all 285 lines, no page errors. The live site
+  also carries today's work. One thing it showed: every visit fails a request
+  to api.tablework.com (not bought yet), and the Account box still invited an
+  email it could not send. Signed out with no API it now says so, and that
+  everything on the page works without an account.
 - Persona round 33 (2026-10-01) — the actor backstage with no signal, with the
   API unreachable. Three faults, all fixed: a failed /me showed the sign-in box
   though the session was fine; a failed /productions looked like "you were

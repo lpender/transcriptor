@@ -366,7 +366,7 @@
     <details class="sec" data-sec="account" open>
       <summary>Account</summary>
     <div id="signedOut">
-      <p class="seats">Sign in to keep your script, invite your cast and see who is off book. No password: a link comes by email.</p>
+      <p class="seats" id="signedOutNote">Sign in to keep your script, invite your cast and see who is off book. No password: a link comes by email.</p>
       <label class="loop" title="A link is sent there; opening it signs you in on this device">email <input id="email" type="email" autocapitalize="off" autocomplete="email" spellcheck="false"></label>
       <div class="row">
         <button class="chip wide" id="signinChip">Send me a sign-in link</button>
@@ -1407,6 +1407,9 @@ const accountNote = $('accountNote');
 function drawAccount() {
   $('signedOut').hidden = !!me;
   $('signedIn').hidden = !me;
+  $('signedOutNote').textContent = !me && offline
+    ? 'No signal, so an account cannot be reached from here. Everything on this page works without one: paste a script, pick your part, learn it.'
+    : 'Sign in to keep your script, invite your cast and see who is off book. No password: a link comes by email.';
   if (me) { accountNote.textContent = offline ? `No signal. Still signed in as ${me.email} on this device: lines, parts and score are kept here and go up when the signal is back.` : `Signed in as ${me.email}`; $('myName').value = me.name || ''; $('welcome').hidden = true; }   // signed in, the welcome's "Sign in" is done
   arrangeSheet();
   loadCompany();
@@ -1418,8 +1421,9 @@ function drawAccount() {
 let offline = false;
 async function whoami() {
   const r = await api('/me');
-  if (r.status === 0 && load('me')) { offline = true; try { me = JSON.parse(load('me')); } catch { me = null; } }
-  else { offline = false; me = r.user || null; me ? save('me', JSON.stringify(me)) : save('me', ''); }
+  offline = r.status === 0;
+  if (offline && load('me')) { try { me = JSON.parse(load('me')); } catch { me = null; } }
+  else if (!offline) { me = r.user || null; me ? save('me', JSON.stringify(me)) : save('me', ''); }
   drawAccount();
 }
 async function sendLink() {
