@@ -47,6 +47,13 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 35 (2026-10-01) — the room on show night, two devices on a
+  seeded production. Leading and following work: the leader steps, the
+  follower lands on the same line, nobody drops, no console errors. But the
+  Together line never changed when a role was taken: a follower who was
+  already following was told to "Press Follow", and the leader read the
+  general explanation of what leading is. It now says which role this device
+  holds, who it is following by name, and how to put it down. Re-walked.
 - Persona round 34 (2026-10-01) — the train, checked on the live host, the only
   place the service worker runs: offline cold load serves the whole app from
   cache (267 entries, 257 clips), all 285 lines, no page errors. The live site

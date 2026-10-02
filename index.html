@@ -998,9 +998,17 @@ function render() {
   $('leadChip').hidden = !!(me && current && current.role === 'cast');   // cast follow; an owner, director or crew leads
   // What Together is, and who is in the room now.
   const here = (room.who || []).map(w => `${companyNames[w.email] || w.email}${w.leading ? ' (leading)' : ''}`);
+  // Taking a role changes what the line should say: telling a follower to press
+  // Follow is telling them to press what they are already holding.
+  const lead = (room.who || []).find(w => w.leading && w.email !== me?.email);
+  const leadName = lead ? companyNames[lead.email] || lead.email : null;
+  const what = room.role === 'lead' ? 'You are leading. Everyone following moves with you; press Lead again to stop.'
+    : room.role === 'follow' ? `You are following${leadName ? ` ${leadName}` : ', and nobody is leading yet'}. Press Follow again to stop and read on your own.`
+    : current?.role === 'cast' ? 'Press Follow and your script goes where the leader goes.'
+    : `One person leads; everyone in ${current?.name ?? 'the room'} who presses Follow goes where they go.`;
   $('roomNote').textContent = me && current
-    ? `${current.role === 'cast' ? 'Press Follow and your script goes where the leader goes.' : `One person leads; everyone in ${current.name} who presses Follow goes where they go.`}${room.up ? here.length ? ` Here now: ${here.join(', ')}.` : ' Nobody else here yet.' : ''}`
-    : 'Pick a room word, the same on every device that should move together. One leads, the others follow.';
+    ? `${what}${room.up ? here.length ? ` Here now: ${here.join(', ')}.` : ' Nobody else here yet.' : ''}`
+    : room.role ? what : 'Pick a room word, the same on every device that should move together. One leads, the others follow.';
   for (const chip of $('cues').querySelectorAll('.chip')) {
     const { cue, kind } = chip.dataset;
     on(chip, 'loop' in chip.dataset ? looping(+cue, kind) : !off.has(cueKey(+cue, kind)));

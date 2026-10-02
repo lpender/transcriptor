@@ -167,7 +167,9 @@ reader pasted their own.
 - **Together.** One device leads and others follow. Signed in with a
   production, the production is the room: pick Lead or Follow and the
   server orders every move, hands a late joiner the last one, and the
-  header says who is here. Signed out, each device enters the same room
+  header says who is here. The Together line says the role this device
+  holds — leading, or following whoever is leading, by name — and how to
+  put it down, not how to take one it already has. Signed out, each device enters the same room
   word in the More sheet and picks Lead or Follow; every move the leader
   makes (a press, a tap, a scene jump) goes out over a public MQTT broker
   (WebSocket, no account; three brokers, tried in turn) and the followers go
