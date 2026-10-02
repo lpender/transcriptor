@@ -47,6 +47,14 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 41 (2026-10-01) — the render pressed twice, faked at the
+  network edge so nothing could be spent. Two money faults left from rounds 39
+  and 40's class: the priced button stayed live WHILE a render ran (a second
+  press pays again for the lines in flight), and after a run stopped it still
+  showed the old price though the rendered lines are now cached and free. It
+  reads "Rendering…" and is disabled during, then becomes "Price the rest",
+  which re-quotes. Verified: BEFORE "$1.00", DURING "Rendering… [off]", AFTER
+  "Price the rest" with the server's reason in the line.
 - Persona round 40 (2026-10-01) — the owner paying for the production, with a
   dummy key so nothing could be charged. Billing is already guarded where it
   counts (no keys = no pay buttons at all, `off: true`), but when the keys

@@ -1678,14 +1678,20 @@ async function renderVoices(note, go) {
     if (go) { go.disabled = true; go.textContent = started.status === 503 ? 'Rendering is not switched on yet' : 'Rendering could not start'; }
     return;
   }
+  // One render at a time: a second press while this one runs would pay twice for
+  // the lines still in flight. When it ends, the old price is stale — some lines
+  // are rendered now — so the button asks for a fresh quote instead of lying.
+  const again = () => { if (go) { go.disabled = false; go.textContent = 'Price the rest'; go.onclick = () => drawVoices(); } };
+  if (go) { go.disabled = true; go.textContent = 'Rendering…'; }
   let r = started.render;
   while (r.state === 'running') {
     note.textContent = `Rendering… ${r.done} of ${r.total}`;
     const next = await api(`/productions/${current.id}/render/${r.id}/next`, {});
-    if (next.status !== 200) return note.textContent = next.message || `Stopped (${next.status}).`;
+    if (next.status !== 200) { note.textContent = next.message || `Stopped (${next.status}).`; return again(); }
     r = next.render;
   }
   note.textContent = r.failed.length ? `${r.done} of ${r.total} rendered; ${r.failed.length} failed (${r.failed[0].error}).` : `All ${r.total} rendered.`;
+  again();
   pullScript();
 }
 // The device's script goes up to the production; the paste box's line says how it went.

@@ -293,3 +293,13 @@ director set.
 A signed-in actor with a part and nothing running sees a one-line HUD nudge
 ("Lane: 2 of 7 clear · More, then Keep learning") so an idle reading
 screen still points at the job.
+
+## Rendering, pressed twice (2026-10-01)
+
+The render button is the one control in the app that spends money, so it is
+disabled while a render runs ("Rendering…"): a second press would pay again for
+the lines still in flight. When the run ends — finished, failed or stopped — the
+quote on the button is stale, because the lines just rendered are now cached and
+free. It does not keep the old price: it becomes "Price the rest", which asks
+the server for a fresh quote. The same rule covers the refusals: a render or a
+payment that cannot open leaves no live priced button under its message.
