@@ -47,6 +47,12 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 32 (2026-10-01) — the stage manager on a seeded production.
+  Start here, Show and Together read right, but the sheet opened on Parts
+  offering "Mine" beside every character — an invitation to learn lines to
+  the one role that keeps none. Crew now get Show and Hear only, with a line
+  saying why; Parts is rebuilt once the role is known (the first paint runs
+  before it). Cast and director unchanged, checked.
 - Persona round 31 (2026-10-01) — the actor one pass from off book. The only
   rungs were blocked-out or open; F now shows the first letter of each word
   ("H a y,"), kept per device, with the blocks still the default. Verified at

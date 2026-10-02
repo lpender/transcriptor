@@ -1081,14 +1081,16 @@ function buildRoles(names) {
     const who = document.createElement('span');
     who.className = 'who';
     who.textContent = n;
-    row.append(who,
+    row.append(who);
+    if (current?.role !== 'crew') row.append(
       toggle(n, 'Mine', `Learn ${n}'s lines`, () => {
         myRoles.has(n) ? myRoles.delete(n) : myRoles.add(n);
         save('roles', JSON.stringify([...myRoles]));
         pushParts();
         learn ? startLearn(drilling) : stopLearn();
         drawSolo(names);
-      }),
+      }));
+    row.append(
       toggle(n, 'Show', `Show ${n}'s lines`, () => {
         covered.has(n) ? covered.delete(n) : covered.add(n);
         save('covered', JSON.stringify([...covered]));
@@ -1109,7 +1111,10 @@ function buildRoles(names) {
 function drawSolo(names) {
   const box = $('soloStart');
   box.replaceChildren();
-  if (me && current) return;                       // drawStart says it better, with the company in it
+  if (me && current) {                             // drawStart says it better, with the company in it
+    if (current.role === 'crew') { box.className = 'start'; box.append(el('p', { className: 'seats', textContent: 'Crew keep no lines of their own. Show and Hear set what you see and hear while you run the book.' })); }
+    return;
+  }
   if (!names.length) return;
   const parts = [...myRoles].filter(n => names.includes(n));
   const n = lines.filter(p => !isCue(p) && parts.includes(speaker(p))).length;
@@ -1716,7 +1721,8 @@ async function drawCompany() {
     return `${p.best === p.total ? 'Off book' : `${p.best} of ${p.total} sentences clear`}${p.weak ? `, ${p.weak} weak${quoted}` : ''}.${days > 6 ? ` Quiet ${days} days.` : ''}`;
   };
   const mine = members.find(m => m.user_id === me.id);
-  if (mine?.parts.length && !myRoles.size) { myRoles = new Set(mine.parts); save('roles', JSON.stringify([...myRoles])); buildRoles(speakers()); }   // the director cast you
+  if (mine?.parts.length && !myRoles.size) { myRoles = new Set(mine.parts); save('roles', JSON.stringify([...myRoles])); }   // the director cast you
+  buildRoles(speakers());   // the first paint drew Parts before the role was known: crew have no Mine chip
   if (mine) mine.standing = standing(mine);
   // Who is off book: an owner or director sees each member's best clean run
   // against the size of their parts, and how many sentences they still owe.
