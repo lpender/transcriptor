@@ -434,6 +434,9 @@ const cur = () => lines[i];
 const has = (p, c) => p.classList.contains(c);
 const mine = p => has(p, 'mine');
 const bestKey = () => 'best:' + [...myRoles].sort().join('+');
+// This device's own standing: best clean run against the sentences of its parts,
+// and the ones still missed. Read by Company (a member's row) and by Parts (no account).
+const own = () => { const its = lines.filter(p => !isCue(p) && myRoles.has(speaker(p))).flatMap(p => sentences(words(p))); const weak = its.filter(missCount); return { best: +load(bestKey(), 0), total: its.length, weak: weak.length, shaky: weak.slice(0, 3) }; };
 
 // How often each sentence has been missed, kept across visits so the weak ones can be drilled.
 const stats = JSON.parse(load('stats', '{}'));
@@ -1104,9 +1107,14 @@ function drawSolo(names) {
   const n = lines.filter(p => !isCue(p) && parts.includes(speaker(p))).length;
   box.className = 'start';
   if (!parts.length) box.append(el('p', { textContent: `${names.length} ${names.length === 1 ? 'character' : 'characters'} in this script. Which do you play? Press Mine beside the name.` }));
-  else box.append(
-    el('p', { textContent: `You play ${listOf(parts)}, ${n} ${n === 1 ? 'line' : 'lines'}. Your lines hide: say them, press, they appear.` }),
-    el('button', { className: 'chip wide', textContent: `${+load(bestKey(), 0) ? 'Keep learning' : 'Learn'} ${listOf(parts)}'s lines`, onclick: () => { sheet.close(); startLearn(); render(); } }));
+  else {
+    const { best, total, weak } = own();
+    const how = !best ? 'Your lines hide: say them, press, they appear.'
+      : `Best run: ${best === total ? 'all ' + total : best + ' of ' + total} ${total === 1 ? 'sentence' : 'sentences'} clear${weak ? `, ${weak} weak` : ''}.`;
+    box.append(
+    el('p', { textContent: `You play ${listOf(parts)}, ${n} ${n === 1 ? 'line' : 'lines'}. ${how}` }),
+    el('button', { className: 'chip wide', textContent: `${best ? 'Keep learning' : 'Learn'} ${listOf(parts)}'s lines`, onclick: () => { sheet.close(); startLearn(); render(); } }));
+  }
 }
 
 // Two devices, one place. A leader sends every move to a public MQTT broker over a
@@ -1691,7 +1699,6 @@ async function drawCompany() {
   companyNames = Object.fromEntries(members.map(m => [m.email, m.name || m.email]));
   // Each member's standing, in words: best clean run against their parts, what they still owe.
   // Your own standing comes from this device: cast do not read the progress table.
-  const own = () => { const its = lines.filter(p => !isCue(p) && myRoles.has(speaker(p))).flatMap(p => sentences(words(p))); const weak = its.filter(missCount); return { best: +load(bestKey(), 0), total: its.length, weak: weak.length, shaky: weak.slice(0, 3) }; };
   const standing = m => {
     if (!m.parts.length) return '';   // no part, nothing owed, whatever an old run said
     const p = progress[m.email] || (m.user_id === me.id && myRoles.size ? own() : null);

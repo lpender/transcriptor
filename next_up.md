@@ -47,6 +47,15 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 29 (2026-10-01) — the stranger who comes back. Found a
+  page-breaking regression from round 28: on RELOAD the saved script paints
+  before el() is defined, so the whole first paint threw and the reader came
+  back empty (the syntax gate cannot see a dead-zone const). el is hoisted,
+  and `task test` now loads the page in a real browser, pastes, reloads and
+  fails on any page error — checked: it catches that exact build. The
+  returning stranger also saw nothing of their score until they pressed
+  Learn; Parts now says "Best run: 3 of 4 sentences clear", the same words
+  Company gives a signed-in member (own() hoisted, one source).
 - Persona round 28 (2026-10-01) — the vision's "first five minutes", walked
   signed out: pasting a script dropped a stranger in a plain reader with no
   score, no hint that lines hide, and "Learn my lines" four taps down under
