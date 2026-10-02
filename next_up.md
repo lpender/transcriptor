@@ -47,6 +47,12 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 45 (2026-10-01) — the invited actor's first screen. The words
+  and the focus were right ("Join <production> as cast. Give your email and a
+  link is sent that signs you in on this device.", email focused), but the
+  section opened with the "How Tablework works" link ABOVE the ask: the first
+  thing an invited actor read was a detour. The join ask, field and button come
+  first now, help after. Walked from a real invite link.
 - Persona round 44 (2026-10-01) — the Your AI panel, read from the demo
   screenshots. A connected AI's row showed "used 10/1/2026" in the page's big
   serif, floating above the label and the Revoke button: a date in a locale's
