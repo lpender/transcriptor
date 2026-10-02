@@ -47,6 +47,12 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 46 (2026-10-01) — the paste box's buttons. Beside "Start
+  reading" sat "Fetch the script", which goes and gets the bundled script.js —
+  a file that exists only on the show's own host. Everywhere else it was a
+  button whose only outcome was "Could not fetch: script.js did not look
+  right", next to the box where you paste your own script. Hidden off the show
+  host; still there on it (both checked).
 - Demo for the 2026-10-01 20:22–23:22 window (rounds 27–45): private Artifact
   at https://claude.ai/artifact/KuJnkQnJ67LeBWFRe7ukxV — four flows on the
   synthetic production, the decisions with the doc each lives in, and the nine

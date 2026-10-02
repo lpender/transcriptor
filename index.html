@@ -1387,7 +1387,9 @@ const saved = (load('script') || '').trim() ? load('script') : '';
 // one show's private material: a first visit gets a welcome, and the cues wait
 // for a production's own (pullCues) or stay silent.
 const SHOW_HOST = location.hostname === 'lpender.github.io' || new URLSearchParams(location.search).get('show') === '1';
-if (!SHOW_HOST) { window.CUES = []; window.GAINS = {}; }
+// "Fetch the script" goes and gets the bundled script.js: it exists only on the
+// show's own host, so anywhere else it is a button that can only fail.
+if (!SHOW_HOST) { window.CUES = []; window.GAINS = {}; $('fetchBtn').hidden = true; }
 src.value = (load('pasted') === 'true' && saved ? saved : SHOW_HOST ? window.SCRIPT : '') || saved || '';
 if (src.value.trim()) $('start').click();
 else if (!SHOW_HOST) {
