@@ -4,6 +4,19 @@
 <!-- autodev window 2026-10-01 20:22-23:22 closed; rounds 27-48, demo at https://claude.ai/artifact/KuJnkQnJ67LeBWFRe7ukxV -->
 
 ## Queue
+- [ ] (EPIC) script-in-any-form — most directors cannot "paste their script":
+  it is a PDF, a Word file, a scan, or paper. Today the only way in is the
+  `NAME: speech` paste box, which silently assumes someone already converted
+  the script. Lee's own path was an AI (`convert.py` plus a model reading the
+  PDF). Two halves: (a) THE PATH — decide whether the MCP server IS the answer
+  ("open Claude, attach the PDF, say load this into Tablework", which already
+  works via `add_script` and needs no upload, no parser, no OCR in our stack)
+  or whether the app needs its own file drop; weigh a paper-only script
+  (phone photo → AI) and a director with no AI subscription. (b) THE VALUE
+  PROP — the landing and how.html must say this out loud: right now nothing
+  tells a director holding a PDF that there is a way in at all, so the paste
+  box reads as "not for me". Design round first (`docs/design/script-ingest.md`),
+  three persona questions, then split.
 
 ## Gated
 - [ ] show-script-in-public-repo — DECISION (yours, legal): the show's
