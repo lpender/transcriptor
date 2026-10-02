@@ -47,6 +47,12 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- Persona round 44 (2026-10-01) — the Your AI panel, read from the demo
+  screenshots. A connected AI's row showed "used 10/1/2026" in the page's big
+  serif, floating above the label and the Revoke button: a date in a locale's
+  order, in the wrong size, in the wrong place. It reads "director-ai last used
+  today" (then "yesterday", then 2026-09-28 as the app writes dates everywhere
+  else), small and dim beside the label, with Revoke on the right.
 - Persona round 43 (2026-10-01) — a sweep of the whole day's work through
   `task demo:shots` (11 screens, a synthetic company, the MCP transcript):
   every screen today's fifteen edits touched still reads right. Two things

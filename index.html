@@ -1893,8 +1893,13 @@ async function drawTokens(fresh) {
     try { await navigator.clipboard.writeText(snippet); ai.append(el('p', { className: 'seats', textContent: 'Copied.' })); } catch {}
   }
   for (const t of tokens) {
-    const when = new Date(t.last_seen).toLocaleDateString();
-    ai.append(el('div', { className: 'row' }, el('span', { className: 'who', textContent: t.label }), el('span', {}, `used ${when} `, el('button', { className: 'chip', textContent: 'Revoke', onclick: async () => { await api(`/tokens/${t.id}`, undefined, 'DELETE'); drawTokens(); } }))));
+    // Dates read the same way everywhere in the app: 2026-10-01, not a locale's order.
+    const days = Math.floor((Date.now() - new Date(t.last_seen).getTime()) / 864e5);
+    const when = days === 0 ? 'today' : days === 1 ? 'yesterday' : `${t.last_seen.slice(0, 10)}`;
+    ai.append(el('div', { className: 'row' },
+      el('span', { className: 'who', textContent: t.label },
+        el('span', { className: 'dim', textContent: ` last used ${when}` })),
+      el('button', { className: 'chip', textContent: 'Revoke', onclick: async () => { await api(`/tokens/${t.id}`, undefined, 'DELETE'); drawTokens(); } })));
   }
   ai.append(el('div', { className: 'row' }, el('button', { className: 'chip wide', textContent: tokens.length ? 'Connect another AI' : 'Connect your AI', onclick: async () => {
     const label = prompt('A name for this AI (which app, which device)?', 'Claude on my laptop');
