@@ -2,12 +2,13 @@
 
 ## Why this exists
 
-A cast learns a play together but every line-learning app is built for one
-actor alone with a phone. The director loads the script once, then each
-actor pastes their own copy into their own app, hears different voices,
-keeps their own notes, and nobody knows who is off book. The stage manager's
-cues live in a separate binder. This app is the rehearsal room: one script,
-one set of voices, one sound design, everyone's place and progress in it.
+A cast learns a play together but line-learning apps are built around one
+actor and one phone. A few now share a script to a cast (ADR 001, amended
+2026-10-01), and none of them share the company's VOICES: each actor still
+hears a different reading, keeps their own notes, and nobody knows who is
+off book. The stage manager's cues live in a separate binder. This app is
+the rehearsal room: one script, one set of voices, one sound design,
+everyone's place and progress in it.
 
 ## Who it is for
 
