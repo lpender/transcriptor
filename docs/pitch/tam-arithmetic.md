@@ -1,11 +1,20 @@
 # The arithmetic (2026-10-04)
 
-**Status: the inverse is done, the market count is not.** A research leg
-against primary sources (TCG Theatre Facts, EdTA, AACT, the NEA participation
-survey) was commissioned in this window and did not land inside it. So this
-file gives the half that needs no external source — **how many customers each
-revenue level requires** — and names the missing input rather than filling it
-with a remembered number.
+**Updated after the close.** The market leg landed late and sized it. The
+inverse below was computed first and needed no external source; the sizing
+that confirms it is in the box immediately after, with the research round in
+`teardown-round-2.md`.
+
+> ## The number the inverse was waiting for
+>
+> **US TAM at $1 per seat per month: $2.6M–$6.5M.**
+> **$100M of annual revenue is 15–38× the entire market.**
+>
+> Source: the 2026-10-04 market research leg (`teardown-round-2.md`). The
+> chain's own inputs were not delivered to this file, so treat the band as the
+> leg's figure rather than one re-derived here — but note it agrees with the
+> inverse below, which was computed independently and first. **Two independent
+> routes, same conclusion: the venture case does not exist at this price.**
 
 ## Inputs, all from the repo
 
@@ -55,11 +64,18 @@ $100,000,000 ÷ $299 =  334,448 organisations
 a person can picture, which the $1-a-seat chain never was. The change of buyer
 moves the required customer count by **150×**.
 
-## The softest input, named
+## The softest input, named — and partly answered
 
 **The number of producing organisations that have a budget and would spend it
-on this.** Not the number of theatres — the number with a line item. Nothing
-in this run sourced it. Candidate primary sources for the next session, in
+on this.** Not the number of theatres — the number with a line item. The late
+leg did not count them either, but it found something better than a count:
+**Stage Write already sells to exactly that buyer at $249/year for a team and
+$599/year for education, and is the one commercially healthy product in the
+category.** So the buyer demonstrably exists and pays; what is unknown is how
+many there are. Note the price band is **higher** than the $199–399 guessed
+before the leg landed, which moves chain B in the right direction.
+
+The counts themselves remain unsourced. Candidate primary sources for the next session, in
 order: EdTA on US high schools producing plays and the students in them; AACT
 on community theatres; TCG Theatre Facts on nonprofit professional theatres
 and their budgets; the NEA Survey of Public Participation in the Arts.
@@ -72,7 +88,10 @@ signs" faster and better than any desk estimate, and that is already the ask.
 
 1. How many productions a year, at any definition.
 2. Whether a school or community theatre has ever bought software of this kind.
-3. What the solo competitors' actual conversion and churn look like.
+3. What the solo competitors' actual conversion and churn look like. (The leg
+   found the *price* ceiling — $4 once, unchanged 2016 to 2026 — and that the
+   category leader coldRead froze development in 2022 while still billing
+   $83.99/year. Conversion and churn numbers are still unavailable.)
 4. Whether a director will accept a default voice casting (which is what the
    render cache needs to compound — `moat-measured.md`).
 5. Invite-link conversion in this product: sent → accepted → started their own.

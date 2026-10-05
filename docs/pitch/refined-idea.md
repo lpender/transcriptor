@@ -40,17 +40,37 @@ See `tam-arithmetic.md`. The short form: at $1 a seat the absolute ceiling is
 too small to pay for its own customers, and the entire question is whether the
 organisation price clears a CAC that a two-channel founder can actually pay.
 
+## Confirmed independently, after this was written
+
+The market leg (`teardown-round-2.md`) landed after the pitch window closed and
+found this position already occupied — profitably:
+
+> **Stage Write**: free read-only seats for the cast, paid seats for the budget
+> holder, **$249/year team, $599/year education**. The one commercially healthy
+> product in a category where roughly 25 shipping apps are free, the price
+> ceiling for an individual has been **$4 once since 2016**, and the leader by
+> installed base (coldRead, 3,934 ratings) **froze development in 2022 while
+> still billing $83.99 a year**.
+
+Two consequences. **The buyer is proven**, so the pivot stops being a
+hypothesis. And **the price band here was too low**: $249–599 a year, not
+$199–399. A competitor already took the harder half of the risk and survived
+it, which is the best possible news for this position and the worst possible
+news for the $1-a-seat one.
+
 ## The counter-argument, kept on the page
 
 **Who would conclude the opposite, and why they might be right:**
 
-1. **The solo-app founders.** Four products sell to individual actors at
-   $7–14/month and are still shipping, which is evidence that the actor pays
-   and the institution does not. School and community theatre is famously
-   unbudgeted — the director buys the royalties and a box of gels and that is
-   the line. If that is true, the organisation pivot swaps a small market for
-   a *smaller, slower-closing* one, and ActOnCue's hourly model is the right
-   shape after all.
+1. ~~**The solo-app founders.**~~ **Weakened by the market leg, and worth
+   keeping for the record.** The argument was that four products selling to
+   individual actors at $7–14/month proves the actor pays. The leg shows the
+   opposite: those products are mostly frozen or dead, every currently-shipping
+   line-learning app is free, and the individual's ceiling is $4 once. The
+   actor does not pay. **But a harder counter replaced it:** *Scene Partner*
+   was the only app with licensed MTI and Samuel French script text — the
+   asset anyone would call this category's moat — and it died anyway, with no
+   cause ever made public. Assets do not save products here.
 2. **The founder's own channel is cast-shaped, not institution-shaped.** He
    knows actors and directors, not department heads and managing directors. A
    pivot to an institutional buyer discards the only distribution he owns, and
