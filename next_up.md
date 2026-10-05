@@ -1,7 +1,8 @@
 # Next Up — transcriptor
 
 ## Now
-<!-- autodev window 2026-10-01 20:22-23:22 closed; rounds 27-48, demo at https://claude.ai/artifact/KuJnkQnJ67LeBWFRe7ukxV -->
+<!-- autodev until 2026-10-04 21:25 -->
+- /pitch 1 (2026-10-04 20:25-21:25): the investor workshop on Tablework. Deliverables in `docs/pitch/`, personas in `docs/personas/`, one published Artifact at the close.
 
 ## Queue
 
