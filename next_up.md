@@ -1,12 +1,21 @@
 # Next Up — transcriptor
 
 ## Now
-<!-- autodev until 2026-10-04 21:25 -->
-- /pitch 1 (2026-10-04 20:25-21:25): the investor workshop on Tablework. Deliverables in `docs/pitch/`, personas in `docs/personas/`, one published Artifact at the close.
-
+<!-- /pitch 1 window 2026-10-04 20:25-21:35 CLOSED: verdict "good tool, not a business at $1 a seat"; report at https://claude.ai/artifact/NnyKo8nhiqmfCETaMed49a -->
 ## Queue
 
 ## Gated
+- [ ] read-the-piia-clause — DECISION (yours, legal, do first): Tablework's
+  first commit is 2026-09-16, after the Gusto start, so it is NOT a prior
+  invention and Exhibit B does not cover it. A theatre app does not relate to
+  payroll or benefits, which is a much cleaner §2870-style position than
+  impatient.care's — but the clause's actual words, the governing state, and
+  whether any of it touched employer time or equipment are yours to confirm
+  before anything here becomes commercial. The loop is not a lawyer.
+- [ ] ask-five-directors — ACTION (yours, your network): ask five directors
+  what their department actually buys (licensing, scripts, software) and who
+  signs. Five answers kill or confirm the institutional buyer. No desk research
+  substitutes; `docs/pitch/tam-arithmetic.md` names this as the softest input.
 - [ ] show-script-in-public-repo — DECISION (yours, legal): the show's
   `script.js`, `cues.js` and `clips/` have been in this public repo and on
   GitHub Pages since September, which the hard rule "the show's script is
@@ -48,6 +57,18 @@
   then delete the 3 orphaned clips. Spends ElevenLabs credits.
 
 ## Done
+- /pitch 1 (2026-10-04 20:25-21:35) — the investor workshop, run against a
+  bootstrapper investor because the founder wants income and an honest read,
+  not a venture outcome. Verdict: at $1 a seat this is a good tool, not a
+  business — a production pays ~$20 before it closes, which buys no customers
+  at all; $100M would need 5,000,000 production-runs a year. Sold to the
+  producing organisation at a season price the same code needs 150x fewer
+  customers. No moat (the global render cache only compounds on shared voice
+  casting). Zero of eight of the investor's published tests passed. Nothing was
+  shipped to the product on purpose: the finding is a price and a buyer, not a
+  screen. Deliverables in `docs/pitch/` and `docs/personas/`; report at
+  https://claude.ai/artifact/NnyKo8nhiqmfCETaMed49a. The market-size research
+  leg did not land inside the window and is named as missing, not guessed.
 - Persona round 49 (2026-10-02) — the director holding a PDF, the whole way
   through. Read at 390 and 1280 after each change: the copy chip wrapped to two
   lines and the connected-AI path led with a step a stranger cannot take (it

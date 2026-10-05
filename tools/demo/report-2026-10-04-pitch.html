@@ -1,0 +1,161 @@
+<title>The Tablework Verdict</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --ink:#0B0A08; --panel:#100F0B; --edge:#2A2721; --paper:#E8E1CF;
+    --cue:#8C8371; --faded:#5E5540; --ribbon:#C8432F; --good:#7E9A6B;
+    --serif:'Spectral',Georgia,'Iowan Old Style',serif;
+    --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+  }
+  body{background:var(--ink);color:var(--paper);font:400 17px/1.6 var(--serif);margin:0}
+  .wrap{max-width:46em;margin:0 auto;padding-block:48px 72px;padding-left:20px;padding-right:20px}
+  h1{font:600 2.5em/1.05 var(--serif);margin:0 0 6px;text-wrap:balance;letter-spacing:.01em}
+  .kicker{font:500 11px/1.8 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--cue);margin:0 0 20px}
+  h2{font:600 1.5em/1.2 var(--serif);margin:48px 0 10px;text-wrap:balance;border-top:1px solid var(--edge);padding-top:26px}
+  h3{font:600 1.08em/1.3 var(--serif);margin:26px 0 6px}
+  p{margin:0 0 14px;color:#D6CEBA}
+  em.note{color:var(--cue);font-size:.9em}
+  a{color:var(--paper)}
+  .verdict{border-left:4px solid var(--ribbon);background:var(--panel);padding:20px 22px;border-radius:0 12px 12px 0;margin:26px 0 34px}
+  .verdict p{margin:0;font-size:1.22em;line-height:1.45}
+  .verdict b{color:#fff;font-weight:600}
+  .tiles{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(9.5em,1fr));margin:26px 0 8px}
+  .tile{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:14px 16px}
+  .tile b{display:block;font:600 1.7em/1.1 var(--serif);color:var(--paper);font-variant-numeric:tabular-nums}
+  .tile span{display:block;font:400 11.5px/1.5 var(--mono);color:var(--cue);margin-top:5px;letter-spacing:.04em}
+  .tile.bad b{color:var(--ribbon)}
+  .find{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;margin:22px 0;align-items:start}
+  .find .n{font:500 13px/1.7 var(--mono);color:var(--ribbon);padding-top:4px}
+  .find h3{margin:0 0 4px}
+  .find p{margin:0 0 18px}
+  .scroll{overflow-x:auto;margin:20px 0}
+  table{border-collapse:collapse;width:100%;font-size:.92em;min-width:30em}
+  th,td{text-align:left;padding:9px 12px 9px 0;border-bottom:1px solid var(--edge);vertical-align:top}
+  th{font:500 11px/1.6 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--cue)}
+  td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+  .fail{color:var(--ribbon);font:500 12px var(--mono)}
+  .part{color:#C9A227;font:500 12px var(--mono)}
+  .open{color:var(--cue);font:500 12px var(--mono)}
+  pre{background:var(--panel);border:1px solid var(--edge);border-radius:10px;padding:14px 16px;overflow-x:auto;font:400 13px/1.7 var(--mono);color:var(--paper);margin:16px 0}
+  .ask{background:var(--panel);border:1px solid var(--edge);border-radius:12px;padding:18px 20px;margin:14px 0}
+  .ask .pill{display:inline-block;font:500 10.5px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink);background:var(--cue);padding:5px 8px;border-radius:5px;margin-bottom:10px}
+  .ask .pill.money{background:var(--ribbon);color:#fff}
+  .ask .pill.legal{background:#C9A227}
+  .ask h3{margin:0 0 6px}
+  .ask p{margin:0 0 8px;font-size:.96em}
+  ol.steps{padding-left:1.2em;margin:14px 0}
+  ol.steps li{margin-bottom:12px}
+  footer{margin-top:56px;border-top:1px solid var(--edge);padding-top:18px;font:400 12.5px/1.7 var(--mono);color:var(--faded)}
+</style>
+<div class="wrap">
+<p class="kicker">Pitch workshop · 2026-10-04 · one hour</p>
+<h1>The Tablework Verdict</h1>
+
+<div class="verdict">
+<p>At <b>$1 a seat a month</b>, this is a <b>good tool, not a business</b> — because a production pays $20 before it closes, which buys no customers at all. The next thing to do is <b>five phone calls</b>, not code.</p>
+</div>
+
+<div class="tiles">
+  <div class="tile"><b>$20</b><span>lifetime value per production</span></div>
+  <div class="tile bad"><b>5,000,000</b><span>productions a year that $100M needs</span></div>
+  <div class="tile"><b>150×</b><span>fewer customers at the org price</span></div>
+  <div class="tile bad"><b>0 of 8</b><span>investor tests passed</span></div>
+  <div class="tile bad"><b>0 of 145</b><span>his portfolio in performing arts</span></div>
+  <div class="tile"><b>342</b><span>commits — a cost, not traction</span></div>
+</div>
+<p><em class="note">Every figure traced to the repo or a sourced page; the market count was commissioned and did not land inside the hour, and is marked as missing rather than guessed. No invented words are attributed to any real person.</em></p>
+
+<h2>The counterparty, and whether this is even in scope</h2>
+<p>The founder asked for an honest read and reliable income, <em>not</em> a venture outcome. So the rehearsal was run against a <b>bootstrapper investor</b> — Rob Walling of TinySeed — rather than a seed fund. His tests are public and specific, which is what makes him useful here.</p>
+<p>The research leg found the alternative was already gone: <b>Calm Company Fund stopped early-stage investing on 2024-12-30</b> and returned called capital, and Earnest Capital is that same firm under its old name, not a second option. TinySeed is live — a $16M fourth fund closed 2025-12-10, applications reopening February 2027.</p>
+<p>Then the count that matters: <b>0 of 145 portfolio companies are in theatre or performing arts</b>, about 14 are arts/education/creative tools read generously, and <b>0 confirmed consumer subscriptions under $20 a month</b>. This deal is out of scope before a slide is shown — and the reason it is out of scope is the same reason the business does not work.</p>
+
+<h2>What killed the deck</h2>
+
+<div class="find">
+  <div class="n">01</div>
+  <div>
+    <h3>The price cannot pay for a customer</h3>
+    <p>A cast of ten at $1 a seat is $10 a month. A production rehearses six to eight weeks and closes, so it pays roughly twice: <b>LTV $20–30</b>, with rendered voices sold at cost and contributing nothing. A single paid click would have to convert at better than 50% to break even. The investor's own recorded prior, before any pitch: <em>"B2C apps are brutal. They're like eating glass… your churn is so high, so much customer support."</em></p>
+  </div>
+  <div class="n">02</div>
+  <div>
+    <h3>There is no moat, and it was asserted as a feature table</h3>
+    <p>Counted rather than claimed. The render cache <em>is</em> global — <code>clips.hash</code> is the primary key with no production column, so a line rendered once is free for everyone after. But the hash includes the voice id, so it only compounds when companies converge on the same casting, and voice casting is the one thing a director will want to own. 258 clips, one play, one production. A funded competitor reproduces the lot in days for a few hundred dollars.</p>
+  </div>
+  <div class="n">03</div>
+  <div>
+    <h3>The buyer is wrong, and the code already supports the right one</h3>
+    <p>Sold to a cast, this is a consumer subscription in a team's clothes. Sold to the <b>department that programmes four shows a year</b> — budget line, next show, a reason to care who went off book last time — it is B2B at a season price. Same code. Productions already nest under an account; roles, billing and invites exist. The only new screen is a season view, and its data is already in the database.</p>
+  </div>
+</div>
+
+<h2>The arithmetic, shown</h2>
+<p>The inverse needs no market research, and it is decisive on its own:</p>
+<pre>At $1/seat/month, cast of 10, ~2 months of paying = $20 per production-run
+
+  $100,000,000 ÷ $20  = 5,000,000 production-runs a year
+    $1,000,000 ÷ $20  =    50,000 production-runs a year
+
+At an organisation season price of ~$299
+
+  $100,000,000 ÷ $299 =   334,448 organisations
+    $1,000,000 ÷ $299 =     3,344 organisations
+      $100,000 ÷ $299 =       334 organisations</pre>
+<p>Five million productions a year is more than are staged anywhere, by any counting method — the venture test fails before the market is sized. Three thousand institutions is a number a person can picture. <b>Changing the buyer moves the required customer count by 150×</b>, and changes nothing in the code.</p>
+<p><em class="note">The softest input — how many producing organisations have a budget line — is unsourced. A research leg against EdTA, AACT and TCG Theatre Facts was commissioned and did not return inside the window. It is named as missing on purpose: five calls to directors answer it better than any desk estimate, and that is already the ask.</em></p>
+
+<h2>Scored against his published tests</h2>
+<div class="scroll">
+<table>
+  <tr><th>Test</th><th>Result</th><th>Why</th></tr>
+  <tr><td>MRR now, and six months ago</td><td><span class="fail">FAIL</span></td><td>$0. Applications without revenue are declined on the first screen.</td></tr>
+  <tr><td>Revenue and logo churn</td><td><span class="fail">FAIL</span></td><td>Churn is structural — the customer is a production, and productions close.</td></tr>
+  <tr><td>ARPC and LTV</td><td><span class="fail">FAIL</span></td><td>$10 a month, $20–30 lifetime. No acquisition budget exists at that number.</td></tr>
+  <tr><td>Is this B2B SaaS?</td><td><span class="part">PARTIAL</span></td><td>Not as priced. Yes if the buyer becomes the producing organisation.</td></tr>
+  <tr><td>Is the moat real?</td><td><span class="fail">FAIL</span></td><td>Conditional on shared voice casting, which nothing encourages.</td></tr>
+  <tr><td>Ongoing access to demand</td><td><span class="part">PARTIAL</span></td><td>The invite link is a real built-in mechanic — unmeasured and unexploited.</td></tr>
+  <tr><td>Market size, marketplace dependency</td><td><span class="open">OPEN</span></td><td>No marketplace dependency. Size unsourced inside the window.</td></tr>
+  <tr><td>A real business on its own terms</td><td><span class="part">PARTIAL</span></td><td>Not at $1 a seat. Possibly at an institutional season price, untested.</td></tr>
+</table>
+</div>
+<p><b>Zero passes.</b> Every failure is the same failure wearing a different hat: the price and the buyer are wrong, and no amount of product fixes that.</p>
+
+<h2>What survives</h2>
+<p>One sentence a competitor could not also write: <b>Tablework is the producing organisation's rehearsal record — one shared reading of the play, and a season's worth of evidence about which actors actually go off book.</b></p>
+<p>That is narrower than the original claim and better than it. The three cast-facing competitors share a script or the director's own recordings; none shares a company's <em>voices</em>, and none shows a director who is off book and where. The perimeter — sound cues, room sync — came from the founder's own show rather than from a customer, and should get nothing.</p>
+<h3>The counter-argument, kept on the page</h3>
+<p>Four products sell to individual actors at $7–14 a month and are still shipping, which is evidence that the actor pays and the institution does not. A pivot to an institutional buyer also discards the only distribution the founder owns — he knows directors and actors, not department heads — and buys a sales cycle a season long, against under six months of runway. These are not disposed of. They are why the ask is a test and not a build.</p>
+
+<h2>What was built this window</h2>
+<p>Nothing shipped to the product, deliberately. The teardown's finding is a price and a buyer, not a screen, and building before the five calls would be the exact failure mode the persona file warns about. Seven documents landed in the repo: the two personas, deck v1 with its own list of omissions, the structure teardown, the counted moat, the arithmetic, the refined idea, the five-slide decision deck, and the scored rehearsal.</p>
+
+<h2>What remains for you</h2>
+
+<div class="ask">
+  <span class="pill legal">Your judgment · do this first</span>
+  <h3>Read the PIIA clause</h3>
+  <p>Tablework's first commit is 2026-09-16, after you started at Gusto, so it is <b>not</b> a prior invention and Exhibit B does not cover it. A theatre app plainly does not relate to payroll or benefits, which is a far cleaner position than impatient.care's — but the clause, the governing state, and whether anything touched employer time or equipment are yours to confirm before any of this becomes commercial. This is not legal advice.</p>
+</div>
+
+<div class="ask">
+  <span class="pill">Your network · five calls</span>
+  <h3>Ask five directors what the department actually buys</h3>
+  <p>Licensing, scripts, software, anything — and who signs. Five answers kill or confirm the institutional buyer outright, and no desk research substitutes. You have the network; this is the one thing only you can do.</p>
+</div>
+
+<div class="ask">
+  <span class="pill money">Costs money · trivially</span>
+  <h3>Charge the production you are in</h3>
+  <p>One paying stranger beats the whole deck, and this investor will not look at a company without revenue. Needs the Stripe keys and the Cloudflare account that are already in <code>next_up.md</code> under Gated.</p>
+</div>
+
+<h3>And the one piece of work I can do next</h3>
+<ol class="steps">
+  <li><b>Instrument the invite link.</b> Count invites sent, accepted, and how many accepters later start a production of their own. It is the only acquisition mechanic the product has, it is already built, and it is the number that decides whether there is a business here. Say the word and it is a day's work.</li>
+</ol>
+
+<footer>
+Tablework / transcriptor · pitch workshop 2026-10-04 20:25–21:25 · sources in <code>docs/pitch/</code> and <code>docs/personas/</code> · the investor is a real person whose published tests are quoted and sourced; the rehearsal dialogue is the loop's words, not his, and he has not seen this company.
+</footer>
+</div>
