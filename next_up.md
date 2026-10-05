@@ -67,8 +67,21 @@
   casting). Zero of eight of the investor's published tests passed. Nothing was
   shipped to the product on purpose: the finding is a price and a buyer, not a
   screen. Deliverables in `docs/pitch/` and `docs/personas/`; report at
-  https://claude.ai/artifact/NnyKo8nhiqmfCETaMed49a. The market-size research
-  leg did not land inside the window and is named as missing, not guessed.
+  https://claude.ai/artifact/NnyKo8nhiqmfCETaMed49a.
+- Market round folded in after the close (`docs/pitch/teardown-round-2.md`):
+  the US market at $1 a seat is **$2.6-6.5M**, so $100M would be 15-38x the
+  whole thing - agreeing with the inverse computed independently first. The
+  actor's ceiling has been **$4 once since 2016**; all ~25 shipping
+  line-learning apps are free; the leader by installed base (coldRead, 3,934
+  ratings) froze development in 2022 while still billing $83.99/yr. **Stage
+  Write already sells this exact position** - free cast seats, $249/yr team
+  and $599/yr education to the budget holder - and is the only commercially
+  healthy product in the category, so the organisation buyer is proven and the
+  guessed price band was too low. Scene Partner died holding licensed MTI and
+  Samuel French script deals, so assets do not save products here. Launch
+  channels are closed (r/Theatre removed a launch post 2026-05-07, HN zero
+  coverage). Explicitly NOT searched and not to be filled from memory: dated
+  theatre-tech shutdowns, founder post-mortems, 2024-26 funding rounds.
 - Persona round 49 (2026-10-02) — the director holding a PDF, the whole way
   through. Read at 390 and 1280 after each change: the copy chip wrapped to two
   lines and the connected-AI path led with a step a stranger cannot take (it
